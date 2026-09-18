@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "641151113525",
+    "project_id": "netropia-tkj",
+    "storage_bucket": "netropia-tkj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641151113525:android:b4024247b84383b6e8147c",
+        "android_client_info": {
+          "package_name": "com.example.netropia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBseGwZ2jVs89y6en7DSunBiAJKN49nqdE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
