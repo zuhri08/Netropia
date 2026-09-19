@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
+import '../materi_detail_layout.dart';
 
 class DasarTkjScreen extends StatelessWidget {
   const DasarTkjScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dasar TKJ'),
-      ),
-      body: const Center(
-        child: Text(
-          'Materi Dasar TKJ',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+    return const MateriDetailLayout(
+      title: 'Dasar TKJ',
+      themeColor: Color(0xFF1565C0),
     );
   }
 }

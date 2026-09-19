@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
+import '../materi_detail_layout.dart';
 
 class KomponenKomputerScreen extends StatelessWidget {
   const KomponenKomputerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Komponen Komputer'),
-      ),
-      body: const Center(
-        child: Text(
-          'Materi Komponen Komputer',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+    return const MateriDetailLayout(
+      title: 'Komponen Komputer',
+      themeColor: Color(0xFF6A1B9A),
     );
   }
 }

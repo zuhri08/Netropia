@@ -66,7 +66,7 @@ class MateriScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
         title: const Text(
@@ -135,12 +135,12 @@ class MateriScreen extends StatelessWidget {
 
             const SizedBox(height: 25),
 
-            const Text(
+            Text(
               'Pilih Materi',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF172033),
+                color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
 
@@ -201,7 +201,7 @@ class MateriScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       child: Material(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
@@ -245,10 +245,10 @@ class MateriScreen extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF172033),
+                          color: Theme.of(context).textTheme.titleMedium?.color,
                         ),
                       ),
 

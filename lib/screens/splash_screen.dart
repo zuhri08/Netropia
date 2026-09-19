@@ -1,7 +1,9 @@
 import 'dart:async';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'main_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,17 +16,54 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
+  }
 
-    Timer(const Duration(seconds: 2), () {
-      if (!mounted) return;
+  Future<void> _checkLoginStatus() async {
+    // Tunggu sebentar untuk efek splash
+    await Future.delayed(const Duration(seconds: 2));
+    
+    if (!mounted) return;
 
+    final User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists && mounted) {
+          final data = userDoc.data() as Map<String, dynamic>;
+          final String nama = data['nama'] ?? 'Pengguna';
+          final String role = data['role'] ?? 'siswa';
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainScreen(
+                username: nama,
+                role: role,
+              ),
+            ),
+          );
+          return;
+        }
+      } catch (e) {
+        debugPrint('Error fetching user data: $e');
+      }
+    }
+
+    // Jika tidak ada user atau data gagal diambil, ke halaman login
+    if (mounted) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => const LoginScreen(),
         ),
       );
-    });
+    }
   }
 
   @override

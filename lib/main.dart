@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +20,18 @@ class NetropiaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Netropia',
-      theme: AppTheme.theme,
-      home: const SplashScreen(),
+    return ListenableBuilder(
+      listenable: themeManager,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Netropia',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeManager.themeMode,
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

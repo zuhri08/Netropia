@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../materi/materi_screen.dart';
+import 'settings_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String username;
@@ -17,7 +18,7 @@ class DashboardScreen extends StatelessWidget {
     final bool isGuru = role.toLowerCase() == 'guru';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       // ============================================================
       // APP BAR
@@ -33,12 +34,17 @@ class DashboardScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            tooltip: 'Profil',
+            tooltip: 'Pengaturan',
             onPressed: () {
-              _showComingSoon(context, 'Profil');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
             icon: const Icon(
-              Icons.account_circle_outlined,
+              Icons.settings_rounded,
             ),
           ),
         ],
@@ -74,12 +80,12 @@ class DashboardScreen extends StatelessWidget {
             // SECTION TITLE
             // ======================================================
 
-            const Text(
+            Text(
               'Menu Pembelajaran',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF172033),
+                color: Theme.of(context).textTheme.titleLarge?.color,
               ),
             ),
 
@@ -375,7 +381,7 @@ class DashboardScreen extends StatelessWidget {
         required VoidCallback onTap,
       }) {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -410,10 +416,10 @@ class DashboardScreen extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF172033),
+                  color: Theme.of(context).textTheme.titleMedium?.color,
                 ),
               ),
 
@@ -450,7 +456,7 @@ class DashboardScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
