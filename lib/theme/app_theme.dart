@@ -43,6 +43,13 @@ class AppTheme {
         ),
       ),
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: Color(0xFF1565C0),
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
+      elevation: 0,
+    ),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -86,6 +93,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
         ),
       ),
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Color(0xFF1E1E1E),
+      selectedItemColor: Color(0xFF90CAF9),
+      unselectedItemColor: Colors.grey,
+      type: BottomNavigationBarType.fixed,
+      elevation: 0,
     ),
   );
 }

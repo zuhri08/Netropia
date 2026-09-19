@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dashboard_screen.dart';
 import 'main_screen.dart';
@@ -22,8 +23,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool obscurePassword = true;
   bool isLoading = false;
+  bool rememberMe = false;
 
   String selectedRole = 'siswa';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCredentials();
+  }
+
+  Future<void> _loadCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      emailController.text = prefs.getString('saved_email') ?? '';
+      passwordController.text = prefs.getString('saved_password') ?? '';
+      rememberMe = prefs.getBool('remember_me') ?? false;
+    });
+  }
+
+  Future<void> _saveCredentials(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (rememberMe) {
+      await prefs.setString('saved_email', email);
+      await prefs.setString('saved_password', password);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+  }
 
   // ============================================================
   // LOGIN
@@ -99,6 +129,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         return;
       }
+
+      if (!mounted) return;
+
+      await _saveCredentials(email, password);
 
       if (!mounted) return;
 
@@ -331,32 +365,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 38),
-
-              // ==================================================
-              // WELCOME
-              // ==================================================
-
-              const Text(
-                'Selamat Datang 👋',
-                style: TextStyle(
-                  fontSize: 27,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF172033),
-                ),
-              ),
-
-              const SizedBox(height: 7),
-
-              const Text(
-                'Masuk untuk melanjutkan pembelajaran TKJ.',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
-              ),
-
-              const SizedBox(height: 25),
+              const SizedBox(height: 10),
 
               // ==================================================
               // LOGIN CARD
@@ -567,6 +576,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // INGAT SAYA
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: Checkbox(
+                            value: rememberMe,
+                            onChanged: (val) {
+                              setState(() {
+                                rememberMe = val ?? false;
+                              });
+                            },
+                            activeColor: const Color(0xFF1565C0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Ingat Saya',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF172033),
+                          ),
+                        ),
+                      ],
                     ),
 
                     const SizedBox(height: 8),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
+import '../progress/progress_screen.dart';
+import '../ai/netropia_ai_screen.dart';
+import '../virtual_lab/virtual_lab_screen.dart';
+import '../profile/profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   final String username;
@@ -25,10 +29,10 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _pages = [
       DashboardScreen(username: widget.username, role: widget.role),
-      _placeholderScreen('Progres Belajar', Icons.trending_up_rounded),
-      _placeholderScreen('AI Assistant', Icons.psychology_rounded),
-      _placeholderScreen('Simulasi Praktik', Icons.science_rounded),
-      _placeholderScreen('Profil Pengguna', Icons.person_rounded),
+      const ProgressScreen(),
+      const NetropiaAiScreen(),
+      const VirtualLabScreen(),
+      ProfileScreen(username: widget.username, role: widget.role),
     ];
   }
 
@@ -75,13 +79,6 @@ class _MainScreenState extends State<MainScreen> {
               _selectedIndex = index;
             });
           },
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF1565C0),
-          unselectedItemColor: Colors.grey,
-          selectedFontSize: 12,
-          unselectedFontSize: 12,
-          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),

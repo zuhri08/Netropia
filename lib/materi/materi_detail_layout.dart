@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../ai/netropia_ai_screen.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
@@ -57,7 +58,37 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             const SizedBox(height: 20),
             _buildMotivationSection(),
             const SizedBox(height: 15),
+            _buildAiAssistantButton(context),
+            const SizedBox(height: 15),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAiAssistantButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NetropiaAiScreen(
+                initialMessage: "Jelaskan tentang materi ${widget.title}",
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.psychology_rounded),
+        label: const Text("Jelaskan materi ini dengan AI"),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: widget.themeColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
         ),
       ),
     );

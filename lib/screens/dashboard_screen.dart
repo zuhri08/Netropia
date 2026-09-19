@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../materi/materi_screen.dart';
+import '../profile/settings_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String username;
