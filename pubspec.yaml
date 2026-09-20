@@ -17,6 +17,11 @@ dependencies:
   device_preview: ^1.1.0
   shared_preferences: ^2.2.2
   qr_flutter: ^4.1.0
+  webview_flutter: ^4.4.2
+  image_picker: ^1.0.4
+  firebase_storage: ^13.6.0
+  firebase_app_check: ^0.4.8
+  google_generative_ai: ^0.4.3
 
 dev_dependencies:
   flutter_test:

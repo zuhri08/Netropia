@@ -79,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
               _selectedIndex = index;
             });
           },
+          type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),

@@ -46,6 +46,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context, String email) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Container(
       width: double.infinity,
@@ -73,10 +74,18 @@ class ProfileScreen extends StatelessWidget {
                   color: Colors.white24,
                   shape: BoxShape.circle,
                 ),
-                child: const CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person_rounded, size: 60, color: Color(0xFF1565C0)),
+                child: Builder(
+                  builder: (context) {
+                    final String? photoUrl = user?.photoURL;
+                    return CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.white,
+                      backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                      child: photoUrl == null 
+                          ? const Icon(Icons.person_rounded, size: 60, color: Color(0xFF1565C0))
+                          : null,
+                    );
+                  },
                 ),
               ),
               Positioned(

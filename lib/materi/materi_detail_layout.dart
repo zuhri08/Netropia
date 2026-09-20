@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../ai/netropia_ai_screen.dart';
 import 'dasar_tkj/pages/materi/materi_dasar_tkj_screen.dart';
 
 class MateriDetailLayout extends StatefulWidget {
@@ -61,9 +60,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               _buildProgressSection(),
               const SizedBox(height: 20),
               _buildMotivationSection(),
-              const SizedBox(height: 15),
-              _buildAiAssistantButton(context),
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -137,20 +134,18 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int crossAxisCount = constraints.maxWidth >= 700
-            ? 6
-            : constraints.maxWidth >= 450
-            ? 4
-            : 3;
+        // Menggunakan 4 kolom untuk HP, 6 untuk Tablet/Layar Lebar
+        final int crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
 
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 14,
-            childAspectRatio: 0.82,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            // mainAxisExtent memastikan tinggi setiap item tetap (konsisten) di semua device
+            mainAxisExtent: 95, 
           ),
           itemCount: menuItems.length,
           itemBuilder: (context, index) {
@@ -365,32 +360,4 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     );
   }
 
-  Widget _buildAiAssistantButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NetropiaAiScreen(
-                initialMessage:
-                'Jelaskan tentang materi ${widget.title}',
-              ),
-            ),
-          );
-        },
-        icon: const Icon(Icons.psychology_rounded),
-        label: const Text('Jelaskan materi ini dengan AI'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: widget.themeColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-      ),
-    );
-  }
 }

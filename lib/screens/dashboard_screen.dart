@@ -5,6 +5,11 @@ import '../kalkulator_subnet/subnet_calculator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../absensi/teacher_attendance_screen.dart';
+import '../virtual_lab/virtual_lab_screen.dart';
+
+import '../virtual_lab/device_3d_viewer_screen.dart';
+import '../devices_3d/device_3d_list_screen.dart';
+
 class DashboardScreen extends StatelessWidget {
   final String username;
   final String role;
@@ -63,7 +68,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       // ========================================================
       // APP BAR
@@ -131,15 +136,13 @@ class DashboardScreen extends StatelessWidget {
 
               Text(
                 'Halo, $username 👋',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF172B4D),
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
-
               const SizedBox(height: 6),
-
               Text(
                 role.toLowerCase() == 'guru'
                     ? 'Selamat datang di Netropia.'
@@ -164,12 +167,12 @@ class DashboardScreen extends StatelessWidget {
               // MENU UTAMA
               // ==================================================
 
-              const Text(
+              Text(
                 'Menu Utama',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF172B4D),
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
 
@@ -190,6 +193,7 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
+                    context,
                     title: 'Materi TKJ',
                     subtitle: 'Pelajari materi TKJ',
                     icon: Icons.menu_book_rounded,
@@ -207,17 +211,20 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
-                    title: 'Virtual Lab',
-                    subtitle: 'Praktik jaringan',
-                    icon: Icons.computer_rounded,
+                    context,
+                    title: 'Perangkat 3D',
+                    subtitle: 'Eksplorasi alat TKJ',
+                    icon: Icons.view_in_ar_rounded,
                     iconColor:
                     const Color(0xFF00897B),
                     backgroundColor:
                     const Color(0xFFE5F7F4),
                     onTap: () {
-                      _showComingSoon(
+                      Navigator.push(
                         context,
-                        'Virtual Lab',
+                        MaterialPageRoute(
+                          builder: (context) => const Device3DListScreen(),
+                        ),
                       );
                     },
                   ),
@@ -227,6 +234,7 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
+                    context,
                     title: 'Kalkulator Subnet',
                     subtitle: 'Hitung subnet',
                     icon: Icons.calculate_rounded,
@@ -244,6 +252,7 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
+                    context,
                     title: 'Absen',
                     subtitle: 'Kehadiran belajar',
                     icon: Icons.fact_check_rounded,
@@ -304,6 +313,7 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
+                    context,
                     title: 'Peminjaman',
                     subtitle: 'Pinjam alat TKJ',
                     icon: Icons.inventory_2_rounded,
@@ -324,6 +334,7 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
 
                   _buildMenuCard(
+                    context,
                     title: 'Project',
                     subtitle: 'Proyek pembelajaran',
                     icon: Icons.folder_copy_rounded,
@@ -341,22 +352,22 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: 25),
 
               // ==================================================
-              // AKTIVITAS TERBARU
+              // PROGRESS BELAJAR
               // ==================================================
 
               Row(
                 mainAxisAlignment:
                 MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Aktivitas Terbaru',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF172B4D),
+                      color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
 
@@ -381,6 +392,7 @@ class DashboardScreen extends StatelessWidget {
               // ------------------------------------------
 
               _buildActivityCard(
+                context,
                 icon: Icons.menu_book_rounded,
                 iconColor:
                 const Color(0xFF1565C0),
@@ -397,6 +409,7 @@ class DashboardScreen extends StatelessWidget {
               // ------------------------------------------
 
               _buildActivityCard(
+                context,
                 icon: Icons.calculate_rounded,
                 iconColor:
                 const Color(0xFFE65100),
@@ -413,6 +426,7 @@ class DashboardScreen extends StatelessWidget {
               // ------------------------------------------
 
               _buildActivityCard(
+                context,
                 icon: Icons.fact_check_rounded,
                 iconColor:
                 const Color(0xFF7B1FA2),
@@ -428,7 +442,7 @@ class DashboardScreen extends StatelessWidget {
               // PROGRESS BELAJAR
               // ==================================================
 
-              _buildProgressCard(),
+              _buildProgressCard(context),
             ],
           ),
         ),
@@ -470,7 +484,7 @@ class DashboardScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color:
-            Colors.blue.withValues(alpha: 0.18),
+            Colors.blue.withOpacity(0.18),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -635,7 +649,8 @@ class DashboardScreen extends StatelessWidget {
   // MENU CARD
   // ============================================================
 
-  Widget _buildMenuCard({
+  Widget _buildMenuCard(
+    BuildContext context, {
     required String title,
     required String subtitle,
     required IconData icon,
@@ -648,11 +663,11 @@ class DashboardScreen extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 3),
             ),
@@ -674,7 +689,9 @@ class DashboardScreen extends StatelessWidget {
                       width: 46,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: backgroundColor,
+                        color: Theme.of(context).brightness == Brightness.light 
+                            ? backgroundColor 
+                            : iconColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
@@ -691,10 +708,10 @@ class DashboardScreen extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF172B4D),
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
 
@@ -705,9 +722,9 @@ class DashboardScreen extends StatelessWidget {
                       subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
-                        color: Color(0xFF7B8494),
+                        color: Theme.of(context).textTheme.bodySmall?.color,
                       ),
                     ),
                   ],
@@ -724,7 +741,8 @@ class DashboardScreen extends StatelessWidget {
   // AKTIVITAS TERBARU CARD
   // ============================================================
 
-  Widget _buildActivityCard({
+  Widget _buildActivityCard(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -737,7 +755,7 @@ class DashboardScreen extends StatelessWidget {
       const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius:
         BorderRadius.circular(16),
 
@@ -789,12 +807,12 @@ class DashboardScreen extends StatelessWidget {
 
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight:
                     FontWeight.bold,
                     color:
-                    Color(0xFF172B4D),
+                    Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
 
@@ -805,10 +823,10 @@ class DashboardScreen extends StatelessWidget {
                   maxLines: 1,
                   overflow:
                   TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     color:
-                    Color(0xFF7B8494),
+                    Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ),
               ],
@@ -818,10 +836,10 @@ class DashboardScreen extends StatelessWidget {
           // TIME
           Text(
             time,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               color:
-              Color(0xFF9CA3AF),
+              Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
             ),
           ),
         ],
@@ -833,14 +851,14 @@ class DashboardScreen extends StatelessWidget {
   // PROGRESS BELAJAR
   // ============================================================
 
-  Widget _buildProgressCard() {
+  Widget _buildProgressCard(BuildContext context) {
     return Container(
       width: double.infinity,
       padding:
       const EdgeInsets.all(18),
 
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius:
         BorderRadius.circular(18),
 
@@ -863,14 +881,14 @@ class DashboardScreen extends StatelessWidget {
 
         children: [
 
-          const Text(
+          Text(
             'Progress Belajar',
             style: TextStyle(
               fontSize: 16,
               fontWeight:
               FontWeight.bold,
               color:
-              Color(0xFF172B4D),
+              Theme.of(context).textTheme.titleLarge?.color,
             ),
           ),
 
@@ -912,14 +930,14 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
 
-                    const Text(
+                    Text(
                       '25%',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight:
                         FontWeight.bold,
                         color:
-                        Color(0xFF172B4D),
+                        Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                   ],
@@ -946,4 +964,5 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'lab_detail_screen.dart';
+import 'device_3d_viewer_screen.dart';
 
 class VirtualLabScreen extends StatelessWidget {
   const VirtualLabScreen({super.key});
@@ -27,6 +28,7 @@ class VirtualLabScreen extends StatelessWidget {
                   _buildSectionHeader(context, "Daftar Lab Praktik", Icons.science_rounded),
                   const SizedBox(height: 15),
                   _buildLabList(context),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -35,6 +37,8 @@ class VirtualLabScreen extends StatelessWidget {
       ),
     );
   }
+
+  // _buildDevice3DList removed and moved to DashboardScreen
 
   Widget _buildAppBar(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;

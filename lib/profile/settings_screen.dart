@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/theme_manager.dart';
 import '../screens/login_screen.dart';
+import 'edit_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -60,8 +61,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingsGroup(
             title: 'Akun',
             items: [
-              _buildSettingsItem(Icons.person_outline_rounded, 'Edit Nama', onTap: () {}),
-              _buildSettingsItem(Icons.camera_alt_outlined, 'Edit Foto', onTap: () {}),
+              _buildSettingsItem(Icons.person_outline_rounded, 'Edit Nama', onTap: () {
+                final user = FirebaseAuth.instance.currentUser;
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
+              }),
+              _buildSettingsItem(Icons.camera_alt_outlined, 'Edit Foto', onTap: () {
+                final user = FirebaseAuth.instance.currentUser;
+                Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
+              }),
               _buildSettingsItem(Icons.email_outlined, 'Edit Email', onTap: () {}),
               _buildSettingsItem(Icons.lock_outline_rounded, 'Ubah Password', onTap: () {}),
             ],

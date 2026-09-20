@@ -10,6 +10,7 @@ class AppTheme {
       seedColor: const Color(0xFF1565C0),
       brightness: Brightness.light,
     ),
+    cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
@@ -61,6 +62,7 @@ class AppTheme {
       seedColor: const Color(0xFF90CAF9),
       brightness: Brightness.dark,
     ),
+    cardColor: const Color(0xFF1E1E1E),
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
