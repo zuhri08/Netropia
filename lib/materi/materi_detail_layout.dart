@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../ai/netropia_ai_screen.dart';
+import 'dasar_tkj/pages/materi/materi_dasar_tkj_screen.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
@@ -35,7 +36,8 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   @override
   void initState() {
     super.initState();
-    _currentMotivation = _motivations[Random().nextInt(_motivations.length)];
+    _currentMotivation =
+    _motivations[Random().nextInt(_motivations.length)];
   }
 
   @override
@@ -45,49 +47,24 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: widget.themeColor,
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildGrid(),
-            const SizedBox(height: 20),
-            _buildProgressSection(),
-            const SizedBox(height: 20),
-            _buildMotivationSection(),
-            const SizedBox(height: 15),
-            _buildAiAssistantButton(context),
-            const SizedBox(height: 15),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAiAssistantButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => NetropiaAiScreen(
-                initialMessage: "Jelaskan tentang materi ${widget.title}",
-              ),
-            ),
-          );
-        },
-        icon: const Icon(Icons.psychology_rounded),
-        label: const Text("Jelaskan materi ini dengan AI"),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: widget.themeColor,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildGrid(),
+              const SizedBox(height: 20),
+              _buildProgressSection(),
+              const SizedBox(height: 20),
+              _buildMotivationSection(),
+              const SizedBox(height: 15),
+              _buildAiAssistantButton(context),
+              const SizedBox(height: 15),
+            ],
           ),
         ),
       ),
@@ -96,85 +73,177 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
   Widget _buildGrid() {
     final List<Map<String, dynamic>> menuItems = [
-      {'name': 'Materi', 'icon': Icons.menu_book_rounded, 'color': Colors.blue},
-      {'name': 'Video', 'icon': Icons.play_circle_fill_rounded, 'color': Colors.red},
-      {'name': 'Peta Konsep', 'icon': Icons.account_tree_rounded, 'color': Colors.teal},
-      {'name': 'Referensi', 'icon': Icons.library_books_rounded, 'color': Colors.indigo},
-      {'name': 'Pre Test', 'icon': Icons.assignment_rounded, 'color': Colors.orange},
-      {'name': 'Post test', 'icon': Icons.assignment_turned_in_rounded, 'color': Colors.green},
-      {'name': 'Penugasan', 'icon': Icons.task_rounded, 'color': Colors.deepOrange},
-      {'name': 'Portofolio', 'icon': Icons.folder_shared_rounded, 'color': Colors.purple},
-      {'name': 'Forum Diskusi', 'icon': Icons.forum_rounded, 'color': Colors.lightBlue},
-      {'name': 'Refleksi', 'icon': Icons.psychology_rounded, 'color': Colors.pink},
-      {'name': 'Evaluasi', 'icon': Icons.assessment_rounded, 'color': Colors.cyan},
-      {'name': 'Feedback', 'icon': Icons.feedback_rounded, 'color': Colors.deepPurple},
+      {
+        'name': 'Materi',
+        'icon': Icons.menu_book_rounded,
+        'color': Colors.blue,
+      },
+      {
+        'name': 'Video',
+        'icon': Icons.play_circle_fill_rounded,
+        'color': Colors.red,
+      },
+      {
+        'name': 'Peta Konsep',
+        'icon': Icons.account_tree_rounded,
+        'color': Colors.teal,
+      },
+      {
+        'name': 'Referensi',
+        'icon': Icons.library_books_rounded,
+        'color': Colors.indigo,
+      },
+      {
+        'name': 'Pre Test',
+        'icon': Icons.assignment_rounded,
+        'color': Colors.orange,
+      },
+      {
+        'name': 'Post Test',
+        'icon': Icons.assignment_turned_in_rounded,
+        'color': Colors.green,
+      },
+      {
+        'name': 'Penugasan',
+        'icon': Icons.task_rounded,
+        'color': Colors.deepOrange,
+      },
+      {
+        'name': 'Portofolio',
+        'icon': Icons.folder_shared_rounded,
+        'color': Colors.purple,
+      },
+      {
+        'name': 'Forum Diskusi',
+        'icon': Icons.forum_rounded,
+        'color': Colors.lightBlue,
+      },
+      {
+        'name': 'Refleksi',
+        'icon': Icons.psychology_rounded,
+        'color': Colors.pink,
+      },
+      {
+        'name': 'Evaluasi',
+        'icon': Icons.assessment_rounded,
+        'color': Colors.cyan,
+      },
+      {
+        'name': 'Feedback',
+        'icon': Icons.feedback_rounded,
+        'color': Colors.deepPurple,
+      },
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: menuItems.length,
-      itemBuilder: (context, index) {
-        return _buildMenuItem(
-          menuItems[index]['name'],
-          menuItems[index]['icon'],
-          menuItems[index]['color'],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final int crossAxisCount = constraints.maxWidth >= 700
+            ? 6
+            : constraints.maxWidth >= 450
+            ? 4
+            : 3;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.82,
+          ),
+          itemCount: menuItems.length,
+          itemBuilder: (context, index) {
+            final item = menuItems[index];
+
+            return _buildMenuItem(
+              name: item['name'],
+              icon: item['icon'],
+              iconColor: item['color'],
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildMenuItem(String name, IconData icon, Color iconColor) {
-    return InkWell(
-      onTap: () {
-        // Implement navigation or action here
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: iconColor.withOpacity(0.15),
-                width: 1.0,
+  Widget _buildMenuItem({
+    required String name,
+    required IconData icon,
+    required Color iconColor,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleMenuTap(name),
+        borderRadius: BorderRadius.circular(16),
+        splashColor: iconColor.withOpacity(0.12),
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.10),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    color: iconColor.withOpacity(0.16),
+                  ),
+                ),
+                child: Icon(
+                  icon,
+                  color: iconColor,
+                  size: 23,
+                ),
               ),
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 22,
-            ),
+              const SizedBox(height: 7),
+              Text(
+                name,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodyLarge
+                      ?.color,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 5),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 9.5,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  void _handleMenuTap(String name) {
+    if (name == 'Materi') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MateriDasarTkjScreen(),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$name sedang kami siapkan.'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
       ),
     );
   }
 
   Widget _buildProgressSection() {
-    double progressValue = 0.45; // Contoh nilai progres (45%)
+    const double progressValue = 0.45;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -196,15 +265,18 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Progres Belajar",
+                'Progres Belajar',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.titleMedium?.color,
+                  color: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.color,
                 ),
               ),
               Text(
-                "${(progressValue * 100).toInt()}%",
+                '${(progressValue * 100).toInt()}%',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -219,13 +291,15 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             child: LinearProgressIndicator(
               value: progressValue,
               minHeight: 8,
-              backgroundColor: widget.themeColor.withOpacity(0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(widget.themeColor),
+              backgroundColor:
+              widget.themeColor.withOpacity(0.1),
+              valueColor:
+              AlwaysStoppedAnimation<Color>(widget.themeColor),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            "Lanjutkan untuk menyelesaikan materi ini!",
+            'Lanjutkan untuk menyelesaikan materi ini!',
             style: TextStyle(
               fontSize: 11,
               color: Colors.grey.shade600,
@@ -239,7 +313,10 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   Widget _buildMotivationSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 18,
+      ),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -252,7 +329,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: widget.themeColor.withOpacity(0.1),
-          width: 1,
         ),
       ),
       child: Column(
@@ -276,7 +352,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           ),
           const SizedBox(height: 8),
           Text(
-            "- Motivasi Hari Ini -",
+            '- Motivasi Hari Ini -',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -285,6 +361,35 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAiAssistantButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => NetropiaAiScreen(
+                initialMessage:
+                'Jelaskan tentang materi ${widget.title}',
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.psychology_rounded),
+        label: const Text('Jelaskan materi ini dengan AI'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: widget.themeColor,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
       ),
     );
   }

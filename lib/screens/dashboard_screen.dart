@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-
+import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
-import '../profile/settings_screen.dart';
-
+import '../kalkulator_subnet/subnet_calculator_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../absensi/teacher_attendance_screen.dart';
 class DashboardScreen extends StatelessWidget {
   final String username;
   final String role;
@@ -22,6 +24,15 @@ class DashboardScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => const MateriScreen(),
+      ),
+    );
+  }
+
+  void _openSubnetCalculator(BuildContext context) {
+    debugPrint('Membuka Kalkulator Subnet');
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const SubnetCalculatorScreen(),
       ),
     );
   }
@@ -224,10 +235,7 @@ class DashboardScreen extends StatelessWidget {
                     backgroundColor:
                     const Color(0xFFFFF0E6),
                     onTap: () {
-                      _showComingSoon(
-                        context,
-                        'Kalkulator Subnet',
-                      );
+                      _openSubnetCalculator(context);
                     },
                   ),
 
@@ -239,15 +247,55 @@ class DashboardScreen extends StatelessWidget {
                     title: 'Absen',
                     subtitle: 'Kehadiran belajar',
                     icon: Icons.fact_check_rounded,
-                    iconColor:
-                    const Color(0xFF7B1FA2),
-                    backgroundColor:
-                    const Color(0xFFF3E8FF),
-                    onTap: () {
-                      _showComingSoon(
-                        context,
-                        'Absen',
-                      );
+                    iconColor: const Color(0xFF7B1FA2),
+                    backgroundColor: const Color(0xFFF3E8FF),
+                    onTap: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+
+                      if (user == null) {
+                        return;
+                      }
+
+                      try {
+                        final userDoc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .get();
+
+                        final role = userDoc.data()?['role'];
+
+                        if (!context.mounted) return;
+
+                        if (role == 'guru') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const TeacherAttendanceScreen(),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const AttendanceScreen(),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('ERROR CEK ROLE ABSENSI: $e');
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Gagal membuka halaman absensi.',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
 
@@ -422,7 +470,7 @@ class DashboardScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color:
-            Colors.blue.withOpacity(0.18),
+            Colors.blue.withValues(alpha: 0.18),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -595,96 +643,77 @@ class DashboardScreen extends StatelessWidget {
     required Color backgroundColor,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.white,
-      borderRadius:
-      BorderRadius.circular(18),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(18),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ICON
+                    Container(
+                      width: 46,
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: iconColor,
+                        size: 24,
+                      ),
+                    ),
 
-      child: InkWell(
-        onTap: onTap,
-        borderRadius:
-        BorderRadius.circular(18),
+                    const Spacer(),
 
-        child: Container(
-          padding:
-          const EdgeInsets.all(14),
+                    // TITLE
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF172B4D),
+                      ),
+                    ),
 
-          decoration: BoxDecoration(
-            borderRadius:
-            BorderRadius.circular(18),
+                    const SizedBox(height: 4),
 
-            boxShadow: [
-              BoxShadow(
-                color:
-                Colors.black.withOpacity(
-                  0.04,
-                ),
-                blurRadius: 8,
-                offset:
-                const Offset(0, 3),
-              ),
-            ],
-          ),
-
-          child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-            children: [
-
-              // ICON
-              Container(
-                width: 46,
-                height: 46,
-                decoration:
-                BoxDecoration(
-                  color:
-                  backgroundColor,
-                  borderRadius:
-                  BorderRadius.circular(
-                    14,
-                  ),
-                ),
-
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 24,
-                ),
-              ),
-
-              const Spacer(),
-
-              // TITLE
-              Text(
-                title,
-                maxLines: 1,
-                overflow:
-                TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight:
-                  FontWeight.bold,
-                  color:
-                  Color(0xFF172B4D),
+                    // SUBTITLE
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF7B8494),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-
-              const SizedBox(height: 4),
-
-              // SUBTITLE
-              Text(
-                subtitle,
-                maxLines: 1,
-                overflow:
-                TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color:
-                  Color(0xFF7B8494),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
