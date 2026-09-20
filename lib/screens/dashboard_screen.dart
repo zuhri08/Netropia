@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../absensi/teacher_attendance_screen.dart';
 import '../virtual_lab/virtual_lab_screen.dart';
-
+import '../peminjaman/borrowing_screen.dart';
 import '../virtual_lab/device_3d_viewer_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
 
@@ -311,20 +311,19 @@ class DashboardScreen extends StatelessWidget {
                   // ------------------------------------------
                   // PEMINJAMAN
                   // ------------------------------------------
-
                   _buildMenuCard(
                     context,
                     title: 'Peminjaman',
                     subtitle: 'Pinjam alat TKJ',
                     icon: Icons.inventory_2_rounded,
-                    iconColor:
-                    const Color(0xFF0277BD),
-                    backgroundColor:
-                    const Color(0xFFE3F2FD),
+                    iconColor: const Color(0xFF0277BD),
+                    backgroundColor: const Color(0xFFE3F2FD),
                     onTap: () {
-                      _showComingSoon(
+                      Navigator.push(
                         context,
-                        'Peminjaman',
+                        MaterialPageRoute(
+                          builder: (context) => const BorrowingScreen(),
+                        ),
                       );
                     },
                   ),
