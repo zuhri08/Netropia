@@ -9,7 +9,7 @@ import '../virtual_lab/virtual_lab_screen.dart';
 import '../peminjaman/borrowing_screen.dart';
 import '../virtual_lab/device_3d_viewer_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
-
+import '../peminjaman/teacher_borrowing_screen.dart';
 class DashboardScreen extends StatelessWidget {
   final String username;
   final String role;
@@ -314,17 +314,59 @@ class DashboardScreen extends StatelessWidget {
                   _buildMenuCard(
                     context,
                     title: 'Peminjaman',
-                    subtitle: 'Pinjam alat TKJ',
+                    subtitle: role.toLowerCase() == 'guru'
+                        ? 'Kelola peminjaman alat'
+                        : 'Pinjam alat TKJ',
                     icon: Icons.inventory_2_rounded,
                     iconColor: const Color(0xFF0277BD),
                     backgroundColor: const Color(0xFFE3F2FD),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const BorrowingScreen(),
-                        ),
-                      );
+                    onTap: () async {
+                      final user = FirebaseAuth.instance.currentUser;
+
+                      if (user == null) {
+                        return;
+                      }
+
+                      try {
+                        final userDoc = await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(user.uid)
+                            .get();
+
+                        final userRole = userDoc.data()?['role'];
+
+                        if (!context.mounted) return;
+
+                        if (userRole == 'guru') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const TeacherBorrowingScreen(),
+                            ),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const BorrowingScreen(),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('ERROR CEK ROLE PEMINJAMAN: $e');
+
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Gagal membuka halaman peminjaman.',
+                            ),
+                          ),
+                        );
+                      }
                     },
                   ),
 

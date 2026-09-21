@@ -1,3 +1,9 @@
+# Firebase Admin SDK
+serviceAccountKey.json
+
+# Node.js seeder
+seeder/node_modules/
+seeder/serviceAccountKey.json
 # Miscellaneous
 *.class
 *.log
