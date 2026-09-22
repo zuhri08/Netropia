@@ -305,7 +305,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   Widget _buildInputArea(bool isDark) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 82), // Menurunkan sedikit padding dari 95 ke 82 agar lebih pas
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         boxShadow: [

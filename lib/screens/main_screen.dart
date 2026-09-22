@@ -4,6 +4,7 @@ import '../progress/progress_screen.dart';
 import '../ai/netropia_ai_screen.dart';
 import '../virtual_lab/virtual_lab_screen.dart';
 import '../profile/profile_screen.dart';
+import '../widgets/magic_nav_bar.dart';
 
 class MainScreen extends StatefulWidget {
   final String username;
@@ -36,73 +37,28 @@ class _MainScreenState extends State<MainScreen> {
     ];
   }
 
-  Widget _placeholderScreen(String title, IconData icon) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 80, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text(
-              '$title Sedang Dikembangkan',
-              style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          type: BottomNavigationBarType.fixed,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_rounded),
-              label: 'Beranda',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.trending_up_rounded),
-              label: 'Progres',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.psychology_rounded),
-              label: 'AI',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.science_rounded),
-              label: 'Simulasi',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: 'Profil',
-            ),
-          ],
-        ),
+      bottomNavigationBar: MagicNavBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        items: [
+          MagicNavItem(icon: Icons.home_rounded, label: 'Beranda'),
+          MagicNavItem(icon: Icons.trending_up_rounded, label: 'Progres'),
+          MagicNavItem(icon: Icons.psychology_rounded, label: 'AI'),
+          MagicNavItem(icon: Icons.science_rounded, label: 'Simulasi'),
+          MagicNavItem(icon: Icons.person_rounded, label: 'Profil'),
+        ],
       ),
     );
   }
