@@ -7,7 +7,7 @@ import 'perangkat_jaringan/perangkat_jaringan_screen.dart';
 import 'dasar_jaringan/dasar_jaringan_screen.dart';
 import 'ip_address/ip_address_screen.dart';
 import 'kabel_jaringan/kabel_jaringan_screen.dart';
-
+import 'dasar_jaringan/pengertian_jaringan_screen.dart';
 class MateriScreen extends StatelessWidget {
   const MateriScreen({super.key});
 

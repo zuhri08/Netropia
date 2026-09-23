@@ -1,15 +1,21 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
+
 import 'dasar_tkj/pages/materi/materi_dasar_tkj_screen.dart';
+import 'dasar_jaringan/video_screen.dart';
+import 'package:netropia/materi/referensi/referensi_screen.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
+  final VoidCallback? onMateriTap;
 
   const MateriDetailLayout({
     super.key,
     required this.title,
     this.themeColor = const Color(0xFF1565C0),
+    this.onMateriTap,
   });
 
   @override
@@ -35,6 +41,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   @override
   void initState() {
     super.initState();
+
     _currentMotivation =
     _motivations[Random().nextInt(_motivations.length)];
   }
@@ -134,18 +141,18 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Menggunakan 4 kolom untuk HP, 6 untuk Tablet/Layar Lebar
-        final int crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
+        final int crossAxisCount =
+        constraints.maxWidth >= 600 ? 6 : 4;
 
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            // mainAxisExtent memastikan tinggi setiap item tetap (konsisten) di semua device
-            mainAxisExtent: 95, 
+            mainAxisExtent: 95,
           ),
           itemCount: menuItems.length,
           itemBuilder: (context, index) {
@@ -218,23 +225,94 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   }
 
   void _handleMenuTap(String name) {
+    // =========================
+    // MATERI
+    // =========================
     if (name == 'Materi') {
+      if (widget.onMateriTap != null) {
+        widget.onMateriTap!();
+        return;
+      }
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const MateriDasarTkjScreen(),
+          builder: (context) =>
+          const MateriDasarTkjScreen(),
         ),
       );
+
       return;
     }
 
+    // =========================
+    // VIDEO
+    // =========================
+    if (name == 'Video') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const VideoScreen(),
+        ),
+      );
+
+      return;
+    }
+
+    // =========================
+    // REFERENSI
+    // =========================
+    if (name == 'Referensi') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ReferensiScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+          ),
+        ),
+      );
+
+      return;
+    }
+
+    // =========================
+    // MENU YANG BELUM AKTIF
+    // =========================
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$name sedang kami siapkan.'),
+        content: Text(
+          '$name sedang kami siapkan.',
+        ),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  String _getMateriId() {
+    switch (widget.title) {
+      case 'K3':
+        return 'k3';
+
+      case 'Komponen Komputer':
+        return 'komponen_komputer';
+
+      case 'Perangkat Jaringan':
+        return 'perangkat_jaringan';
+
+      case 'Dasar Jaringan':
+        return 'dasar_jaringan';
+
+      case 'IP Address':
+        return 'ip_address';
+
+      case 'Kabel Jaringan':
+        return 'kabel_jaringan';
+
+      default:
+        return '';
+    }
   }
 
   Widget _buildProgressSection() {
@@ -257,7 +335,8 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment:
+            MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Progres Belajar',
@@ -289,7 +368,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               backgroundColor:
               widget.themeColor.withOpacity(0.1),
               valueColor:
-              AlwaysStoppedAnimation<Color>(widget.themeColor),
+              AlwaysStoppedAnimation<Color>(
+                widget.themeColor,
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -359,5 +440,4 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       ),
     );
   }
-
 }
