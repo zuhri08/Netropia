@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import '../materi_detail_layout.dart';
+import 'ip_address_materi_screen.dart';
 
 class IpAddressScreen extends StatelessWidget {
   const IpAddressScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MateriDetailLayout(
-      title: 'IP Address',
-      themeColor: Color(0xFFC62828),
-    );
+    return const IpAddressMateriScreen(index: 0);
   }
 }

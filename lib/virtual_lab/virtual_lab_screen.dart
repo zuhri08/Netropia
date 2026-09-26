@@ -49,7 +49,7 @@ class VirtualLabScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SimulatorPage()),
+                MaterialPageRoute(builder: (context) => SimulatorPage()),
               );
             },
           ),

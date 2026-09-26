@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'dasar_tkj/pages/materi/materi_dasar_tkj_screen.dart';
 import 'dasar_jaringan/video_screen.dart';
 import 'package:netropia/materi/referensi/referensi_screen.dart';
+import '../screens/learning_feature_screen.dart';
+import 'package:netropia/services/progress_service.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
@@ -23,6 +25,8 @@ class MateriDetailLayout extends StatefulWidget {
 }
 
 class _MateriDetailLayoutState extends State<MateriDetailLayout> {
+  final ProgressService _progressService = ProgressService();
+
   final List<String> _motivations = [
     "Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia. - Nelson Mandela",
     "Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya. - Mahatma Gandhi",
@@ -276,16 +280,15 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       return;
     }
 
-    // =========================
-    // MENU YANG BELUM AKTIF
-    // =========================
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$name sedang kami siapkan.',
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LearningFeatureScreen(
+          materiId: _getMateriId(),
+          materiTitle: widget.title,
+          feature: name,
+          themeColor: widget.themeColor,
         ),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -310,79 +313,84 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       case 'Kabel Jaringan':
         return 'kabel_jaringan';
 
+      case 'Dasar TKJ':
       default:
-        return '';
+        return 'dasar_tkj';
     }
   }
 
   Widget _buildProgressSection() {
-    const double progressValue = 0.45;
+    final materiId = _getMateriId();
+    final activities = <String>[
+      '${materiId}_assignment',
+      '${materiId}_portfolio',
+      '${materiId}_peta_konsep',
+      '${materiId}_forum_diskusi',
+      '${materiId}_evaluasi',
+    ];
 
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Progres Belajar',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context)
-                      .textTheme
-                      .titleMedium
-                      ?.color,
-                ),
-              ),
-              Text(
-                '${(progressValue * 100).toInt()}%',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: widget.themeColor,
-                ),
+    return FutureBuilder<List<bool>>(
+      future: Future.wait(activities.map((activity) => _progressService.isLessonCompleted(activity))),
+      builder: (context, snapshot) {
+        final completed = snapshot.data?.where((done) => done).length ?? 0;
+        final progressValue = activities.isEmpty ? 0.0 : completed / activities.length;
+
+        return Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: progressValue,
-              minHeight: 8,
-              backgroundColor:
-              widget.themeColor.withOpacity(0.1),
-              valueColor:
-              AlwaysStoppedAnimation<Color>(
-                widget.themeColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Progres Belajar',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleMedium?.color,
+                    ),
+                  ),
+                  Text(
+                    '${(progressValue * 100).round()}%',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: widget.themeColor,
+                    ),
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progressValue,
+                  minHeight: 8,
+                  backgroundColor: widget.themeColor.withOpacity(0.1),
+                  valueColor: AlwaysStoppedAnimation<Color>(widget.themeColor),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '$completed dari ${activities.length} aktivitas utama selesai.',
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Lanjutkan untuk menyelesaikan materi ini!',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.grey.shade600,
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
