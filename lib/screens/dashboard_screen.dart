@@ -5,11 +5,10 @@ import '../kalkulator_subnet/subnet_calculator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../absensi/teacher_attendance_screen.dart';
-import '../virtual_lab/virtual_lab_screen.dart';
 import '../peminjaman/borrowing_screen.dart';
-import '../virtual_lab/device_3d_viewer_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
 import '../peminjaman/teacher_borrowing_screen.dart';
+import 'package:netropia/project/project_screen.dart';
 class DashboardScreen extends StatelessWidget {
   final String username;
   final String role;
@@ -377,16 +376,16 @@ class DashboardScreen extends StatelessWidget {
                   _buildMenuCard(
                     context,
                     title: 'Project',
-                    subtitle: 'Proyek pembelajaran',
-                    icon: Icons.folder_copy_rounded,
-                    iconColor:
-                    const Color(0xFF2E7D32),
-                    backgroundColor:
-                    const Color(0xFFE8F5E9),
+                    subtitle: 'Tugas & Project',
+                    icon: Icons.assignment_rounded,
+                    iconColor: const Color(0xFF2E7D32),
+                    backgroundColor: const Color(0xFFE8F5E9),
                     onTap: () {
-                      _showComingSoon(
+                      Navigator.push(
                         context,
-                        'Project',
+                        MaterialPageRoute(
+                          builder: (context) => const ProjectScreen(),
+                        ),
                       );
                     },
                   ),
