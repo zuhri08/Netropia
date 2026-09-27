@@ -45,7 +45,7 @@ class VirtualLabScreen extends StatelessWidget {
             title: 'Simulasi Jaringan (Cisco)',
             subtitle: 'Bangun topologi dan konfigurasi perangkat Cisco.',
             icon: Icons.hub_rounded,
-            color: Colors.blue,
+            color: Color(0xFFAD8B73),
             onTap: () {
               Navigator.push(
                 context,
@@ -68,7 +68,7 @@ class VirtualLabScreen extends StatelessWidget {
             title: 'Windows Simulator',
             subtitle: 'Praktik sistem operasi dan administrasi Windows.',
             icon: Icons.window_rounded,
-            color: Colors.blueAccent,
+            color: const Color(0xFFAD8B73),
             onTap: () => _launchUrl('https://win7simu.visnalize.com/'),
           ),
         ],

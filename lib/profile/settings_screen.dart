@@ -128,7 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10, bottom: 10),
-          child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+          child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73))),
         ),
         Container(
           decoration: BoxDecoration(
@@ -144,7 +144,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSettingsItem(IconData icon, String title, {String? subtitle, Widget? trailing, Color? titleColor, VoidCallback? onTap}) {
     return ListTile(
-      leading: Icon(icon, color: titleColor ?? const Color(0xFF1565C0), size: 22),
+      leading: Icon(icon, color: titleColor ?? const Color(0xFFAD8B73), size: 22),
       title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: titleColor)),
       subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12)) : null,
       trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 20),

@@ -55,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
         gradient: LinearGradient(
           colors: isDark 
             ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
-            : [const Color(0xFF1565C0), const Color(0xFF1976D2)],
+            : [const Color(0xFFAD8B73), const Color(0xFFCEAB93)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -82,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
                       child: photoUrl == null 
-                          ? const Icon(Icons.person_rounded, size: 60, color: Color(0xFF1565C0))
+                          ? const Icon(Icons.person_rounded, size: 60, color: Color(0xFFAD8B73))
                           : null,
                     );
                   },
@@ -142,7 +142,7 @@ class ProfileScreen extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFF1565C0),
+              foregroundColor: const Color(0xFFAD8B73),
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
@@ -182,7 +182,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1565C0))),
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73))),
         const SizedBox(height: 4),
         Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
@@ -205,7 +205,7 @@ class ProfileScreen extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildBadge("Network Beginner", Icons.lan_rounded, Colors.blue, true),
+              _buildBadge("Network Beginner", Icons.lan_rounded, Color(0xFFAD8B73), true),
               _buildBadge("First Lesson", Icons.school_rounded, Colors.green, true),
               _buildBadge("Subnet Master", Icons.calculate_rounded, Colors.orange, false),
               _buildBadge("Lab Explorer", Icons.science_rounded, Colors.purple, true),
@@ -273,7 +273,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF1565C0)),
+      leading: Icon(icon, color: const Color(0xFFAD8B73)),
       title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       trailing: const Icon(Icons.chevron_right_rounded, size: 20),
       onTap: onTap,

@@ -9,7 +9,7 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  static const Color primaryBlue = Color(0xFF1565C0);
+  static const Color primaryBlue = Color(0xFFAD8B73);
   static const Color darkBlue = Color(0xFF123B7A);
   static const Color backgroundColor = Color(0xFFF7F9FB);
 
@@ -26,7 +26,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'deskripsi':
       'Memahami pengertian dan konsep dasar jaringan komputer.',
       'videoId': 'xT58k6AB7gk',
-      'color': const Color(0xFF1565C0),
+      'color': const Color(0xFFAD8B73),
     },
     {
       'number': '02',
@@ -89,7 +89,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'deskripsi':
       'Melihat contoh penerapan jaringan dalam kehidupan sehari-hari.',
       'videoId': 'D30i_hmXZK0',
-      'color': const Color(0xFF1976D2),
+      'color': const Color(0xFFCEAB93),
     },
   ];
 
@@ -263,8 +263,8 @@ class _VideoScreenState extends State<VideoScreen> {
 
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF0D47A1),
-            Color(0xFF1976D2),
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
             Color(0xFF42A5F5),
           ],
           begin: Alignment.topLeft,
@@ -464,7 +464,7 @@ class _VideoScreenState extends State<VideoScreen> {
             vertical: 9,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFFEAF4FF),
+            color: const Color(0xFFF5EBE6),
             borderRadius: BorderRadius.circular(30),
           ),
           child: const Row(
@@ -941,7 +941,7 @@ class VideoSearchDelegate
             ),
             trailing: const Icon(
               Icons.play_circle_fill_rounded,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
             onTap: () {
               onVideoTap(video['videoId']);

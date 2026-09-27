@@ -28,7 +28,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '2–3 Pertemuan',
       icon: Icons.lan_rounded,
       progress: 0,
-      color: Color(0xFF1565C0),
+      color: Color(0xFFAD8B73),
       steps: [
         'Memahami masalah',
         'Membuat perencanaan',
@@ -219,7 +219,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
           child: Icon(
             Icons.info_outline_rounded,
             size: 21,
-            color: Color(0xFF1565C0),
+            color: Color(0xFFAD8B73),
           ),
         ),
       ),
@@ -235,11 +235,11 @@ class _ProjectScreenState extends State<ProjectScreen> {
       margin: const EdgeInsets.fromLTRB(20, 14, 20, 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF1565C0),
+        color: const Color(0xFFAD8B73),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1565C0).withOpacity(0.18),
+            color: const Color(0xFFAD8B73).withOpacity(0.18),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -403,12 +403,12 @@ class _ProjectScreenState extends State<ProjectScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 17),
               decoration: BoxDecoration(
                 color: selected
-                    ? const Color(0xFF1565C0)
+                    ? const Color(0xFFAD8B73)
                     : Colors.white,
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: selected
-                      ? const Color(0xFF1565C0)
+                      ? const Color(0xFFAD8B73)
                       : const Color(0xFFE3E7EC),
                 ),
               ),
@@ -468,7 +468,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
             style: const TextStyle(
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
           ),
         ],
@@ -812,7 +812,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
             child: const Icon(
               Icons.check_rounded,
               size: 18,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
           ),
           const SizedBox(width: 10),

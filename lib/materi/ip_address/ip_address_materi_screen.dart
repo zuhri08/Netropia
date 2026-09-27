@@ -4,7 +4,7 @@ class IpAddressMateriScreen extends StatelessWidget {
   final int index;
   const IpAddressMateriScreen({super.key, required this.index});
 
-  static const Color primary = Color(0xFF1565C0);
+  static const Color primary = Color(0xFFAD8B73);
   static const Color dark = Color(0xFF123B7A);
   static const Color light = Color(0xFFEAF2FB);
   static const Color textDark = Color(0xFF263238);

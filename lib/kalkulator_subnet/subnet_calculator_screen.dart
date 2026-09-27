@@ -428,7 +428,7 @@ class _SubnetCalculatorScreenState
 
       appBar: AppBar(
         title: const Text('Kalkulator Subnet'),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFFAD8B73),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -477,8 +477,8 @@ class _SubnetCalculatorScreenState
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF1565C0),
-            Color(0xFF1976D2),
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -632,7 +632,7 @@ class _SubnetCalculatorScreenState
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                const Color(0xFF1565C0),
+                const Color(0xFFAD8B73),
                 foregroundColor: Colors.white,
                 padding:
                 const EdgeInsets.symmetric(
@@ -719,7 +719,7 @@ class _SubnetCalculatorScreenState
           icon: Icons.router_rounded,
           title: 'Network Address',
           value: _network!,
-          color: const Color(0xFF1565C0),
+          color: const Color(0xFFAD8B73),
         ),
 
         _resultCard(
@@ -765,7 +765,7 @@ class _SubnetCalculatorScreenState
           icon: Icons.devices_rounded,
           title: 'Total Number of Hosts',
           value: _totalHosts!,
-          color: const Color(0xFF1976D2),
+          color: const Color(0xFFCEAB93),
         ),
 
         _resultCard(
@@ -837,7 +837,7 @@ class _SubnetCalculatorScreenState
           icon: Icons.code_rounded,
           title: 'Binary ID',
           value: _binaryId!,
-          color: const Color(0xFF1565C0),
+          color: const Color(0xFFAD8B73),
           smallerText: true,
         ),
 
@@ -867,7 +867,7 @@ class _SubnetCalculatorScreenState
           icon: Icons.language_rounded,
           title: 'IPv4 Mapped Address',
           value: _ipv4Mapped!,
-          color: const Color(0xFF1976D2),
+          color: const Color(0xFFCEAB93),
         ),
 
         _resultCard(
@@ -899,13 +899,13 @@ class _SubnetCalculatorScreenState
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
+              color: const Color(0xFFF5EBE6),
               borderRadius:
               BorderRadius.circular(11),
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF1565C0),
+              color: const Color(0xFFAD8B73),
               size: 21,
             ),
           ),
@@ -917,7 +917,7 @@ class _SubnetCalculatorScreenState
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
           ),
         ],
@@ -1013,7 +1013,7 @@ class _SubnetCalculatorScreenState
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFE3F2FD),
+        color: const Color(0xFFF5EBE6),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: const Color(0xFFBBDEFB),
@@ -1035,7 +1035,7 @@ class _SubnetCalculatorScreenState
                 ),
                 child: const Icon(
                   Icons.lightbulb_rounded,
-                  color: Color(0xFF1565C0),
+                  color: Color(0xFFAD8B73),
                 ),
               ),
 
@@ -1047,7 +1047,7 @@ class _SubnetCalculatorScreenState
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1565C0),
+                    color: Color(0xFFAD8B73),
                   ),
                 ),
               ),

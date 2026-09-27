@@ -782,13 +782,13 @@ class _TeacherAttendanceScreenState
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: const Color(0xFFE3F2FD),
+            color: const Color(0xFFF5EBE6),
             borderRadius:
             BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFF1565C0),
+            color: const Color(0xFFAD8B73),
             size: 22,
           ),
         ),

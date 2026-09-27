@@ -476,7 +476,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
             const Icon(
               Icons.calendar_today_outlined,
               size: 20,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
             const SizedBox(width: 10),
             Text(
@@ -733,8 +733,8 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF0D47A1),
-                    Color(0xFF1976D2),
+                    Color(0xFFAD8B73),
+                    Color(0xFFCEAB93),
                   ],
                 ),
                 borderRadius:
@@ -962,14 +962,14 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Color(0xFF1565C0),
+                    color: Color(0xFFAD8B73),
                   ),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Pengajuan peminjaman akan diperiksa oleh guru sebelum disetujui.',
                       style: TextStyle(
-                        color: Color(0xFF0D47A1),
+                        color: Color(0xFFAD8B73),
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -1067,7 +1067,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                       return const Icon(
                         Icons.devices,
                         color:
-                        Color(0xFF1565C0),
+                        Color(0xFFAD8B73),
                         size: 32,
                       );
                     },
@@ -1075,7 +1075,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                 )
                     : const Icon(
                   Icons.devices,
-                  color: Color(0xFF1565C0),
+                  color: Color(0xFFAD8B73),
                   size: 32,
                 ),
               ),
@@ -1104,7 +1104,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                     Text(
                       item['kategori'],
                       style: const TextStyle(
-                        color: Color(0xFF1565C0),
+                        color: Color(0xFFAD8B73),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -1473,7 +1473,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
       case 'disetujui':
         return const _LoanStatusInfo(
           label: 'Disetujui',
-          color: Colors.blue,
+          color: Color(0xFFAD8B73),
         );
 
       case 'dipinjam':

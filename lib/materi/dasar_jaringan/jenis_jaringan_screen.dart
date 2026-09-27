@@ -8,9 +8,9 @@ class JenisJaringanScreen extends StatelessWidget {
     this.onNext,
   });
 
-  static const Color primaryBlue = Color(0xFF1565C0);
+  static const Color primaryBlue = Color(0xFFAD8B73);
   static const Color darkBlue = Color(0xFF123B7A);
-  static const Color lightBlue = Color(0xFFEAF2FB);
+  static const Color lightBlue = Color(0xFFF5EBE6);
   static const Color textDark = Color(0xFF263238);
   static const Color textGrey = Color(0xFF607D8B);
   static const Color borderGrey = Color(0xFFDCE3EA);

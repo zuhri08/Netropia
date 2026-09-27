@@ -135,7 +135,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1565C0),
+                  color: Color(0xFFAD8B73),
                 ),
               ),
             ],
@@ -148,7 +148,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
               minHeight: 7,
               backgroundColor: const Color(0xFFE5EAF0),
               valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFF1565C0),
+                Color(0xFFAD8B73),
               ),
             ),
           ),
@@ -487,7 +487,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
             ),
             child: const Icon(
               Icons.task_alt_rounded,
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
             ),
           ),
           const SizedBox(width: 14),
@@ -550,7 +550,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 child: Icon(
                   icon,
                   size: 19,
-                  color: const Color(0xFF1565C0),
+                  color: const Color(0xFFAD8B73),
                 ),
               ),
               const SizedBox(width: 10),
@@ -647,7 +647,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(
-          color: Color(0xFF1565C0),
+          color: Color(0xFFAD8B73),
           width: 1.5,
         ),
       ),
@@ -672,7 +672,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           children: [
             Checkbox(
               value: practiceChecklist[index],
-              activeColor: const Color(0xFF1565C0),
+              activeColor: const Color(0xFFAD8B73),
               onChanged: (value) {
                 setState(() {
                   practiceChecklist[index] = value ?? false;
@@ -748,7 +748,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
               onPressed: _nextStep,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(0, 50),
-                backgroundColor: const Color(0xFF1565C0),
+                backgroundColor: const Color(0xFFAD8B73),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
@@ -802,7 +802,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 Navigator.pop(context, true);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1565C0),
+                backgroundColor: const Color(0xFFAD8B73),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Selesai'),
@@ -842,7 +842,7 @@ class _MaterialRow extends StatelessWidget {
           Icon(
             icon,
             size: 20,
-            color: const Color(0xFF1565C0),
+            color: const Color(0xFFAD8B73),
           ),
           const SizedBox(width: 12),
           Text(
@@ -876,7 +876,7 @@ class _TestItem extends StatelessWidget {
         children: [
           const Icon(
             Icons.check_circle_outline_rounded,
-            color: Color(0xFF1565C0),
+            color: Color(0xFFAD8B73),
             size: 21,
           ),
           const SizedBox(width: 12),
@@ -938,7 +938,7 @@ class _ReflectionQuestion extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1565C0),
+                color: Color(0xFFAD8B73),
               ),
             ),
           ),

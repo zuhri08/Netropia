@@ -19,7 +19,7 @@ class MagicNavBar extends StatelessWidget {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     
     final Color barColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final Color activeColor = const Color(0xFF1565C0);
+    final Color activeColor = const Color(0xFFAD8B73);
     final Color slideColor = isDark ? Colors.white.withOpacity(0.05) : Colors.white;
 
     return Container(

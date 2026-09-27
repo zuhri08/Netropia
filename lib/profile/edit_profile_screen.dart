@@ -118,7 +118,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF1565C0), width: 3),
+                      border: Border.all(color: const Color(0xFFAD8B73), width: 3),
                     ),
                     child: CircleAvatar(
                       radius: 60,
@@ -129,7 +129,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               : FileImage(File(_pickedImage!.path)) as ImageProvider)
                           : (user?.photoURL != null ? NetworkImage(user!.photoURL!) : null),
                       child: _pickedImage == null && user?.photoURL == null
-                          ? const Icon(Icons.person_rounded, size: 70, color: Color(0xFF1565C0))
+                          ? const Icon(Icons.person_rounded, size: 70, color: Color(0xFFAD8B73))
                           : null,
                     ),
                   ),
@@ -139,7 +139,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: GestureDetector(
                       onTap: _pickImage,
                       child: CircleAvatar(
-                        backgroundColor: const Color(0xFF1565C0),
+                        backgroundColor: const Color(0xFFAD8B73),
                         radius: 18,
                         child: const Icon(Icons.camera_alt_rounded, size: 20, color: Colors.white),
                       ),

@@ -345,7 +345,7 @@ class _PreTestScreenState extends State<PreTestScreen> {
             backgroundColor: const Color(0xFFE9EDF2),
             valueColor:
             const AlwaysStoppedAnimation<Color>(
-              Color(0xFF1565C0),
+              Color(0xFFAD8B73),
             ),
           ),
           Expanded(
@@ -362,7 +362,7 @@ class _PreTestScreenState extends State<PreTestScreen> {
                   const Text(
                     'DASAR JARINGAN',
                     style: TextStyle(
-                      color: Color(0xFF1565C0),
+                      color: Color(0xFFAD8B73),
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
@@ -457,7 +457,7 @@ class _PreTestScreenState extends State<PreTestScreen> {
                   onPressed: _nextQuestion,
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
-                    const Color(0xFF1565C0),
+                    const Color(0xFFAD8B73),
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
@@ -525,12 +525,12 @@ class _AnswerOption extends StatelessWidget {
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: selected
-                  ? const Color(0xFFEAF2FF)
+                  ? const Color(0xFFF5EBE6)
                   : Colors.white,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
                 color: selected
-                    ? const Color(0xFF1565C0)
+                    ? const Color(0xFFAD8B73)
                     : const Color(0xFFE1E6EC),
                 width: selected ? 1.5 : 1,
               ),
@@ -547,7 +547,7 @@ class _AnswerOption extends StatelessWidget {
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: selected
-                        ? const Color(0xFF1565C0)
+                        ? const Color(0xFFAD8B73)
                         : const Color(0xFFF2F4F7),
                     shape: BoxShape.circle,
                   ),
@@ -586,7 +586,7 @@ class _AnswerOption extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Icon(
                     Icons.check_circle_rounded,
-                    color: Color(0xFF1565C0),
+                    color: Color(0xFFAD8B73),
                     size: 20,
                   ),
                 ],
@@ -700,7 +700,7 @@ class PreTestResultScreen extends StatelessWidget {
                             valueColor:
                             const AlwaysStoppedAnimation<
                                 Color>(
-                              Color(0xFF1565C0),
+                              Color(0xFFAD8B73),
                             ),
                           ),
                         ),
@@ -755,7 +755,7 @@ class PreTestResultScreen extends StatelessWidget {
                           value: '${questions.length}',
                           label: 'Soal',
                           icon: Icons.assignment_outlined,
-                          color: const Color(0xFF1565C0),
+                          color: const Color(0xFFAD8B73),
                         ),
                       ),
                     ],
@@ -770,7 +770,7 @@ class PreTestResultScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: const Color(0xFFEAF2FF),
+                color: const Color(0xFFF5EBE6),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
@@ -779,7 +779,7 @@ class PreTestResultScreen extends StatelessWidget {
                 children: [
                   const Icon(
                     Icons.info_outline_rounded,
-                    color: Color(0xFF1565C0),
+                    color: Color(0xFFAD8B73),
                     size: 21,
                   ),
                   const SizedBox(width: 12),
@@ -808,7 +808,7 @@ class PreTestResultScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                  const Color(0xFF1565C0),
+                  const Color(0xFFAD8B73),
                   foregroundColor: Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -842,7 +842,7 @@ class PreTestResultScreen extends StatelessWidget {
                 },
                 style: OutlinedButton.styleFrom(
                   foregroundColor:
-                  const Color(0xFF1565C0),
+                  const Color(0xFFAD8B73),
                   side: const BorderSide(
                     color: Color(0xFFB9D1F2),
                   ),
