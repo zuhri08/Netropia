@@ -240,7 +240,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Icon(
                   Icons.person_add,
                   size: 70,
-                  color: Color(0xFF1565C0),
+                  color: Color(0xFFAD8B73),
                 ),
               ),
 

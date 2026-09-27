@@ -225,7 +225,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           ),
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: Color(0xFF1565C0),
+            color: Color(0xFFAD8B73),
           ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
@@ -259,7 +259,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
             borderSide: const BorderSide(
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
               width: 1.5,
             ),
           ),
@@ -295,11 +295,11 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
-            selectedColor: const Color(0xFF1565C0),
+            selectedColor: const Color(0xFFAD8B73),
             backgroundColor: Colors.white,
             side: BorderSide(
               color: selected
-                  ? const Color(0xFF1565C0)
+                  ? const Color(0xFFAD8B73)
                   : const Color(0xFFE4E9EF),
             ),
             shape: RoundedRectangleBorder(
@@ -345,7 +345,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
               ),
               child: const Icon(
                 Icons.search_off_rounded,
-                color: Color(0xFF1565C0),
+                color: Color(0xFFAD8B73),
                 size: 34,
               ),
             ),
@@ -379,7 +379,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
                 });
               },
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF1565C0),
+                foregroundColor: const Color(0xFFAD8B73),
                 side: const BorderSide(
                   color: Color(0xFFB9D1F2),
                 ),
@@ -429,7 +429,7 @@ class _ReferenceCardState extends State<_ReferenceCard> {
         return const Color(0xFF8E44AD);
 
       case 'Materi Komputer':
-        return const Color(0xFF1565C0);
+        return const Color(0xFFAD8B73);
 
       case 'Networking':
         return const Color(0xFF00838F);
@@ -441,7 +441,7 @@ class _ReferenceCardState extends State<_ReferenceCard> {
         return const Color(0xFF6A4C93);
 
       case 'Dasar Jaringan':
-        return const Color(0xFF1565C0);
+        return const Color(0xFFAD8B73);
 
       case 'Bacaan Tambahan':
         return const Color(0xFFE65100);
@@ -450,7 +450,7 @@ class _ReferenceCardState extends State<_ReferenceCard> {
         return const Color(0xFF2E7D32);
 
       default:
-        return const Color(0xFF1565C0);
+        return const Color(0xFFAD8B73);
     }
   }
 

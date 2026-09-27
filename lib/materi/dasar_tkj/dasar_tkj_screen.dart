@@ -8,7 +8,7 @@ class DasarTkjScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MateriDetailLayout(
       title: 'Dasar TKJ',
-      themeColor: Color(0xFF1565C0),
+      themeColor: Color(0xFFAD8B73),
     );
   }
 }

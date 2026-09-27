@@ -522,8 +522,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   gradient:
                   const LinearGradient(
                     colors: [
-                      Color(0xFF1565C0),
-                      Color(0xFF1976D2),
+                      Color(0xFFAD8B73),
+                      Color(0xFFCEAB93),
                     ],
                   ),
                   borderRadius:
@@ -883,7 +883,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           Icon(
             icon,
             color:
-            const Color(0xFF1565C0),
+            const Color(0xFFAD8B73),
             size: 25,
           ),
           const SizedBox(
@@ -936,7 +936,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         BorderRadius.circular(18),
         border: Border.all(
           color: const Color(
-            0xFF1565C0,
+            0xFFAD8B73,
           ).withOpacity(0.15),
         ),
         boxShadow: [
@@ -964,7 +964,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 BoxDecoration(
                   color:
                   const Color(
-                    0xFFE3F2FD,
+                    0xFFF5EBE6,
                   ),
                   borderRadius:
                   BorderRadius.circular(
@@ -974,7 +974,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 child: const Icon(
                   Icons.fact_check,
                   color:
-                  Color(0xFF1565C0),
+                  Color(0xFFAD8B73),
                 ),
               ),
               const SizedBox(
@@ -1092,7 +1092,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             BoxDecoration(
               color:
               const Color(
-                0xFFE3F2FD,
+                0xFFF5EBE6,
               ),
               borderRadius:
               BorderRadius.circular(
@@ -1103,7 +1103,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               statusIcon(status),
               color:
               const Color(
-                0xFF1565C0,
+                0xFFAD8B73,
               ),
             ),
           ),
@@ -1159,7 +1159,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             style:
             const TextStyle(
               color:
-              Color(0xFF1565C0),
+              Color(0xFFAD8B73),
               fontWeight:
               FontWeight.bold,
               fontSize: 12,

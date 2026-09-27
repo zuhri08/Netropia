@@ -74,7 +74,7 @@ class DashboardScreen extends StatelessWidget {
       // ========================================================
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFFAD8B73),
         foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 20,
@@ -197,7 +197,7 @@ class DashboardScreen extends StatelessWidget {
                     subtitle: 'Pelajari materi TKJ',
                     icon: Icons.menu_book_rounded,
                     iconColor:
-                    const Color(0xFF1565C0),
+                    const Color(0xFFAD8B73),
                     backgroundColor:
                     const Color(0xFFE8F1FF),
                     onTap: () {
@@ -435,7 +435,7 @@ class DashboardScreen extends StatelessWidget {
                 context,
                 icon: Icons.menu_book_rounded,
                 iconColor:
-                const Color(0xFF1565C0),
+                const Color(0xFFAD8B73),
                 title: 'Dasar TKJ',
                 subtitle:
                 'Materi terakhir dipelajari',
@@ -513,8 +513,8 @@ class DashboardScreen extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF1565C0),
-            Color(0xFF1976D2),
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -524,7 +524,7 @@ class DashboardScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color:
-            Colors.blue.withOpacity(0.18),
+            Color(0xFFAD8B73).withOpacity(0.18),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -659,7 +659,7 @@ class DashboardScreen extends StatelessWidget {
                 backgroundColor:
                 Colors.white,
                 foregroundColor:
-                const Color(0xFF1565C0),
+                const Color(0xFFAD8B73),
                 elevation: 0,
                 padding:
                 const EdgeInsets.symmetric(
@@ -965,7 +965,7 @@ class DashboardScreen extends StatelessWidget {
                         valueColor:
                         const AlwaysStoppedAnimation<
                             Color>(
-                          Color(0xFF1565C0),
+                          Color(0xFFAD8B73),
                         ),
                       ),
                     ),

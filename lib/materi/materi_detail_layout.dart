@@ -16,7 +16,7 @@ class MateriDetailLayout extends StatefulWidget {
   const MateriDetailLayout({
     super.key,
     required this.title,
-    this.themeColor = const Color(0xFF1565C0),
+    this.themeColor = const Color(0xFFAD8B73),
     this.onMateriTap,
   });
 
@@ -84,7 +84,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       {
         'name': 'Materi',
         'icon': Icons.menu_book_rounded,
-        'color': Colors.blue,
+        'color': Color(0xFFAD8B73),
       },
       {
         'name': 'Video',
@@ -99,7 +99,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       {
         'name': 'Referensi',
         'icon': Icons.library_books_rounded,
-        'color': Colors.indigo,
+        'color': Color(0xFFCEAB93),
       },
       {
         'name': 'Pre Test',

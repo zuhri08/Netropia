@@ -60,7 +60,7 @@ class _Device3DViewerScreenState extends State<Device3DViewerScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("3D View: ${widget.deviceName}"),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFFAD8B73),
         foregroundColor: Colors.white,
       ),
       body: Stack(
@@ -68,7 +68,7 @@ class _Device3DViewerScreenState extends State<Device3DViewerScreen> {
           _buildView(),
           if (!kIsWeb && _isLoading)
             const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1565C0)),
+              child: CircularProgressIndicator(color: Color(0xFFAD8B73)),
             ),
         ],
       ),

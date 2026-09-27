@@ -103,10 +103,10 @@ class Device3DListScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1565C0).withOpacity(0.1),
+                      color: const Color(0xFFAD8B73).withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(device['icon'] as IconData, color: const Color(0xFF1565C0), size: 28),
+                    child: Icon(device['icon'] as IconData, color: const Color(0xFFAD8B73), size: 28),
                   ),
                   const SizedBox(height: 12),
                   Text(

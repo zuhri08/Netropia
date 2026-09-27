@@ -64,7 +64,7 @@ class _LabDetailScreenState extends State<LabDetailScreen> {
 
   Widget _buildTopologyView() {
     return Container(
-      color: Theme.of(context).brightness == Brightness.dark ? Colors.black26 : Colors.blue.shade50.withOpacity(0.3),
+      color: Theme.of(context).brightness == Brightness.dark ? Colors.black26 : const Color(0xFFAD8B73).withOpacity(0.1),
       child: Stack(
         children: [
           const Center(child: Text("TOPOLOGY VIEW", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 10))),
@@ -87,16 +87,16 @@ class _LabDetailScreenState extends State<LabDetailScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isActive ? const Color(0xFF1565C0) : Colors.white,
+              color: isActive ? const Color(0xFFAD8B73) : Colors.white,
               shape: BoxShape.circle,
               boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
-              border: Border.all(color: isActive ? Colors.white : const Color(0xFF1565C0), width: 2),
+              border: Border.all(color: isActive ? Colors.white : const Color(0xFFAD8B73), width: 2),
             ),
-            child: Icon(icon, color: isActive ? Colors.white : const Color(0xFF1565C0), size: 30),
+            child: Icon(icon, color: isActive ? Colors.white : const Color(0xFFAD8B73), size: 30),
           ),
           const SizedBox(height: 8),
           Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-          if (isActive) Text(detail, style: const TextStyle(fontSize: 10, color: Colors.blue, fontWeight: FontWeight.w600)),
+          if (isActive) Text(detail, style: const TextStyle(fontSize: 10, color: Color(0xFFAD8B73), fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -106,7 +106,7 @@ class _LabDetailScreenState extends State<LabDetailScreen> {
     return Container(
       width: 200,
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.blue.shade100)),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFCEAB93))),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -218,14 +218,14 @@ class _ScoreItem extends StatelessWidget {
   const _ScoreItem({required this.label, required this.value});
   @override
   Widget build(BuildContext context) {
-    return Column(children: [Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.blue)), Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey))]);
+    return Column(children: [Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFFAD8B73))), Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey))]);
   }
 }
 
 class TopologyLinkPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.blue.withOpacity(0.3)..strokeWidth = 2..style = PaintingStyle.stroke;
+    final paint = Paint()..color = Color(0xFFAD8B73).withOpacity(0.3)..strokeWidth = 2..style = PaintingStyle.stroke;
     // PC to Switch
     canvas.drawLine(const Offset(70, 130), const Offset(160, 130), paint);
     // Switch to Router

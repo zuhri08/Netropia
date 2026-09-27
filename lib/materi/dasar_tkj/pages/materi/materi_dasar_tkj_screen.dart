@@ -19,7 +19,7 @@ class _MateriDasarTkjScreenState
       'title': 'OBSERVE',
       'subtitle': 'Amati',
       'icon': Icons.visibility_rounded,
-      'color': Color(0xFF1976D2),
+      'color': Color(0xFFCEAB93),
     },
     {
       'title': 'THINK',
@@ -53,7 +53,7 @@ class _MateriDasarTkjScreenState
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text('Materi Dasar TKJ'),
-        backgroundColor: const Color(0xFF1565C0),
+        backgroundColor: const Color(0xFFAD8B73),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -83,8 +83,8 @@ class _MateriDasarTkjScreenState
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            Color(0xFF1565C0),
-            Color(0xFF1976D2),
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -244,7 +244,7 @@ class _MateriDasarTkjScreenState
     return _contentCard(
       title: 'Amati Lingkungan di Sekitarmu',
       icon: Icons.visibility_rounded,
-      color: const Color(0xFF1976D2),
+      color: const Color(0xFFCEAB93),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -316,7 +316,7 @@ class _MateriDasarTkjScreenState
         children: [
           Icon(
             icon,
-            color: const Color(0xFF1565C0),
+            color: const Color(0xFFAD8B73),
             size: 32,
           ),
           const SizedBox(height: 8),
@@ -757,7 +757,7 @@ class _ConceptItem extends StatelessWidget {
           Icon(
             icon,
             size: 21,
-            color: const Color(0xFF1565C0),
+            color: const Color(0xFFAD8B73),
           ),
           const SizedBox(width: 10),
           Expanded(

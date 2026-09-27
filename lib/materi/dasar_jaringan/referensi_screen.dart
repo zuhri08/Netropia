@@ -18,7 +18,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
       'Referensi tentang pengertian, fungsi, cara kerja, dan jenis-jenis jaringan komputer.',
       'kategori': 'Materi TKJ',
       'icon': Icons.school_rounded,
-      'color': Color(0xFF1565C0),
+      'color': Color(0xFFAD8B73),
       'url':
       'https://telkomuniversity.ac.id/mengenal-jaringan-komputer-definisi-fungsi-cara-kerja-dan-ragam-jenisnya/',
     },
@@ -195,7 +195,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           end: Alignment.bottomRight,
           colors: [
             Color(0xFF123B7A),
-            Color(0xFF1976D2),
+            Color(0xFFCEAB93),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
@@ -299,7 +299,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           hintText: 'Cari referensi...',
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: Color(0xFF1565C0),
+            color: Color(0xFFAD8B73),
           ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
@@ -331,7 +331,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
               width: 1.5,
             ),
           ),
@@ -371,13 +371,13 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
             vertical: 6,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFFEAF2FF),
+            color: const Color(0xFFF5EBE6),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             '$count sumber',
             style: const TextStyle(
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
               fontSize: 10,
               fontWeight: FontWeight.bold,
             ),
@@ -530,12 +530,12 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
               width: 75,
               height: 75,
               decoration: BoxDecoration(
-                color: const Color(0xFFEAF2FF),
+                color: const Color(0xFFF5EBE6),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: const Icon(
                 Icons.search_off_rounded,
-                color: Color(0xFF1565C0),
+                color: Color(0xFFAD8B73),
                 size: 35,
               ),
             ),

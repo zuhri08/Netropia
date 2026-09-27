@@ -82,7 +82,7 @@ class ProgressScreen extends StatelessWidget {
       floating: false,
       pinned: true,
       elevation: 0,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFF1565C0),
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFAD8B73),
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: false,
         titlePadding: const EdgeInsets.only(left: 20, bottom: 20),
@@ -96,7 +96,7 @@ class ProgressScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
-                color: isDark ? Colors.blue.shade200 : Colors.white,
+                color: isDark ? const Color(0xFFCEAB93) : Colors.white,
                 letterSpacing: 0.5,
               ),
             ),
@@ -147,7 +147,7 @@ class ProgressScreen extends StatelessWidget {
   Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 20, color: const Color(0xFF1565C0)),
+        Icon(icon, size: 20, color: const Color(0xFFAD8B73)),
         const SizedBox(width: 8),
         Text(
           title,
@@ -171,14 +171,14 @@ class ProgressScreen extends StatelessWidget {
         gradient: LinearGradient(
           colors: isDark 
             ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
-            : [const Color(0xFF1565C0), const Color(0xFF1976D2)],
+            : [const Color(0xFFAD8B73), const Color(0xFFCEAB93)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1565C0).withOpacity(isDark ? 0.1 : 0.3),
+            color: const Color(0xFFAD8B73).withOpacity(isDark ? 0.1 : 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -265,7 +265,7 @@ class ProgressScreen extends StatelessWidget {
 
   Widget _buildMateriProgressList(BuildContext context) {
     final List<Map<String, dynamic>> items = [
-      {'name': 'Dasar TKJ', 'done': 6, 'total': 10, 'percent': 0.6, 'color': Colors.blue},
+      {'name': 'Dasar TKJ', 'done': 6, 'total': 10, 'percent': 0.6, 'color': Color(0xFFAD8B73)},
       {'name': 'Jaringan Komputer', 'done': 4, 'total': 12, 'percent': 0.33, 'color': Colors.green},
       {'name': 'Keamanan Jaringan', 'done': 1, 'total': 8, 'percent': 0.12, 'color': Colors.orange},
     ];
@@ -342,7 +342,7 @@ class ProgressScreen extends StatelessWidget {
     final List<Map<String, dynamic>> items = [
       {'name': 'Early Bird', 'icon': Icons.wb_twilight_rounded, 'color': Colors.amber},
       {'name': 'Quiz Master', 'icon': Icons.psychology_rounded, 'color': Colors.purple},
-      {'name': 'Social Star', 'icon': Icons.groups_rounded, 'color': Colors.blue},
+      {'name': 'Social Star', 'icon': Icons.groups_rounded, 'color': Color(0xFFAD8B73)},
       {'name': 'Lab King', 'icon': Icons.science_rounded, 'color': Colors.green},
     ];
 
@@ -439,7 +439,7 @@ class ProgressScreen extends StatelessWidget {
                       height: values[index] * 100,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF1565C0), Color(0xFF64B5F6)],
+                          colors: [Color(0xFFAD8B73), Color(0xFFCEAB93)],
                           begin: Alignment.bottomCenter,
                           end: Alignment.topCenter,
                         ),
@@ -477,7 +477,7 @@ class ProgressScreen extends StatelessWidget {
           final List<Map<String, dynamic>> acts = [
             {'title': 'Selesai Modul 4', 'sub': 'Dasar TKJ • Jaringan', 'time': '12m ago', 'icon': Icons.check_circle_rounded, 'color': Colors.green},
             {'title': 'Mengerjakan Kuis', 'sub': 'Keamanan • Enkripsi', 'time': '2h ago', 'icon': Icons.quiz_rounded, 'color': Colors.orange},
-            {'title': 'Masuk Rank Top 10', 'sub': 'Mingguan • Siswa', 'time': 'Yesterday', 'icon': Icons.leaderboard_rounded, 'color': Colors.blue},
+            {'title': 'Masuk Rank Top 10', 'sub': 'Mingguan • Siswa', 'time': 'Yesterday', 'icon': Icons.leaderboard_rounded, 'color': Color(0xFFAD8B73)},
           ];
           final act = acts[index];
           return ListTile(

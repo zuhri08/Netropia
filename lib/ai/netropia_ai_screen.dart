@@ -197,7 +197,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: message.isUser
-              ? (isDark ? const Color(0xFF1565C0) : const Color(0xFF1565C0))
+              ? (isDark ? const Color(0xFFAD8B73) : const Color(0xFFAD8B73))
               : (isDark ? const Color(0xFF2C2C2C) : Colors.white),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(18),
@@ -268,7 +268,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
             const SizedBox(
               width: 12,
               height: 12,
-              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1565C0)),
+              child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFAD8B73)),
             ),
             const SizedBox(width: 12),
             Text("AI sedang berpikir...", style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
@@ -338,7 +338,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           const SizedBox(width: 12),
           Container(
             decoration: const BoxDecoration(
-              color: Color(0xFF1565C0),
+              color: Color(0xFFAD8B73),
               shape: BoxShape.circle,
             ),
             child: IconButton(

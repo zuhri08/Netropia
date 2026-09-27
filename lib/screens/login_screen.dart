@@ -314,8 +314,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
-                        Color(0xFF0D47A1),
-                        Color(0xFF1976D2),
+                        Color(0xFFAD8B73),
+                        Color(0xFFCEAB93),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -325,7 +325,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     boxShadow: [
                       BoxShadow(
                         color:
-                        Colors.blue.withOpacity(0.20),
+                        Color(0xFFAD8B73).withOpacity(0.20),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -348,7 +348,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
-                    color: Color(0xFF1565C0),
+                    color: Color(0xFFAD8B73),
                   ),
                 ),
               ),
@@ -477,7 +477,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           BorderRadius.circular(14),
                           borderSide:
                           const BorderSide(
-                            color: Color(0xFF1565C0),
+                            color: Color(0xFFAD8B73),
                             width: 2,
                           ),
                         ),
@@ -543,7 +543,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           BorderRadius.circular(14),
                           borderSide:
                           const BorderSide(
-                            color: Color(0xFF1565C0),
+                            color: Color(0xFFAD8B73),
                             width: 2,
                           ),
                         ),
@@ -572,7 +572,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Lupa Password?',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1565C0),
+                            color: Color(0xFFAD8B73),
                           ),
                         ),
                       ),
@@ -593,7 +593,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 rememberMe = val ?? false;
                               });
                             },
-                            activeColor: const Color(0xFF1565C0),
+                            activeColor: const Color(0xFFAD8B73),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -624,7 +624,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         isLoading ? null : login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                          const Color(0xFF1565C0),
+                          const Color(0xFFAD8B73),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape:
@@ -705,7 +705,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           'Daftar sekarang',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1565C0),
+                            color: Color(0xFFAD8B73),
                           ),
                         ),
                       ),
@@ -799,13 +799,13 @@ class _LoginScreenState extends State<LoginScreen> {
         height: 52,
         decoration: BoxDecoration(
           color: selected
-              ? const Color(0xFF1565C0)
+              ? const Color(0xFFAD8B73)
               : const Color(0xFFF7F9FC),
           borderRadius:
           BorderRadius.circular(14),
           border: Border.all(
             color: selected
-                ? const Color(0xFF1565C0)
+                ? const Color(0xFFAD8B73)
                 : const Color(0xFFE1E5EA),
             width: selected ? 2 : 1,
           ),
@@ -819,7 +819,7 @@ class _LoginScreenState extends State<LoginScreen> {
               size: 20,
               color: selected
                   ? Colors.white
-                  : const Color(0xFF1565C0),
+                  : const Color(0xFFAD8B73),
             ),
 
             const SizedBox(width: 7),

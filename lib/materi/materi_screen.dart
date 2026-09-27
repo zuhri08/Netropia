@@ -18,7 +18,7 @@ class MateriScreen extends StatelessWidget {
         'title': 'Dasar TKJ',
         'subtitle': 'Pengenalan dasar Teknik Komputer dan Jaringan',
         'icon': Icons.computer_rounded,
-        'color': const Color(0xFF1565C0),
+        'color': const Color(0xFFAD8B73),
         'screen': const DasarTkjScreen(),
       },
       {
@@ -90,8 +90,8 @@ class MateriScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF0D47A1),
-                    Color(0xFF1976D2),
+                    Color(0xFFAD8B73),
+                    Color(0xFFCEAB93),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
