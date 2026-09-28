@@ -7,7 +7,9 @@ import 'dasar_jaringan/video_screen.dart';
 import 'package:netropia/materi/referensi/referensi_screen.dart';
 import '../screens/learning_feature_screen.dart';
 import 'package:netropia/services/progress_service.dart';
-
+import 'dasar_jaringan/pre_test_screen.dart';
+import 'dasar_jaringan/post_test_screen.dart';
+import 'dasar_jaringan/penugasan_screen.dart';
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
@@ -279,7 +281,38 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
       return;
     }
+    // =========================
+// PRE TEST
+// =========================
+    if (name == 'Pre Test') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PreTestScreen(),
+        ),
+      );
 
+      return;
+    }
+    if (name == 'Post Test') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PostTestScreen(),
+        ),
+      );
+
+      return;
+    }
+    if (name == 'Penugasan') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PenugasanScreen(),
+        ),
+      );
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(

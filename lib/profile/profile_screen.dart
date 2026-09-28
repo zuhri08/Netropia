@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
-import '../progress/progress_screen.dart';
+import '../progres/progres_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String username;
@@ -257,7 +257,7 @@ class ProfileScreen extends StatelessWidget {
             Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: username, role: role)));
           }),
           _buildMenuItem(context, Icons.trending_up_rounded, "Progress Belajar", () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProgressScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (context) => ProgresScreen()));
           }),
           _buildMenuItem(context, Icons.emoji_events_outlined, "Achievement", () {}),
           _buildMenuItem(context, Icons.history_rounded, "Riwayat Aktivitas", () {}),

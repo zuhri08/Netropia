@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
-import '../progress/progress_screen.dart';
+import '../progres/progres_screen.dart';
 import '../ai/netropia_ai_screen.dart';
 import '../virtual_lab/virtual_lab_screen.dart';
 import '../profile/profile_screen.dart';
@@ -30,7 +30,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _pages = [
       DashboardScreen(username: widget.username, role: widget.role),
-      const ProgressScreen(),
+      ProgresScreen(),
       const NetropiaAiScreen(),
       const VirtualLabScreen(),
       ProfileScreen(username: widget.username, role: widget.role),

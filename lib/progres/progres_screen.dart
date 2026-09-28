@@ -1,131 +1,159 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import '../services/progress_service.dart';
 
-class ProgressService {
-  static const String _activityKey = 'recent_activities';
+class ProgresScreen extends StatefulWidget {
+  const ProgresScreen({super.key});
 
-  // ============================================================
-  // MATERI
-  // ============================================================
+  @override
+  State<ProgresScreen> createState() => _ProgresScreenState();
+}
 
-  Future<bool> isLessonCompleted(String lessonId) async {
-    final prefs = await SharedPreferences.getInstance();
+class _ProgresScreenState extends State<ProgresScreen> {
+  final ProgressService _progressService = ProgressService();
+  int _overallProgress = 0;
+  List<Map<String, String>> _activities = [];
+  bool _isLoading = true;
 
-    return prefs.getBool('progress_$lessonId') ?? false;
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
   }
 
-  Future<void> setLessonCompleted(
-      String lessonId, [
-        bool completed = true,
-      ]) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setBool(
-      'progress_$lessonId',
-      completed,
-    );
-  }
-
-  // ============================================================
-  // HITUNG PROGRESS
-  // ============================================================
-
-  Future<int> getOverallProgress() async {
-    final lessonIds = [
-      'pengertian_jaringan',
-      'tujuan_manfaat_jaringan',
-      'cara_kerja_jaringan',
-      'jenis_jaringan',
-      'topologi_jaringan',
-      'protokol_jaringan',
-      'keamanan_jaringan',
-      'penerapan_jaringan',
-    ];
-
-    int completed = 0;
-
-    for (final lessonId in lessonIds) {
-      final isCompleted = await isLessonCompleted(lessonId);
-
-      if (isCompleted) {
-        completed++;
-      }
+  Future<void> _loadData() async {
+    final progress = await _progressService.getOverallProgress();
+    final activities = await _progressService.getRecentActivities();
+    if (mounted) {
+      setState(() {
+        _overallProgress = progress;
+        _activities = activities;
+        _isLoading = false;
+      });
     }
-
-    if (lessonIds.isEmpty) {
-      return 0;
-    }
-
-    return ((completed / lessonIds.length) * 100).round();
   }
 
-  // ============================================================
-  // AKTIVITAS TERBARU
-  // ============================================================
-
-  Future<void> saveActivity({
-    required String title,
-    required String subtitle,
-    required String time,
-    required String type,
-  }) async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final activities =
-        prefs.getStringList(_activityKey) ?? [];
-
-    final activity = [
-      title,
-      subtitle,
-      time,
-      type,
-    ].join('|||');
-
-    // Aktivitas terbaru berada di depan.
-    activities.removeWhere(
-          (item) => item.startsWith('$title|||'),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Progres Belajar'),
+        backgroundColor: const Color(0xFF1565C0),
+        foregroundColor: Colors.white,
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1565C0), Color(0xFF1976D2)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Total Progres Belajar',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '$_overallProgress%',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.trending_up_rounded,
+                                color: Colors.white,
+                                size: 40,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          LinearProgressIndicator(
+                            value: _overallProgress / 100,
+                            backgroundColor: Colors.white24,
+                            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                            minHeight: 8,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Aktivitas Terbaru',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _activities.isEmpty
+                        ? const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(32.0),
+                              child: Text(
+                                'Belum ada aktivitas terbaru.',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _activities.length,
+                            itemBuilder: (context, index) {
+                              final activity = _activities[index];
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: ListTile(
+                                  leading: const CircleAvatar(
+                                    backgroundColor: Color(0xFFE3F2FD),
+                                    child: Icon(Icons.school_rounded, color: Color(0xFF1565C0)),
+                                  ),
+                                  title: Text(
+                                    activity['title'] ?? '',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(activity['subtitle'] ?? ''),
+                                  trailing: Text(
+                                    activity['time'] ?? '',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ],
+                ),
+              ),
+            ),
     );
-
-    activities.insert(0, activity);
-
-    // Maksimal 10 aktivitas.
-    if (activities.length > 10) {
-      activities.removeRange(
-        10,
-        activities.length,
-      );
-    }
-
-    await prefs.setStringList(
-      _activityKey,
-      activities,
-    );
-  }
-
-  Future<List<Map<String, String>>> getRecentActivities() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final activities =
-        prefs.getStringList(_activityKey) ?? [];
-
-    return activities.map((item) {
-      final parts = item.split('|||');
-
-      return {
-        'title': parts.isNotEmpty ? parts[0] : '',
-        'subtitle': parts.length > 1 ? parts[1] : '',
-        'time': parts.length > 2 ? parts[2] : '',
-        'type': parts.length > 3 ? parts[3] : '',
-      };
-    }).toList();
-  }
-
-  // ============================================================
-  // HAPUS AKTIVITAS
-  // ============================================================
-
-  Future<void> clearActivities() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.remove(_activityKey);
   }
 }
