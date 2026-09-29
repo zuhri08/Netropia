@@ -5,6 +5,7 @@ import '../ai/netropia_ai_screen.dart';
 import '../virtual_lab/virtual_lab_screen.dart';
 import '../profile/profile_screen.dart';
 import '../widgets/magic_nav_bar.dart';
+import '../services/localization_service.dart';
 
 class MainScreen extends StatefulWidget {
   final String username;
@@ -40,30 +41,35 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBody: true,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
-      ),
-      bottomNavigationBar: MagicNavBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          if (index == 1) {
-            _progresKey.currentState?.refreshData();
-          }
-        },
-        items: [
-          MagicNavItem(icon: Icons.home_rounded, label: 'Beranda'),
-          MagicNavItem(icon: Icons.trending_up_rounded, label: 'Progres'),
-          MagicNavItem(icon: Icons.psychology_rounded, label: 'AI'),
-          MagicNavItem(icon: Icons.science_rounded, label: 'Simulasi'),
-          MagicNavItem(icon: Icons.person_rounded, label: 'Profil'),
-        ],
-      ),
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          extendBody: true,
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _pages,
+          ),
+          bottomNavigationBar: MagicNavBar(
+            currentIndex: _selectedIndex,
+            onTap: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+              if (index == 1) {
+                _progresKey.currentState?.refreshData();
+              }
+            },
+            items: [
+              MagicNavItem(icon: Icons.home_rounded, label: localizationService.translate('home')),
+              MagicNavItem(icon: Icons.trending_up_rounded, label: localizationService.translate('progress')),
+              MagicNavItem(icon: Icons.psychology_rounded, label: localizationService.translate('ai')),
+              MagicNavItem(icon: Icons.science_rounded, label: localizationService.translate('simulation')),
+              MagicNavItem(icon: Icons.person_rounded, label: localizationService.translate('profile')),
+            ],
+          ),
+        );
+      },
     );
   }
 }

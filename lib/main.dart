@@ -1,4 +1,3 @@
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/foundation.dart';
@@ -9,6 +8,7 @@ import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_manager.dart';
+import 'services/localization_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +16,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await localizationService.init();
 
   // App Check untuk pengujian lokal Android.
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
@@ -38,10 +40,10 @@ class NetropiaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: themeManager,
+      listenable: Listenable.merge([themeManager, localizationService]),
       builder: (context, child) {
         return MaterialApp(
-          locale: DevicePreview.locale(context),
+          locale: DevicePreview.locale(context) ?? Locale(localizationService.currentLanguage),
           builder: (context, child) {
             return DevicePreview.appBuilder(context, child);
           },

@@ -12,6 +12,7 @@ import '../peminjaman/borrowing_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
 import '../peminjaman/teacher_borrowing_screen.dart';
 import '../project/project_screen.dart';
+import '../services/localization_service.dart';
 import 'notification_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -23,10 +24,6 @@ class DashboardScreen extends StatelessWidget {
     required this.username,
     required this.role,
   });
-
-  // ============================================================
-  // NAVIGASI KE MATERI
-  // ============================================================
 
   void _openMateri(BuildContext context) {
     Navigator.push(
@@ -46,24 +43,20 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // STREAK DIALOG
-  // ============================================================
-
   void _showStreakDialog(BuildContext context, int streak) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.local_fire_department_rounded,
               color: Colors.orange,
               size: 28,
             ),
-            SizedBox(width: 8),
-            Text('Streak Belajar'),
+            const SizedBox(width: 8),
+            Text(localizationService.translate('streak')),
           ],
         ),
         content: Column(
@@ -71,7 +64,7 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$streak Hari Berturut-turut! 🔥',
+              '$streak${localizationService.translate('streak_days')} 🔥',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -79,34 +72,27 @@ class DashboardScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Hebat! Kamu telah belajar secara konsisten. Pertahankan semangat belajarmu setiap hari untuk menjaga streak!',
-              style: TextStyle(fontSize: 14, height: 1.4),
+            Text(
+              localizationService.translate('streak_desc'),
+              style: const TextStyle(fontSize: 14, height: 1.4),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
+            child: Text(localizationService.translate('close')),
           ),
         ],
       ),
     );
   }
 
-  // ============================================================
-  // FITUR YANG BELUM DIBUAT
-  // ============================================================
-
-  void _showComingSoon(
-      BuildContext context,
-      String feature,
-      ) {
+  void _showComingSoon(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '$feature sedang dalam pengembangan.',
+          '$feature ${localizationService.translate('coming_soon')}',
         ),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
@@ -114,535 +100,371 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // BUILD
-  // ============================================================
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-
-      // ========================================================
-      // APP BAR
-      // ========================================================
-
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFAD8B73),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        titleSpacing: 20,
-
-        title: const Row(
-          children: [
-            Icon(
-              Icons.school_rounded,
-              size: 28,
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: const Color(0xFFAD8B73),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            titleSpacing: 20,
+            title: Row(
+              children: [
+                const Icon(
+                  Icons.school_rounded,
+                  size: 28,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  localizationService.translate('netropia'),
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 10),
-            Text(
-              'Netropia',
-              style: TextStyle(
-                fontSize: 21,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-
-        actions: [
-          // STREAK BELAJAR BADGE
-          FutureBuilder<int>(
-            future: SettingsService().getStreak(),
-            builder: (context, snapshot) {
-              final streak = snapshot.data ?? 3;
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _showStreakDialog(context, streak),
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+            actions: [
+              FutureBuilder<int>(
+                future: SettingsService().getStreak(),
+                builder: (context, snapshot) {
+                  final streak = snapshot.data ?? 3;
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _showStreakDialog(context, streak),
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
                             ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.local_fire_department_rounded,
-                              color: Colors.orange,
-                              size: 20,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '$streak',
-                              style: const TextStyle(
-                                color: Color(0xFF5C3D2E),
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.local_fire_department_rounded,
+                                  color: Colors.orange,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$streak',
+                                  style: const TextStyle(
+                                    color: Color(0xFF5C3D2E),
+                                    fontSize: 13.5,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-          FutureBuilder<int>(
-            future: NotificationService().getUnreadCount(),
-            builder: (context, snapshot) {
-              final unreadCount = snapshot.data ?? 0;
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
+                  );
+                },
+              ),
+              const SizedBox(width: 4),
+              FutureBuilder<int>(
+                future: NotificationService().getUnreadCount(),
+                builder: (context, snapshot) {
+                  final unreadCount = snapshot.data ?? 0;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.notifications_none_rounded,
                         ),
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-
-      // ========================================================
-      // BODY
-      // ========================================================
-
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            16,
-            18,
-            16,
-            30,
-          ),
-          child: Column(
-            crossAxisAlignment:
-            CrossAxisAlignment.start,
-            children: [
-
-              // ==================================================
-              // SAPAAN
-              // ==================================================
-
-              Text(
-                'Halo, $username 👋',
-                style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.titleLarge?.color,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                role.toLowerCase() == 'guru'
-                    ? 'Selamat datang di Netropia.'
-                    : 'Semangat belajar, masa depanmu dimulai dari sini.',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // ==================================================
-              // LANJUTKAN BELAJAR
-              // ==================================================
-
-              _buildContinueLearning(context),
-
-              const SizedBox(height: 25),
-
-              // ==================================================
-              // MENU UTAMA
-              // ==================================================
-
-              Text(
-                'Menu Utama',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.titleLarge?.color,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics:
-                const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.18,
-                children: [
-
-                  // ------------------------------------------
-                  // MATERI TKJ
-                  // ------------------------------------------
-
-                  _buildMenuCard(
-                    context,
-                    title: 'Materi TKJ',
-                    subtitle: 'Pelajari materi TKJ',
-                    icon: Icons.menu_book_rounded,
-                    iconColor:
-                    const Color(0xFFAD8B73),
-                    backgroundColor:
-                    const Color(0xFFE8F1FF),
-                    onTap: () {
-                      _openMateri(context);
-                    },
-                  ),
-
-                  // ------------------------------------------
-                  // VIRTUAL LAB
-                  // ------------------------------------------
-
-                  _buildMenuCard(
-                    context,
-                    title: 'Perangkat 3D',
-                    subtitle: 'Eksplorasi alat TKJ',
-                    icon: Icons.view_in_ar_rounded,
-                    iconColor:
-                    const Color(0xFF00897B),
-                    backgroundColor:
-                    const Color(0xFFE5F7F4),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Device3DListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  // ------------------------------------------
-                  // KALKULATOR SUBNET
-                  // ------------------------------------------
-
-                  _buildMenuCard(
-                    context,
-                    title: 'Kalkulator Subnet',
-                    subtitle: 'Hitung subnet',
-                    icon: Icons.calculate_rounded,
-                    iconColor:
-                    const Color(0xFFE65100),
-                    backgroundColor:
-                    const Color(0xFFFFF0E6),
-                    onTap: () {
-                      _openSubnetCalculator(context);
-                    },
-                  ),
-
-                  // ------------------------------------------
-                  // ABSEN
-                  // ------------------------------------------
-
-                  _buildMenuCard(
-                    context,
-                    title: 'Absen',
-                    subtitle: 'Kehadiran belajar',
-                    icon: Icons.fact_check_rounded,
-                    iconColor: const Color(0xFF7B1FA2),
-                    backgroundColor: const Color(0xFFF3E8FF),
-                    onTap: () async {
-                      final user = FirebaseAuth.instance.currentUser;
-
-                      if (user == null) {
-                        return;
-                      }
-
-                      try {
-                        final userDoc = await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(user.uid)
-                            .get();
-
-                        final role = userDoc.data()?['role'];
-
-                        if (!context.mounted) return;
-
-                        if (role == 'guru') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const TeacherAttendanceScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const AttendanceScreen(),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        debugPrint('ERROR CEK ROLE ABSENSI: $e');
-
-                        if (!context.mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Gagal membuka halaman absensi.',
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
                             ),
                           ),
-                        );
-                      }
-                    },
-                  ),
-
-                  // ------------------------------------------
-                  // PEMINJAMAN
-                  // ------------------------------------------
-                  _buildMenuCard(
-                    context,
-                    title: 'Peminjaman',
-                    subtitle: role.toLowerCase() == 'guru'
-                        ? 'Kelola peminjaman alat'
-                        : 'Pinjam alat TKJ',
-                    icon: Icons.inventory_2_rounded,
-                    iconColor: const Color(0xFF0277BD),
-                    backgroundColor: const Color(0xFFE3F2FD),
-                    onTap: () async {
-                      final user = FirebaseAuth.instance.currentUser;
-
-                      if (user == null) {
-                        return;
-                      }
-
-                      try {
-                        final userDoc = await FirebaseFirestore.instance
-                            .collection('users')
-                            .doc(user.uid)
-                            .get();
-
-                        final userRole = userDoc.data()?['role'];
-
-                        if (!context.mounted) return;
-
-                        if (userRole == 'guru') {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const TeacherBorrowingScreen(),
-                            ),
-                          );
-                        } else {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const BorrowingScreen(),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        debugPrint('ERROR CEK ROLE PEMINJAMAN: $e');
-
-                        if (!context.mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Gagal membuka halaman peminjaman.',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  // ------------------------------------------
-                  // PROJECT
-                  // ------------------------------------------
-
-                  _buildMenuCard(
-                    context,
-                    title: 'Project',
-                    subtitle: 'Tugas & Project',
-                    icon: Icons.assignment_rounded,
-                    iconColor: const Color(0xFF2E7D32),
-                    backgroundColor: const Color(0xFFE8F5E9),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProjectScreen(),
                         ),
-                      );
-                    },
-                  ),
-                ],
+                    ],
+                  );
+                },
               ),
-
-              const SizedBox(height: 25),
-
-              // ==================================================
-              // PROGRESS BELAJAR
-              // ==================================================
-
-              Row(
-                mainAxisAlignment:
-                MainAxisAlignment.spaceBetween,
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Aktivitas Terbaru',
+                    '${localizationService.translate('welcome_halo')}$username 👋',
+                    style: TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    role.toLowerCase() == 'guru'
+                        ? (localizationService.isEnglish ? 'Welcome to Netropia.' : 'Selamat datang di Netropia.')
+                        : localizationService.translate('welcome_subtitle'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  _buildContinueLearning(context),
+                  const SizedBox(height: 25),
+                  Text(
+                    localizationService.translate('home'),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).textTheme.titleLarge?.color,
                     ),
                   ),
-
-                  TextButton(
-                    onPressed: () {
-                      _showComingSoon(
+                  const SizedBox(height: 14),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.18,
+                    children: [
+                      _buildMenuCard(
                         context,
-                        'Semua aktivitas',
-                      );
-                    },
-                    child: const Text(
-                      'Lihat Semua',
-                    ),
+                        title: localizationService.translate('study_materials'),
+                        subtitle: localizationService.translate('study_materials_desc'),
+                        icon: Icons.menu_book_rounded,
+                        iconColor: const Color(0xFFAD8B73),
+                        backgroundColor: const Color(0xFFE8F1FF),
+                        onTap: () {
+                          _openMateri(context);
+                        },
+                      ),
+                      _buildMenuCard(
+                        context,
+                        title: localizationService.translate('device_3d'),
+                        subtitle: localizationService.translate('device_3d_desc'),
+                        icon: Icons.view_in_ar_rounded,
+                        iconColor: const Color(0xFF00897B),
+                        backgroundColor: const Color(0xFFE5F7F4),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Device3DListScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildMenuCard(
+                        context,
+                        title: localizationService.translate('subnet_calculator'),
+                        subtitle: localizationService.translate('subnet_desc'),
+                        icon: Icons.calculate_rounded,
+                        iconColor: const Color(0xFFE65100),
+                        backgroundColor: const Color(0xFFFFF0E6),
+                        onTap: () {
+                          _openSubnetCalculator(context);
+                        },
+                      ),
+                      _buildMenuCard(
+                        context,
+                        title: localizationService.translate('attendance'),
+                        subtitle: localizationService.translate('attendance_desc'),
+                        icon: Icons.fact_check_rounded,
+                        iconColor: const Color(0xFF7B1FA2),
+                        backgroundColor: const Color(0xFFF3E8FF),
+                        onTap: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user == null) return;
+
+                          try {
+                            final userDoc = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .get();
+                            final role = userDoc.data()?['role'];
+
+                            if (!context.mounted) return;
+
+                            if (role == 'guru') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TeacherAttendanceScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AttendanceScreen(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('ERROR CEK ROLE ABSENSI: $e');
+                          }
+                        },
+                      ),
+                      _buildMenuCard(
+                        context,
+                        title: localizationService.translate('borrowing'),
+                        subtitle: role.toLowerCase() == 'guru'
+                            ? (localizationService.isEnglish ? 'Manage tool borrowing' : 'Kelola peminjaman alat')
+                            : localizationService.translate('borrowing_desc'),
+                        icon: Icons.inventory_2_rounded,
+                        iconColor: const Color(0xFF0277BD),
+                        backgroundColor: const Color(0xFFE3F2FD),
+                        onTap: () async {
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user == null) return;
+
+                          try {
+                            final userDoc = await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(user.uid)
+                                .get();
+                            final userRole = userDoc.data()?['role'];
+
+                            if (!context.mounted) return;
+
+                            if (userRole == 'guru') {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const TeacherBorrowingScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const BorrowingScreen(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            debugPrint('ERROR CEK ROLE PEMINJAMAN: $e');
+                          }
+                        },
+                      ),
+                      _buildMenuCard(
+                        context,
+                        title: localizationService.translate('project'),
+                        subtitle: localizationService.translate('project_desc'),
+                        icon: Icons.assignment_rounded,
+                        iconColor: const Color(0xFF2E7D32),
+                        backgroundColor: const Color(0xFFE8F5E9),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProjectScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 25),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        localizationService.translate('recent_activities'),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          _showComingSoon(context, localizationService.translate('recent_activities'));
+                        },
+                        child: Text(localizationService.translate('see_all')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildActivityCard(
+                    context,
+                    icon: Icons.health_and_safety_rounded,
+                    iconColor: const Color(0xFF2E7D32),
+                    title: 'K3LH',
+                    subtitle: localizationService.translate('study_materials_desc'),
+                    time: localizationService.isEnglish ? 'Today' : 'Hari ini',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildActivityCard(
+                    context,
+                    icon: Icons.calculate_rounded,
+                    iconColor: const Color(0xFFE65100),
+                    title: localizationService.translate('subnet_calculator'),
+                    subtitle: localizationService.translate('subnet_desc'),
+                    time: localizationService.isEnglish ? 'Not used' : 'Belum digunakan',
+                  ),
+                  const SizedBox(height: 10),
+                  _buildActivityCard(
+                    context,
+                    icon: Icons.fact_check_rounded,
+                    iconColor: const Color(0xFF7B1FA2),
+                    title: localizationService.translate('attendance'),
+                    subtitle: localizationService.translate('attendance_desc'),
+                    time: localizationService.isEnglish ? 'Not checked in' : 'Belum absen',
+                  ),
+                  const SizedBox(height: 28),
+                  _buildProgressCard(context),
                 ],
               ),
-
-              const SizedBox(height: 8),
-
-              // ------------------------------------------
-              // AKTIVITAS 1
-              // ------------------------------------------
-
-              _buildActivityCard(
-                context,
-                icon: Icons.health_and_safety_rounded,
-                iconColor:
-                const Color(0xFF2E7D32),
-                title: 'K3LH',
-                subtitle:
-                'Materi pembelajaran',
-                time: 'Hari ini',
-              ),
-
-              const SizedBox(height: 10),
-
-              // ------------------------------------------
-              // AKTIVITAS 2
-              // ------------------------------------------
-
-              _buildActivityCard(
-                context,
-                icon: Icons.calculate_rounded,
-                iconColor:
-                const Color(0xFFE65100),
-                title: 'Kalkulator Subnet',
-                subtitle:
-                'Fitur perhitungan jaringan',
-                time: 'Belum digunakan',
-              ),
-
-              const SizedBox(height: 10),
-
-              // ------------------------------------------
-              // AKTIVITAS 3
-              // ------------------------------------------
-
-              _buildActivityCard(
-                context,
-                icon: Icons.fact_check_rounded,
-                iconColor:
-                const Color(0xFF7B1FA2),
-                title: 'Absensi',
-                subtitle:
-                'Status kehadiran',
-                time: 'Belum absen',
-              ),
-
-              const SizedBox(height: 28),
-
-              // ==================================================
-              // PROGRESS BELAJAR
-              // ==================================================
-
-              _buildProgressCard(context),
-            ],
+            ),
           ),
-        ),
-      ),
-
-      // ========================================================
-      // PENTING
-      // ========================================================
-      //
-      // BottomNavigationBar TIDAK ditulis di sini.
-      //
-      // Navigasi bawah yang sudah ada pada halaman induk aplikasi
-      // akan menjadi satu-satunya navigasi.
-      //
+        );
+      },
     );
   }
 
-  // ============================================================
-  // CARD LANJUTKAN BELAJAR
-  // ============================================================
-
-  Widget _buildContinueLearning(
-      BuildContext context,
-      ) {
+  Widget _buildContinueLearning(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -655,48 +477,35 @@ class DashboardScreen extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius:
-        BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color:
-            Color(0xFFAD8B73).withOpacity(0.18),
+            color: const Color(0xFFAD8B73).withOpacity(0.18),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-
       child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
-          const Text(
-            'Lanjutkan Belajar',
-            style: TextStyle(
+          Text(
+            localizationService.translate('continue_learning'),
+            style: const TextStyle(
               color: Colors.white70,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
-
           const SizedBox(height: 14),
-
           Row(
             children: [
-
-              // ICON
               Container(
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  color:
-                  Colors.white.withOpacity(
-                    0.18,
-                  ),
-                  borderRadius:
-                  BorderRadius.circular(14),
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
                   Icons.menu_book_rounded,
@@ -704,22 +513,17 @@ class DashboardScreen extends StatelessWidget {
                   size: 28,
                 ),
               ),
-
               const SizedBox(width: 14),
-
-              // TEXT
               const Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'K3LH',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 17,
-                        fontWeight:
-                        FontWeight.bold,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 4),
@@ -733,7 +537,6 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const Icon(
                 Icons.arrow_forward_ios_rounded,
                 color: Colors.white,
@@ -741,49 +544,32 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // PROGRESS
           Row(
             children: [
-
               Expanded(
                 child: ClipRRect(
-                  borderRadius:
-                  BorderRadius.circular(10),
-                  child:
-                  const LinearProgressIndicator(
+                  borderRadius: BorderRadius.circular(10),
+                  child: const LinearProgressIndicator(
                     value: 0.66,
                     minHeight: 7,
-                    backgroundColor:
-                    Color(0x55FFFFFF),
-                    valueColor:
-                    AlwaysStoppedAnimation<
-                        Color>(
-                      Colors.white,
-                    ),
+                    backgroundColor: Color(0x55FFFFFF),
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
                 ),
               ),
-
               const SizedBox(width: 12),
-
               const Text(
                 '66%',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 13,
-                  fontWeight:
-                  FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 14),
-
-          // BUTTON
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -795,9 +581,9 @@ class DashboardScreen extends StatelessWidget {
                 Icons.play_circle_fill_rounded,
                 size: 20,
               ),
-              label: const Text(
-                'Lanjutkan Pembelajaran',
-                style: TextStyle(
+              label: Text(
+                localizationService.translate('continue_button'),
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13.5,
                 ),
@@ -816,10 +602,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-
-  // ============================================================
-  // MENU CARD
-  // ============================================================
 
   Widget _buildMenuCard(
     BuildContext context, {
@@ -856,13 +638,12 @@ class DashboardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ICON
                     Container(
                       width: 46,
                       height: 46,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).brightness == Brightness.light 
-                            ? backgroundColor 
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? backgroundColor
                             : iconColor.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(14),
                       ),
@@ -872,10 +653,7 @@ class DashboardScreen extends StatelessWidget {
                         size: 24,
                       ),
                     ),
-
                     const Spacer(),
-
-                    // TITLE
                     Text(
                       title,
                       maxLines: 1,
@@ -886,10 +664,7 @@ class DashboardScreen extends StatelessWidget {
                         color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
-
                     const SizedBox(height: 4),
-
-                    // SUBTITLE
                     Text(
                       subtitle,
                       maxLines: 1,
@@ -909,10 +684,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // AKTIVITAS TERBARU CARD
-  // ============================================================
-
   Widget _buildActivityCard(
     BuildContext context, {
     required IconData icon,
@@ -923,105 +694,70 @@ class DashboardScreen extends StatelessWidget {
   }) {
     return Container(
       width: double.infinity,
-      padding:
-      const EdgeInsets.all(14),
-
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius:
-        BorderRadius.circular(16),
-
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color:
-            Colors.black.withOpacity(
-              0.035,
-            ),
+            color: Colors.black.withOpacity(0.035),
             blurRadius: 8,
-            offset:
-            const Offset(0, 3),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-
       child: Row(
         children: [
-
-          // ICON
           Container(
             width: 44,
             height: 44,
-
             decoration: BoxDecoration(
-              color:
-              iconColor.withOpacity(
-                0.10,
-              ),
-              borderRadius:
-              BorderRadius.circular(12),
+              color: iconColor.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(12),
             ),
-
             child: Icon(
               icon,
               color: iconColor,
               size: 22,
             ),
           ),
-
           const SizedBox(width: 13),
-
-          // CONTENT
           Expanded(
             child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight:
-                    FontWeight.bold,
-                    color:
-                    Theme.of(context).textTheme.bodyLarge?.color,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
-
                 const SizedBox(height: 4),
-
                 Text(
                   subtitle,
                   maxLines: 1,
-                  overflow:
-                  TextOverflow.ellipsis,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
-                    color:
-                    Theme.of(context).textTheme.bodySmall?.color,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ),
               ],
             ),
           ),
-
-          // TIME
           Text(
             time,
             style: TextStyle(
               fontSize: 10,
-              color:
-              Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
+              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
             ),
           ),
         ],
       ),
     );
   }
-
-  // ============================================================
-  // PROGRESS BELAJAR
-  // ============================================================
 
   Widget _buildProgressCard(BuildContext context) {
     return FutureBuilder<int>(
@@ -1048,7 +784,7 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Progress Belajar',
+                localizationService.translate('learning_progress'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1088,10 +824,12 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 20),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progress belajar.',
-                      style: TextStyle(
+                      localizationService.isEnglish
+                          ? 'Keep improving your learning! Complete materials and practices to increase learning progress.'
+                          : 'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progress belajar.',
+                      style: const TextStyle(
                         fontSize: 12,
                         color: Color(0xFF7B8494),
                         height: 1.4,
@@ -1106,5 +844,4 @@ class DashboardScreen extends StatelessWidget {
       },
     );
   }
-
 }

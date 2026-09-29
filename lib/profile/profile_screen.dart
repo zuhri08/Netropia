@@ -5,6 +5,7 @@ import 'edit_profile_screen.dart';
 import 'help_support_screen.dart';
 import 'about_app_screen.dart';
 import '../progres/progres_screen.dart';
+import '../services/localization_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String username;
@@ -18,31 +19,36 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final email = user?.email ?? "No Email";
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        final user = FirebaseAuth.instance.currentUser;
+        final email = user?.email ?? "No Email";
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildHeader(context, email),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  _buildStatsSection(context),
-                  const SizedBox(height: 30),
-                  _buildAchievementsSection(context),
-                  const SizedBox(height: 30),
-                  _buildMenuSection(context),
-                  const SizedBox(height: 75),
-                ],
-              ),
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeader(context, email),
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      _buildStatsSection(context),
+                      const SizedBox(height: 30),
+                      _buildAchievementsSection(context),
+                      const SizedBox(height: 30),
+                      _buildMenuSection(context),
+                      const SizedBox(height: 75),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -149,7 +155,7 @@ class ProfileScreen extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             ),
-            child: const Text("Edit Profil", style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(localizationService.translate('edit_profile'), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -169,13 +175,13 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem("Materi", "12"),
+          _buildStatItem(localizationService.isEnglish ? 'Materials' : 'Materi', '12'),
           _buildStatDivider(),
-          _buildStatItem("Lab", "8"),
+          _buildStatItem('Lab', '8'),
           _buildStatDivider(),
-          _buildStatItem("Jam", "14h"),
+          _buildStatItem(localizationService.isEnglish ? 'Hours' : 'Jam', '14h'),
           _buildStatDivider(),
-          _buildStatItem("XP", "850"),
+          _buildStatItem('XP', '850'),
         ],
       ),
     );
@@ -199,15 +205,15 @@ class ProfileScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 5, bottom: 15),
-          child: Text("Pencapaian", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Padding(
+          padding: const EdgeInsets.only(left: 5, bottom: 15),
+          child: Text(localizationService.translate('achievements'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildBadge("Network Beginner", Icons.lan_rounded, Color(0xFFAD8B73), true),
+              _buildBadge("Network Beginner", Icons.lan_rounded, const Color(0xFFAD8B73), true),
               _buildBadge("First Lesson", Icons.school_rounded, Colors.green, true),
               _buildBadge("Subnet Master", Icons.calculate_rounded, Colors.orange, false),
               _buildBadge("Lab Explorer", Icons.science_rounded, Colors.purple, true),
@@ -255,19 +261,19 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildMenuItem(context, Icons.person_outline_rounded, "Edit Profil", () {
+          _buildMenuItem(context, Icons.person_outline_rounded, localizationService.translate('edit_profile'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: username, role: role)));
           }),
-          _buildMenuItem(context, Icons.trending_up_rounded, "Progress Belajar", () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => ProgresScreen()));
+          _buildMenuItem(context, Icons.trending_up_rounded, localizationService.translate('learning_progress'), () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const ProgresScreen()));
           }),
-          _buildMenuItem(context, Icons.settings_outlined, "Pengaturan", () {
+          _buildMenuItem(context, Icons.settings_outlined, localizationService.translate('settings'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
           }),
-          _buildMenuItem(context, Icons.help_outline_rounded, "Bantuan", () {
+          _buildMenuItem(context, Icons.help_outline_rounded, localizationService.translate('help'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
           }),
-          _buildMenuItem(context, Icons.info_outline_rounded, "Tentang Netropia", () {
+          _buildMenuItem(context, Icons.info_outline_rounded, localizationService.translate('about_netropia'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutAppScreen()));
           }),
         ],

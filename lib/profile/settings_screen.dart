@@ -33,7 +33,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final enabled = await _settingsService.isReminderEnabled();
     final streak = await _settingsService.getStreak();
     setState(() {
-      _reminderTime = time ?? 'Belum diatur';
+      _reminderTime = time ?? (localizationService.isEnglish ? 'Not set' : 'Belum diatur');
       _dailyTarget = target;
       _isReminderEnabled = enabled;
       _streakCount = streak;
@@ -68,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pengingat diatur ke $_reminderTime')),
+          SnackBar(content: Text(localizationService.isEnglish ? 'Reminder set to $_reminderTime' : 'Pengingat diatur ke $_reminderTime')),
         );
       }
     }
@@ -80,24 +80,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Target Belajar Harian'),
+        title: Text(localizationService.translate('daily_target_title')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Masukkan target belajar harian kamu dalam menit.'),
+            Text(localizationService.translate('daily_target_desc')),
             const SizedBox(height: 15),
             TextField(
               controller: controller,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                suffixText: 'menit',
+                suffixText: localizationService.isEnglish ? 'minutes' : 'menit',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(localizationService.translate('cancel'))),
           TextButton(
             onPressed: () async {
               final val = int.tryParse(controller.text);
@@ -107,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 if (mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Simpan'),
+            child: Text(localizationService.translate('save')),
           ),
         ],
       ),
@@ -133,16 +133,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Keluar Akun'),
-        content: const Text('Apakah kamu yakin ingin keluar dari aplikasi?'),
+        title: Text(localizationService.translate('logout_title')),
+        content: Text(localizationService.translate('logout_desc')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(localizationService.translate('cancel'))),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _logout();
             },
-            child: const Text('Keluar', style: TextStyle(color: Colors.red)),
+            child: Text(localizationService.translate('logout'), style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -154,11 +154,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 28),
-            SizedBox(width: 8),
-            Text('Streak Belajar'),
+            const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 28),
+            const SizedBox(width: 8),
+            Text(localizationService.translate('streak')),
           ],
         ),
         content: Column(
@@ -166,20 +166,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$_streakCount Hari Berturut-turut! 🔥',
+              '$_streakCount${localizationService.translate('streak_days')} 🔥',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Kamu telah belajar secara konsisten. Pertahankan streak belajarmu setiap hari!',
-              style: TextStyle(fontSize: 14, height: 1.4),
+            Text(
+              localizationService.translate('streak_desc'),
+              style: const TextStyle(fontSize: 14, height: 1.4),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
+            child: Text(localizationService.translate('close')),
           ),
         ],
       ),
@@ -191,7 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Pilih Bahasa / Select Language'),
+        title: Text(localizationService.translate('select_language')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -227,124 +227,129 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Pengaturan', style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          _buildSettingsGroup(
-            title: 'Akun',
-            items: [
-              _buildSettingsItem(Icons.person_outline_rounded, 'Edit Nama', onTap: () {
-                final user = FirebaseAuth.instance.currentUser;
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
-              }),
-              _buildSettingsItem(Icons.camera_alt_outlined, 'Edit Foto', onTap: () {
-                final user = FirebaseAuth.instance.currentUser;
-                Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
-              }),
-              _buildSettingsItem(Icons.email_outlined, 'Edit Email', onTap: () {}),
-              _buildSettingsItem(Icons.lock_outline_rounded, 'Ubah Password', onTap: () {}),
-            ],
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            title: Text(localizationService.translate('settings'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            elevation: 0,
           ),
-          const SizedBox(height: 25),
-          _buildSettingsGroup(
-            title: 'Preferensi',
-            items: [
-              _buildSettingsItem(
-                Icons.notifications_none_rounded,
-                'Notifikasi',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const NotificationScreen(),
-                    ),
-                  );
-                },
+          body: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              _buildSettingsGroup(
+                title: localizationService.translate('account'),
+                items: [
+                  _buildSettingsItem(Icons.person_outline_rounded, localizationService.translate('edit_name'), onTap: () {
+                    final user = FirebaseAuth.instance.currentUser;
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
+                  }),
+                  _buildSettingsItem(Icons.camera_alt_outlined, localizationService.translate('edit_photo'), onTap: () {
+                    final user = FirebaseAuth.instance.currentUser;
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
+                  }),
+                  _buildSettingsItem(Icons.email_outlined, localizationService.translate('edit_email'), onTap: () {}),
+                  _buildSettingsItem(Icons.lock_outline_rounded, localizationService.translate('change_password'), onTap: () {}),
+                ],
               ),
-              ListenableBuilder(
-                listenable: themeManager,
-                builder: (context, child) {
-                  return _buildSettingsItem(
-                    themeManager.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                    'Dark Mode',
+              const SizedBox(height: 25),
+              _buildSettingsGroup(
+                title: localizationService.translate('preferences'),
+                items: [
+                  _buildSettingsItem(
+                    Icons.notifications_none_rounded,
+                    localizationService.translate('notifications'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  ListenableBuilder(
+                    listenable: themeManager,
+                    builder: (context, child) {
+                      return _buildSettingsItem(
+                        themeManager.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                        localizationService.translate('dark_mode'),
+                        trailing: Switch(
+                          value: themeManager.isDarkMode,
+                          onChanged: (val) => themeManager.toggleTheme(val),
+                        ),
+                      );
+                    },
+                  ),
+                  ListenableBuilder(
+                    listenable: localizationService,
+                    builder: (context, child) {
+                      return _buildSettingsItem(
+                        Icons.language_rounded,
+                        localizationService.translate('language'),
+                        subtitle: localizationService.currentLanguage == 'en' ? 'English' : 'Bahasa Indonesia',
+                        onTap: _selectLanguage,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 25),
+              _buildSettingsGroup(
+                title: localizationService.translate('learning'),
+                items: [
+                  _buildSettingsItem(
+                    Icons.alarm_rounded,
+                    localizationService.translate('learning_reminder'),
+                    subtitle: _reminderTime,
                     trailing: Switch(
-                      value: themeManager.isDarkMode,
-                      onChanged: (val) => themeManager.toggleTheme(val),
+                      value: _isReminderEnabled,
+                      onChanged: (val) async {
+                        await _settingsService.setReminderEnabled(val);
+                        setState(() => _isReminderEnabled = val);
+                        if (val && (_reminderTime == 'Belum diatur' || _reminderTime == 'Not set')) {
+                          _selectReminderTime();
+                        }
+                      },
                     ),
-                  );
-                },
+                    onTap: _selectReminderTime,
+                  ),
+                  _buildSettingsItem(
+                    Icons.track_changes_rounded,
+                    localizationService.translate('daily_target'),
+                    subtitle: '$_dailyTarget ${localizationService.isEnglish ? 'minutes per day' : 'menit per hari'}',
+                    onTap: _setDailyTarget,
+                  ),
+                  _buildSettingsItem(
+                    Icons.local_fire_department_rounded,
+                    localizationService.translate('streak'),
+                    subtitle: '$_streakCount${localizationService.translate('streak_days')}',
+                    titleColor: Colors.orange,
+                    onTap: _showStreakInfo,
+                  ),
+                ],
               ),
-              ListenableBuilder(
-                listenable: localizationService,
-                builder: (context, child) {
-                  return _buildSettingsItem(
-                    Icons.language_rounded,
-                    'Bahasa',
-                    subtitle: localizationService.currentLanguage == 'en' ? 'English' : 'Bahasa Indonesia',
-                    onTap: _selectLanguage,
-                  );
-                },
+              const SizedBox(height: 25),
+              _buildSettingsGroup(
+                title: localizationService.translate('security'),
+                items: [
+                  _buildSettingsItem(Icons.devices_rounded, localizationService.translate('login_session'), onTap: () {}),
+                  _buildSettingsItem(Icons.logout_rounded, localizationService.translate('logout'), titleColor: Colors.red, onTap: _showLogoutDialog),
+                ],
               ),
-            ],
-          ),
-          const SizedBox(height: 25),
-          _buildSettingsGroup(
-            title: 'Pembelajaran',
-            items: [
-              _buildSettingsItem(
-                Icons.alarm_rounded,
-                'Pengingat Belajar',
-                subtitle: _reminderTime,
-                trailing: Switch(
-                  value: _isReminderEnabled,
-                  onChanged: (val) async {
-                    await _settingsService.setReminderEnabled(val);
-                    setState(() => _isReminderEnabled = val);
-                    if (val && _reminderTime == 'Belum diatur') {
-                      _selectReminderTime();
-                    }
-                  },
+              const SizedBox(height: 50),
+              const Center(
+                child: Text(
+                  "Netropia v1.0.0",
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
                 ),
-                onTap: _selectReminderTime,
-              ),
-              _buildSettingsItem(
-                Icons.track_changes_rounded,
-                'Target Belajar Harian',
-                subtitle: '$_dailyTarget menit per hari',
-                onTap: _setDailyTarget,
-              ),
-              _buildSettingsItem(
-                Icons.local_fire_department_rounded,
-                'Streak Belajar',
-                subtitle: '$_streakCount Hari Berturut-turut',
-                titleColor: Colors.orange,
-                onTap: _showStreakInfo,
               ),
             ],
           ),
-          const SizedBox(height: 25),
-          _buildSettingsGroup(
-            title: 'Keamanan',
-            items: [
-              _buildSettingsItem(Icons.devices_rounded, 'Login Session', onTap: () {}),
-              _buildSettingsItem(Icons.logout_rounded, 'Keluar', titleColor: Colors.red, onTap: _showLogoutDialog),
-            ],
-          ),
-          const SizedBox(height: 50),
-          const Center(
-            child: Text(
-              "Netropia v1.0.0",
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
