@@ -3,6 +3,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ProgressService {
   static const String _activityKey = 'recent_activities';
 
+  static const List<String> modules = [
+    'k3',
+    'komponen_komputer',
+    'perangkat_jaringan',
+    'dasar_jaringan',
+    'ip_address',
+    'kabel_jaringan',
+  ];
+
+  static const List<String> featureSuffixes = [
+    'pre_test',
+    'post_test',
+    'penugasan',
+    'portofolio',
+    'peta_konsep',
+    'forum_diskusi',
+    'evaluasi',
+  ];
+
   Future<bool> isLessonCompleted(String lessonId) async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('progress_$lessonId') ?? false;
@@ -14,7 +33,17 @@ class ProgressService {
   }
 
   Future<int> getOverallProgress() async {
-    final lessonIds = [
+    final List<String> allKeys = [];
+
+    // All module features
+    for (final module in modules) {
+      for (final suffix in featureSuffixes) {
+        allKeys.add('${module}_$suffix');
+      }
+    }
+
+    // Legacy dasar_jaringan sub-lessons
+    allKeys.addAll([
       'pengertian_jaringan',
       'tujuan_manfaat_jaringan',
       'cara_kerja_jaringan',
@@ -23,22 +52,36 @@ class ProgressService {
       'protokol_jaringan',
       'keamanan_jaringan',
       'penerapan_jaringan',
-    ];
+    ]);
 
-    int completed = 0;
+    int completedCount = 0;
 
-    for (final lessonId in lessonIds) {
-      final isCompleted = await isLessonCompleted(lessonId);
-      if (isCompleted) {
-        completed++;
+    for (final key in allKeys) {
+      final isDone = await isLessonCompleted(key);
+      if (isDone) {
+        completedCount++;
       }
     }
 
-    if (lessonIds.isEmpty) {
+    if (allKeys.isEmpty) {
       return 0;
     }
 
-    return ((completed / lessonIds.length) * 100).round();
+    return ((completedCount / allKeys.length) * 100).round();
+  }
+
+  Future<int> getModuleProgress(String materiId) async {
+    final List<String> keys = featureSuffixes.map((s) => '${materiId}_$s').toList();
+    int completedCount = 0;
+
+    for (final key in keys) {
+      if (await isLessonCompleted(key)) {
+        completedCount++;
+      }
+    }
+
+    if (keys.isEmpty) return 0;
+    return ((completedCount / keys.length) * 100).round();
   }
 
   Future<void> saveActivity({
@@ -55,8 +98,8 @@ class ProgressService {
     activities.removeWhere((item) => item.startsWith('$title|||'));
     activities.insert(0, activity);
 
-    if (activities.length > 10) {
-      activities.removeRange(10, activities.length);
+    if (activities.length > 15) {
+      activities.removeRange(15, activities.length);
     }
 
     await prefs.setStringList(_activityKey, activities);

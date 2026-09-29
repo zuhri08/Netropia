@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/progress_service.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
 import '../kalkulator_subnet/subnet_calculator_screen.dart';
@@ -433,12 +434,12 @@ class DashboardScreen extends StatelessWidget {
 
               _buildActivityCard(
                 context,
-                icon: Icons.menu_book_rounded,
+                icon: Icons.health_and_safety_rounded,
                 iconColor:
-                const Color(0xFFAD8B73),
-                title: 'Dasar TKJ',
+                const Color(0xFF2E7D32),
+                title: 'K3LH',
                 subtitle:
-                'Materi terakhir dipelajari',
+                'Materi pembelajaran',
                 time: 'Hari ini',
               ),
 
@@ -578,7 +579,7 @@ class DashboardScreen extends StatelessWidget {
                   CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Dasar TKJ',
+                      'K3LH',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 17,
@@ -588,7 +589,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Modul 1 • Jaringan Komputer',
+                      'Modul Pembelajaran',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -650,32 +651,28 @@ class DashboardScreen extends StatelessWidget {
           // BUTTON
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            height: 44,
+            child: ElevatedButton.icon(
               onPressed: () {
                 _openMateri(context);
               },
-              style:
-              ElevatedButton.styleFrom(
-                backgroundColor:
-                Colors.white,
-                foregroundColor:
-                const Color(0xFFAD8B73),
-                elevation: 0,
-                padding:
-                const EdgeInsets.symmetric(
-                  vertical: 12,
-                ),
-                shape:
-                RoundedRectangleBorder(
-                  borderRadius:
-                  BorderRadius.circular(12),
+              icon: const Icon(
+                Icons.play_circle_fill_rounded,
+                size: 20,
+              ),
+              label: const Text(
+                'Lanjutkan Pembelajaran',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.5,
                 ),
               ),
-              child: const Text(
-                'Lanjutkan Belajar',
-                style: TextStyle(
-                  fontWeight:
-                  FontWeight.bold,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFFAD8B73),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -892,116 +889,86 @@ class DashboardScreen extends StatelessWidget {
   // ============================================================
 
   Widget _buildProgressCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding:
-      const EdgeInsets.all(18),
+    return FutureBuilder<int>(
+      future: ProgressService().getOverallProgress(),
+      builder: (context, snapshot) {
+        final progress = snapshot.data ?? 0;
+        final progressVal = progress / 100.0;
 
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius:
-        BorderRadius.circular(18),
-
-        boxShadow: [
-          BoxShadow(
-            color:
-            Colors.black.withOpacity(
-              0.04,
-            ),
-            blurRadius: 8,
-            offset:
-            const Offset(0, 3),
-          ),
-        ],
-      ),
-
-      child: Column(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
-
-        children: [
-
-          Text(
-            'Progress Belajar',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight:
-              FontWeight.bold,
-              color:
-              Theme.of(context).textTheme.titleLarge?.color,
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          Row(
-            children: [
-
-              // CIRCULAR PROGRESS
-              SizedBox(
-                width: 75,
-                height: 75,
-
-                child: Stack(
-                  alignment:
-                  Alignment.center,
-
-                  children: [
-
-                    SizedBox(
-                      width: 75,
-                      height: 75,
-
-                      child:
-                      CircularProgressIndicator(
-                        value: 0.25,
-                        strokeWidth: 8,
-
-                        backgroundColor:
-                        const Color(
-                          0xFFE8EDF3,
-                        ),
-
-                        valueColor:
-                        const AlwaysStoppedAnimation<
-                            Color>(
-                          Color(0xFFAD8B73),
-                        ),
-                      ),
-                    ),
-
-                    Text(
-                      '25%',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight:
-                        FontWeight.bold,
-                        color:
-                        Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 20),
-
-              // DESCRIPTION
-              const Expanded(
-                child: Text(
-                  'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progress belajar.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color:
-                    Color(0xFF7B8494),
-                    height: 1.4,
-                  ),
-                ),
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Progress Belajar',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                ),
+              ),
+              const SizedBox(height: 15),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 75,
+                    height: 75,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 75,
+                          height: 75,
+                          child: CircularProgressIndicator(
+                            value: progressVal,
+                            strokeWidth: 8,
+                            backgroundColor: const Color(0xFFE8EDF3),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFFAD8B73),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '$progress%',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 20),
+                  const Expanded(
+                    child: Text(
+                      'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progress belajar.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF7B8494),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -22,6 +22,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  final GlobalKey<ProgresScreenState> _progresKey = GlobalKey<ProgresScreenState>();
 
   late List<Widget> _pages;
 
@@ -30,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _pages = [
       DashboardScreen(username: widget.username, role: widget.role),
-      ProgresScreen(),
+      ProgresScreen(key: _progresKey),
       const NetropiaAiScreen(),
       const VirtualLabScreen(),
       ProfileScreen(username: widget.username, role: widget.role),
@@ -51,6 +52,9 @@ class _MainScreenState extends State<MainScreen> {
           setState(() {
             _selectedIndex = index;
           });
+          if (index == 1) {
+            _progresKey.currentState?.refreshData();
+          }
         },
         items: [
           MagicNavItem(icon: Icons.home_rounded, label: 'Beranda'),

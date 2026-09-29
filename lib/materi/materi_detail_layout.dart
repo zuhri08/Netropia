@@ -10,6 +10,12 @@ import 'package:netropia/services/progress_service.dart';
 import 'dasar_jaringan/pre_test_screen.dart';
 import 'dasar_jaringan/post_test_screen.dart';
 import 'dasar_jaringan/penugasan_screen.dart';
+import 'k3/k3_materi_screen.dart';
+import 'komponen_komputer/komponen_komputer_materi_screen.dart';
+import 'ip_address/ip_address_materi_screen.dart';
+import 'perangkat_jaringan/materi_perangkat_layout.dart';
+import 'dasar_jaringan/pengertian_jaringan_screen.dart';
+import 'kabel_jaringan/pengertian_kabel_screen.dart';
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
@@ -240,11 +246,36 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
         return;
       }
 
+      final materiId = _getMateriId();
+      Widget materiScreen;
+      switch (materiId) {
+        case 'k3':
+          materiScreen = const K3MateriScreen(index: 0);
+          break;
+        case 'komponen_komputer':
+          materiScreen = const KomponenKomputerMateriScreen(index: 0);
+          break;
+        case 'ip_address':
+          materiScreen = const IpAddressMateriScreen(index: 0);
+          break;
+        case 'perangkat_jaringan':
+          materiScreen = const PerangkatMateriScreen(index: 0);
+          break;
+        case 'dasar_jaringan':
+          materiScreen = const PengertianJaringanScreen();
+          break;
+        case 'kabel_jaringan':
+          materiScreen = const PengertianKabelScreen();
+          break;
+        default:
+          materiScreen = const K3MateriScreen(index: 0);
+          break;
+      }
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-          const MateriDasarTkjScreen(),
+          builder: (context) => materiScreen,
         ),
       );
 
@@ -281,38 +312,43 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
       return;
     }
+
     // =========================
-// PRE TEST
-// =========================
+    // PRE TEST
+    // =========================
     if (name == 'Pre Test') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const PreTestScreen(),
+          builder: (context) => PreTestScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+            themeColor: widget.themeColor,
+          ),
         ),
       );
 
       return;
     }
+
+    // =========================
+    // POST TEST
+    // =========================
     if (name == 'Post Test') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const PostTestScreen(),
+          builder: (context) => PostTestScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+            themeColor: widget.themeColor,
+          ),
         ),
       );
 
       return;
     }
-    if (name == 'Penugasan') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const PenugasanScreen(),
-        ),
-      );
-      return;
-    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -346,15 +382,17 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       case 'Kabel Jaringan':
         return 'kabel_jaringan';
 
-      case 'Dasar TKJ':
+      case 'K3':
       default:
-        return 'dasar_tkj';
+        return 'k3';
     }
   }
 
   Widget _buildProgressSection() {
     final materiId = _getMateriId();
     final activities = <String>[
+      '${materiId}_pre_test',
+      '${materiId}_post_test',
       '${materiId}_assignment',
       '${materiId}_portfolio',
       '${materiId}_peta_konsep',

@@ -48,6 +48,14 @@ class _LearningFeatureScreenState extends State<LearningFeatureScreen> {
   Future<void> _toggleCompleted() async {
     final newStatus = !_isCompleted;
     await _progressService.setLessonCompleted(_activityKey, newStatus);
+    if (newStatus) {
+      await _progressService.saveActivity(
+        title: '${widget.feature} - ${widget.materiTitle}',
+        subtitle: 'Status: Selesai',
+        time: 'Baru saja',
+        type: widget.feature.toLowerCase().replaceAll(' ', '_'),
+      );
+    }
     if (mounted) {
       setState(() {
         _isCompleted = newStatus;

@@ -1,510 +1,807 @@
 import 'package:flutter/material.dart';
 
-class IpAddressMateriScreen extends StatelessWidget {
+class IpAddressMateriScreen extends StatefulWidget {
   final int index;
-  const IpAddressMateriScreen({super.key, required this.index});
+  const IpAddressMateriScreen({super.key, this.index = 0});
 
-  static const Color primary = Color(0xFFAD8B73);
-  static const Color dark = Color(0xFF123B7A);
-  static const Color light = Color(0xFFEAF2FB);
-  static const Color textDark = Color(0xFF263238);
-  static const Color textGrey = Color(0xFF607D8B);
-  static const Color border = Color(0xFFDCE3EA);
-  static const Color soft = Color(0xFFF1F5F8);
+  @override
+  State<IpAddressMateriScreen> createState() => _IpAddressMateriScreenState();
+}
 
-  static const List<String> titles = [
-    'Pengenalan IP Address',
-    'IPv4 dan Struktur Alamat',
-    'Public, Private, dan Loopback',
-    'Subnet Mask dan Prefix',
-    'Konsep Subnetting',
-    'Static dan DHCP',
-    'IPv6 Secara Singkat',
-    'Troubleshooting IP Address',
+class _IpAddressMateriScreenState extends State<IpAddressMateriScreen> {
+  int _activeStep = 0;
+  int? _selectedTryAnswer;
+  int? _selectedCheckAnswer;
+  bool _trySubmitted = false;
+  bool _checkSubmitted = false;
+
+  final List<Map<String, dynamic>> _steps = [
+    {
+      'title': 'OBSERVE',
+      'subtitle': 'Amati',
+      'icon': Icons.visibility_rounded,
+      'color': Color(0xFFCEAB93),
+    },
+    {
+      'title': 'THINK',
+      'subtitle': 'Pahami',
+      'icon': Icons.lightbulb_rounded,
+      'color': Color(0xFFFF9800),
+    },
+    {
+      'title': 'TRY',
+      'subtitle': 'Coba',
+      'icon': Icons.handyman_rounded,
+      'color': Color(0xFF43A047),
+    },
+    {
+      'title': 'CHECK',
+      'subtitle': 'Periksa',
+      'icon': Icons.fact_check_rounded,
+      'color': Color(0xFF8E24AA),
+    },
+    {
+      'title': 'REFLECT',
+      'subtitle': 'Refleksi',
+      'icon': Icons.psychology_rounded,
+      'color': Color(0xFFE53935),
+    },
   ];
-
-  static const List<String> subtitles = [
-    'Memahami fungsi IP Address sebagai identitas logis perangkat dalam jaringan.',
-    'Mengenal empat oktet IPv4, network ID, dan host ID.',
-    'Membedakan alamat yang digunakan pada internet, jaringan lokal, dan pengujian lokal.',
-    'Menentukan bagian network dan host menggunakan subnet mask atau CIDR.',
-    'Membagi satu jaringan menjadi beberapa subnet sesuai kebutuhan perangkat.',
-    'Membandingkan konfigurasi alamat IP manual dengan pemberian otomatis oleh DHCP.',
-    'Mengenal format alamat IPv6 dan alasan penggunaannya untuk jaringan modern.',
-    'Melacak masalah konektivitas dari konfigurasi IP sampai gateway dan DNS.',
-  ];
-
-  int get current => index.clamp(0, titles.length - 1);
 
   @override
   Widget build(BuildContext context) {
-    final c = current;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FB),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: textDark,
+        title: const Text('IP Address & Pengalamatan Jaringan'),
+        backgroundColor: const Color(0xFFAD8B73),
+        foregroundColor: Colors.white,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text('IP Address', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)),
-            child: Text('${c + 1} / ${titles.length}', style: const TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w700)),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3),
-          child: Container(
-            height: 3,
-            alignment: Alignment.centerLeft,
-            child: FractionallySizedBox(
-              widthFactor: (c + 1) / titles.length,
-              child: Container(color: primary),
-            ),
-          ),
-        ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _header(c),
-              const SizedBox(height: 26),
-              _visual(c),
-              const SizedBox(height: 28),
-              ..._sections(c),
-              const SizedBox(height: 22),
-              _keyPoint(c),
-              const SizedBox(height: 32),
-              _navigation(context, c),
-            ],
-          ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+            _buildLearningFlow(),
+            const SizedBox(height: 20),
+            _buildActiveLearningContent(),
+            const SizedBox(height: 20),
+            _buildNavigationButtons(),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
-  Widget _header(int c) => Column(
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _materialBadge(c + 1),
-          const SizedBox(height: 14),
-          Text(
-            _titleWithBreak(c),
-            style: const TextStyle(color: dark, fontSize: 29, fontWeight: FontWeight.w800, height: 1.12, letterSpacing: -.5),
+          Icon(
+            Icons.lan_rounded,
+            color: Colors.white,
+            size: 44,
           ),
-          const SizedBox(height: 12),
-          Text(subtitles[c], style: const TextStyle(color: textGrey, fontSize: 15, height: 1.55)),
+          SizedBox(height: 12),
+          Text(
+            'Konsep IPv4, Subnetting & Pengalamatan Jaringan',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              height: 1.2,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Modul profesional TKJ mengenai struktur alamat logis IPv4, pembagian Network/Host ID, '
+            'notasi CIDR, teknik subnetting, serta konfigurasi TCP/IP.',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
         ],
-      );
-
-  Widget _materialBadge(int number) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(6)),
-        child: Text(
-          'MATERI ${_two(number)}',
-          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .5),
-        ),
-      );
-
-  String _titleWithBreak(int c) {
-    const values = [
-      'Pengenalan IP\nAddress',
-      'IPv4 dan Struktur\nAlamat',
-      'Public, Private,\ndan Loopback',
-      'Subnet Mask\ndan Prefix',
-      'Konsep\nSubnetting',
-      'Static dan\nDHCP',
-      'IPv6 Secara\nSingkat',
-      'Troubleshooting\nIP Address',
-    ];
-    return values[c];
+      ),
+    );
   }
 
-  Widget _visual(int c) {
-    switch (c) {
+  Widget _buildLearningFlow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Alur Pembelajaran IP Address',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Kuasai protokol pengalamatan jaringan secara bertahap dan mendalam.',
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 105,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _steps.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final step = _steps[index];
+              final bool active = _activeStep == index;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _activeStep = index;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 105,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: active ? step['color'] as Color : Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: step['color'] as Color,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        step['icon'] as IconData,
+                        color: active ? Colors.white : step['color'] as Color,
+                        size: 25,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        step['title'] as String,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: active ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        step['subtitle'] as String,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: active ? Colors.white70 : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActiveLearningContent() {
+    switch (_activeStep) {
       case 0:
-        return _diagramCard('Perangkat → IP Address → Jaringan', _ipFlow(), Icons.lan_rounded);
+        return _buildObserve();
       case 1:
-        return _diagramCard('Struktur IPv4', _ipv4Diagram(), Icons.numbers_rounded);
+        return _buildThink();
       case 2:
-        return _diagramCard('Contoh Kategori Alamat', _addressTypes(), Icons.category_rounded);
+        return _buildTry();
       case 3:
-        return _diagramCard('Contoh 192.168.10.25 / 24', _prefixDiagram(), Icons.account_tree_rounded);
+        return _buildCheck();
       case 4:
-        return _diagramCard('Alur Subnetting', _subnetDiagram(), Icons.call_split_rounded);
-      case 5:
-        return _diagramCard('Cara IP Diperoleh', _dhcpDiagram(), Icons.settings_ethernet_rounded);
-      case 6:
-        return _diagramCard('IPv6 Menggunakan Notasi Heksadesimal', _ipv6Diagram(), Icons.language_rounded);
+        return _buildReflect();
       default:
-        return _diagramCard('Urutan Pemeriksaan', _troubleshootDiagram(), Icons.rule_rounded);
+        return const SizedBox();
     }
   }
 
-  Widget _diagramCard(String title, Widget child, IconData icon) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: border),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)),
-                  child: Icon(icon, color: primary, size: 19),
-                ),
-                const SizedBox(width: 10),
-                Expanded(child: Text(title, style: const TextStyle(color: textDark, fontSize: 13, fontWeight: FontWeight.w700))),
-              ],
-            ),
-            const SizedBox(height: 20),
-            child,
-          ],
-        ),
-      );
-
-  Widget _iconNode(String label, IconData icon, {bool main = false}) => Column(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildObserve() {
+    return _contentCard(
+      title: 'Observasi Mendalam: Anatomi & Parameter IP Address',
+      icon: Icons.visibility_rounded,
+      color: const Color(0xFFCEAB93),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 58,
-            height: 56,
-            decoration: BoxDecoration(
-              color: main ? dark : light,
-              borderRadius: BorderRadius.circular(9),
-              border: Border.all(color: main ? dark : const Color(0xFFB8D2EE)),
-            ),
-            child: Icon(icon, color: main ? Colors.white : primary, size: 27),
+          const Text(
+            'Amati 5 komponen esensial dalam konfigurasi protokol TCP/IP pada sistem operasi:',
+            style: TextStyle(fontSize: 14, height: 1.5),
           ),
-          const SizedBox(height: 7),
-          Text(label, textAlign: TextAlign.center, style: const TextStyle(color: textDark, fontSize: 10.5, fontWeight: FontWeight.w700)),
-        ],
-      );
-
-  Widget _ipChip(String text, {bool main = false}) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
-        decoration: BoxDecoration(
-          color: main ? primary : light,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: main ? primary : const Color(0xFFB8D2EE)),
-        ),
-        child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: main ? Colors.white : dark, fontSize: 12, fontWeight: FontWeight.w700)),
-      );
-
-  Widget _horizontalFlow(Widget left, Widget middle, Widget right) => LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth < 390) {
-            return Column(
-              children: [
-                left,
-                const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-                middle,
-                const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-                right,
-              ],
-            );
-          }
-          return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [left, const Icon(Icons.arrow_forward_rounded, color: primary, size: 21), middle, const Icon(Icons.arrow_forward_rounded, color: primary, size: 21), right]);
-        },
-      );
-
-  Widget _ipFlow() => _horizontalFlow(
-        _iconNode('PC / Laptop', Icons.computer_rounded),
-        _ipChip('192.168.1.10', main: true),
-        _iconNode('LAN', Icons.hub_rounded),
-      );
-
-  Widget _ipv4Diagram() => Column(
-        children: [
-          Row(children: [for (final x in ['192', '168', '1', '10']) Expanded(child: Container(margin: const EdgeInsets.all(3), padding: const EdgeInsets.symmetric(vertical: 12), decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFB8D2EE))), child: Text(x, textAlign: TextAlign.center, style: const TextStyle(color: dark, fontSize: 19, fontWeight: FontWeight.w800))))]),
-          const SizedBox(height: 8),
-          const Row(children: [Expanded(child: Text('Oktet 1', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: textGrey))), Expanded(child: Text('Oktet 2', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: textGrey))), Expanded(child: Text('Oktet 3', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: textGrey))), Expanded(child: Text('Oktet 4', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, color: textGrey)))]),
-          const SizedBox(height: 15),
-          _info('IPv4 terdiri dari 32 bit dan umumnya ditulis sebagai 4 oktet desimal yang dipisahkan titik.'),
-        ],
-      );
-
-  Widget _addressTypes() => Column(
-        children: [
-          _typeRow(Icons.lock_outline_rounded, 'Private', '10.0.0.0/8', 'Jaringan lokal'),
-          _typeRow(Icons.lock_outline_rounded, 'Private', '172.16.0.0/12', 'Jaringan lokal'),
-          _typeRow(Icons.lock_outline_rounded, 'Private', '192.168.0.0/16', 'Jaringan lokal'),
-          _typeRow(Icons.loop_rounded, 'Loopback', '127.0.0.1', 'Uji perangkat sendiri'),
-          _typeRow(Icons.public_rounded, 'Public', 'Contoh: alamat dari ISP', 'Dapat dirutekan di internet'),
-        ],
-      );
-
-  Widget _typeRow(IconData icon, String a, String b, String c) => Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(color: soft, border: Border.all(color: border), borderRadius: BorderRadius.circular(10)),
-        child: Row(
-          children: [
-            Container(width: 34, height: 34, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 18)),
-            const SizedBox(width: 10),
-            SizedBox(width: 66, child: Text(a, style: const TextStyle(color: dark, fontSize: 10.5, fontWeight: FontWeight.w800))),
-            Expanded(child: Text(b, style: const TextStyle(color: textDark, fontSize: 11.5, fontWeight: FontWeight.w700))),
-            const SizedBox(width: 8),
-            Flexible(child: Text(c, textAlign: TextAlign.right, style: const TextStyle(color: textGrey, fontSize: 9.5))),
-          ],
-        ),
-      );
-
-  Widget _prefixDiagram() => Column(
-        children: [
-          _ipChip('192.168.10.25', main: true),
+          const SizedBox(height: 16),
+          _detailedObservationItem(
+            '1. Alamat IPv4 (Contoh: 192.168.1.10)',
+            'Terdiri dari 4 blok bilangan desimal (oktet) yang dipisahkan titik. Setiap oktet merepresentasikan nilai biner 8-bit dengan rentang angka 0 hingga 255.',
+            Icons.numbers_rounded,
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _statCard('255.255.255.0', 'Subnet Mask', Icons.grid_3x3_rounded)),
-            const SizedBox(width: 10),
-            Expanded(child: _statCard('/24', 'CIDR / Prefix', Icons.tag_rounded, accent: true)),
-          ]),
-        ],
-      );
-
-  Widget _statCard(String value, String label, IconData icon, {bool accent = false}) => Container(
-        padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(10)),
-        child: Column(
-          children: [
-            Icon(icon, color: primary, size: 18),
-            const SizedBox(height: 6),
-            Text(value, textAlign: TextAlign.center, style: TextStyle(fontSize: accent ? 19 : 14, fontWeight: FontWeight.w800, color: accent ? primary : dark)),
-            const SizedBox(height: 4),
-            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, color: textGrey)),
-          ],
-        ),
-      );
-
-  Widget _subnetDiagram() => Column(
-        children: [
-          _ipChip('Jaringan 192.168.10.0/24', main: true),
-          const Padding(padding: EdgeInsets.symmetric(vertical: 7), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-          Row(children: [
-            Expanded(child: _branch('Subnet A', '192.168.10.0/26', 'Host 1–62')),
-            const SizedBox(width: 10),
-            Expanded(child: _branch('Subnet B', '192.168.10.64/26', 'Host 65–126')),
-          ]),
-        ],
-      );
-
-  Widget _branch(String a, String b, String c) => Container(
-        padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(color: soft, border: Border.all(color: border), borderRadius: BorderRadius.circular(10)),
-        child: Column(children: [
-          Container(width: 34, height: 34, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.account_tree_rounded, color: primary, size: 18)),
-          const SizedBox(height: 7),
-          Text(a, style: const TextStyle(color: dark, fontWeight: FontWeight.w800, fontSize: 11)),
-          const SizedBox(height: 4),
-          Text(b, textAlign: TextAlign.center, style: const TextStyle(color: textDark, fontSize: 10.5, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 3),
-          Text(c, textAlign: TextAlign.center, style: const TextStyle(color: textGrey, fontSize: 9.5)),
-        ]),
-      );
-
-  Widget _dhcpDiagram() => _horizontalFlow(
-        _iconNode('Client', Icons.laptop_rounded),
-        _chipWithIcon('DHCP', Icons.settings_suggest_rounded, primary),
-        _iconNode('Server / Router', Icons.router_rounded),
-      );
-
-  Widget _chipWithIcon(String title, IconData icon, Color color) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFB8D2EE))),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(icon, color: color, size: 20), const SizedBox(width: 7), Text(title, style: const TextStyle(color: dark, fontSize: 12, fontWeight: FontWeight.w800))]),
-      );
-
-  Widget _ipv6Diagram() => Column(
-        children: [
-          Container(width: double.infinity, padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: dark, borderRadius: BorderRadius.circular(10)), child: const Text('2001:db8:1234:0000:0000:8a2e:0370:7334', textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 12.5, fontWeight: FontWeight.w800, height: 1.45))),
+          _detailedObservationItem(
+            '2. Subnet Mask & Prefix (Contoh: 255.255.255.0 /24)',
+            'Berfungsi sebagai penentu batasan porsi Network ID dan Host ID. Notasi CIDR /24 berarti 24 bit pertama digunakan untuk jaringan dan 8 bit terakhir untuk host.',
+            Icons.grid_3x3_rounded,
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(child: _miniLabel(Icons.looks_one_rounded, '128 bit', 'Panjang alamat')),
-            const SizedBox(width: 10),
-            Expanded(child: _miniLabel(Icons.grid_4x4_rounded, '8 kelompok', 'Heksadesimal')),
-            const SizedBox(width: 10),
-            Expanded(child: _miniLabel(Icons.compress_rounded, 'Bisa disingkat', 'Aturan khusus')),
-          ]),
+          _detailedObservationItem(
+            '3. Default Gateway (Contoh: 192.168.1.1)',
+            'Alamat IP milik Router yang bertindak sebagai "pintu gerbang" bagi komputer lokal untuk berkomunikasi dengan jaringan luar atau internet.',
+            Icons.router_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '4. IP Private vs IP Public',
+            'IP Private digunakan secara eksklusif dalam jaringan lokal (LAN) tanpa koneksi internet langsung, sementara IP Public bersifat routable secara global di internet.',
+            Icons.public_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '5. Uji Latensi via Command Ping & TTL',
+            'Perintah ping menampilkan waktu round-trip (ms) dan Time to Live (TTL) paket data saat melintasi router menuju tujuan.',
+            Icons.speed_rounded,
+          ),
         ],
-      );
-
-  Widget _miniLabel(IconData icon, String value, String label) => Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(color: soft, border: Border.all(color: border), borderRadius: BorderRadius.circular(9)),
-        child: Column(children: [Icon(icon, color: primary, size: 18), const SizedBox(height: 5), Text(value, textAlign: TextAlign.center, style: const TextStyle(color: dark, fontSize: 10.5, fontWeight: FontWeight.w800)), const SizedBox(height: 2), Text(label, textAlign: TextAlign.center, style: const TextStyle(color: textGrey, fontSize: 9))]),
-      );
-
-  Widget _troubleshootDiagram() => Column(children: [
-        _check('1', 'Cek alamat IP', Icons.numbers_rounded),
-        _line(),
-        _check('2', 'Cek subnet mask', Icons.grid_3x3_rounded),
-        _line(),
-        _check('3', 'Cek default gateway', Icons.router_rounded),
-        _line(),
-        _check('4', 'Cek DNS / koneksi internet', Icons.public_rounded),
-      ]);
-
-  Widget _check(String n, String t, IconData icon) => Row(children: [
-        Container(width: 30, height: 30, alignment: Alignment.center, decoration: BoxDecoration(color: light, shape: BoxShape.circle), child: Text(n, style: const TextStyle(color: primary, fontWeight: FontWeight.w800, fontSize: 11))),
-        const SizedBox(width: 10),
-        Container(width: 34, height: 34, decoration: BoxDecoration(color: soft, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 18)),
-        const SizedBox(width: 10),
-        Text(t, style: const TextStyle(color: textDark, fontWeight: FontWeight.w700, fontSize: 12)),
-      ]);
-
-  Widget _line() => Container(margin: const EdgeInsets.only(left: 14), width: 2, height: 18, color: const Color(0xFFB8D2EE));
-
-  List<Widget> _sections(int c) {
-    final data = <List<Map<String, String>>>[
-      [
-        {'t': 'Apa itu IP Address?', 'd': 'IP Address adalah alamat logis yang digunakan untuk mengenali perangkat dan menentukan tujuan pengiriman data dalam jaringan.'},
-        {'t': 'Mengapa dibutuhkan?', 'd': 'Tanpa alamat tujuan yang jelas, perangkat akan kesulitan menentukan ke mana paket data harus dikirim.'},
-        {'t': 'Contoh', 'd': 'Dalam LAN, komputer dapat menggunakan 192.168.1.10 sedangkan router lokal dapat menggunakan 192.168.1.1.'},
-      ],
-      [
-        {'t': '32 bit', 'd': 'IPv4 memiliki panjang 32 bit yang dibagi menjadi empat bagian, masing-masing 8 bit.'},
-        {'t': 'Network dan Host', 'd': 'Sebagian bit digunakan untuk mengidentifikasi jaringan, sedangkan sisanya mengidentifikasi host di dalam jaringan.'},
-        {'t': 'Aturan dasar', 'd': 'Setiap perangkat pada satu subnet perlu memiliki alamat host yang tidak bentrok dengan perangkat lain.'},
-      ],
-      [
-        {'t': 'Private', 'd': 'Digunakan di jaringan lokal seperti rumah, sekolah, dan laboratorium. Rentang private IPv4 ditetapkan untuk penggunaan internal.'},
-        {'t': 'Public', 'd': 'Dapat digunakan untuk komunikasi melalui jaringan internet dan biasanya diperoleh dari penyedia layanan.'},
-        {'t': 'Loopback', 'd': '127.0.0.1 digunakan untuk menguji layanan jaringan pada perangkat itu sendiri.'},
-      ],
-      [
-        {'t': 'Subnet Mask', 'd': 'Menunjukkan bagian alamat yang termasuk network dan bagian yang dapat digunakan oleh host.'},
-        {'t': 'CIDR', 'd': 'Notasi seperti /24 menunjukkan jumlah bit network pada alamat IPv4.'},
-        {'t': 'Contoh', 'd': '192.168.10.25/24 memiliki subnet mask 255.255.255.0 dan jaringan 192.168.10.0 secara umum.'},
-      ],
-      [
-        {'t': 'Tujuan', 'd': 'Subnetting membagi sebuah jaringan menjadi bagian yang lebih kecil agar penggunaan alamat dan pengelolaan jaringan lebih teratur.'},
-        {'t': 'Langkah ringkas', 'd': 'Tentukan jumlah subnet atau host, pilih prefix yang sesuai, lalu tentukan network, host yang tersedia, dan broadcast.'},
-        {'t': 'Manfaat', 'd': 'Membantu segmentasi jaringan, mengurangi broadcast, dan menyesuaikan alokasi alamat dengan kebutuhan.'},
-      ],
-      [
-        {'t': 'Static IP', 'd': 'Alamat diatur manual dan cocok untuk perangkat yang perlu alamat tetap, misalnya server, printer tertentu, atau perangkat jaringan.'},
-        {'t': 'DHCP', 'd': 'Server DHCP dapat memberikan IP, subnet mask, gateway, dan DNS secara otomatis kepada client.'},
-        {'t': 'Perhatian', 'd': 'Pastikan rentang DHCP tidak bentrok dengan alamat statis yang sudah digunakan.'},
-      ],
-      [
-        {'t': '128 bit', 'd': 'IPv6 menggunakan 128 bit sehingga menyediakan ruang alamat yang jauh lebih besar dibanding IPv4.'},
-        {'t': 'Format', 'd': 'IPv6 ditulis dengan kelompok angka heksadesimal yang dipisahkan tanda titik dua (:).'},
-        {'t': 'Peran', 'd': 'IPv6 dirancang untuk memenuhi kebutuhan jumlah alamat yang besar pada jaringan modern.'},
-      ],
-      [
-        {'t': 'Periksa konfigurasi', 'd': 'Pastikan IP, subnet mask, gateway, dan DNS sesuai dengan jaringan yang digunakan.'},
-        {'t': 'Uji koneksi', 'd': 'Gunakan ping ke gateway, lalu ke alamat lain yang diketahui untuk melihat titik gangguan.'},
-        {'t': 'Pisahkan masalah', 'd': 'Bedakan apakah gangguan berasal dari perangkat, kabel/Wi-Fi, gateway, DNS, atau akses internet.'},
-      ],
-    ];
-
-    final icons = <IconData>[
-      Icons.numbers_rounded,
-      Icons.account_tree_rounded,
-      Icons.public_rounded,
-      Icons.grid_3x3_rounded,
-      Icons.call_split_rounded,
-      Icons.settings_ethernet_rounded,
-      Icons.language_rounded,
-      Icons.rule_rounded,
-    ];
-
-    return data[c].asMap().entries.map((entry) {
-      final item = entry.value;
-      return _section(_two(entry.key + 1), item['t']!, item['d']!, icons[c]);
-    }).toList();
+      ),
+    );
   }
 
-  Widget _section(String number, String title, String desc, IconData icon) => Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+  Widget _detailedObservationItem(String title, String desc, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFAD8B73).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFFAD8B73), size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(number, style: const TextStyle(color: primary, fontSize: 13, fontWeight: FontWeight.w800)),
-                const SizedBox(width: 10),
-                Container(width: 32, height: 32, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 17)),
-                const SizedBox(width: 10),
-                Expanded(child: Text(title, style: const TextStyle(color: textDark, fontSize: 19, fontWeight: FontWeight.w800, height: 1.25))),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 12.5,
+                    height: 1.5,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 12),
-            Text(desc, style: const TextStyle(color: Color(0xFF455A64), fontSize: 14, height: 1.7)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThink() {
+    return _contentCard(
+      title: 'Konseptualisasi Mendalam: Teori Pengalamatan TCP/IP',
+      icon: Icons.lightbulb_rounded,
+      color: const Color(0xFFFF9800),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'IP Address adalah alamat logis berbasis perangkat lunak yang diberikan kepada setiap perangkat network interface card (NIC) agar dapat saling mengenali dan bertukar paket data dalam arsitektur internetworking.',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Pilar Teori IPv4 & Subnetting:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          SizedBox(height: 12),
+          _ConceptItem(
+            icon: Icons.account_tree_rounded,
+            title: '1. Struktur 32-bit & Pembagian Oktet',
+            description: 'IPv4 terdiri dari total 32 bit biner yang dibagi menjadi 4 oktet. Nilai maksimum per oktet adalah 2^8 - 1 = 255.',
+          ),
+          _ConceptItem(
+            icon: Icons.domain_rounded,
+            title: '2. Network ID dan Host ID',
+            description: 'Network ID mengidentifikasi segmen jaringan tempat perangkat berada, sedangkan Host ID mengidentifikasi perangkat unik dalam segmen tersebut.',
+          ),
+          _ConceptItem(
+            icon: Icons.grid_view_rounded,
+            title: '3. Subnetting & CIDR (Classless Inter-Domain Routing)',
+            description: 'Metodologi pemecahan blok IP besar menjadi subnet-subnet yang lebih efisien dengan menggeser bit subnet mask ke kanan.',
+          ),
+          _ConceptItem(
+            icon: Icons.bookmark_added_rounded,
+            title: '4. Alamat Khusus (Loopback & Broadcast)',
+            description: 'IP 127.0.0.1 (Loopback) untuk uji internal stack TCP/IP, Host ber-bit 0 sebagai Network Address, dan Host ber-bit 1 sebagai Broadcast Address.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTry() {
+    return _contentCard(
+      title: 'Prosedur Praktis (TRY): Simulasi Analisis Network ID',
+      icon: Icons.handyman_rounded,
+      color: const Color(0xFF43A047),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Studi Kasus: Sebuah komputer dalam jaringan lokal dikonfigurasi dengan IP Address `192.168.10.45` dan Subnet Mask `255.255.255.0` (Prefix /24). '
+            'Berdasarkan aturan operasi logika AND antara IP dan Subnet Mask, berapakah alamat Network ID dari komputer tersebut?',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.lan_rounded, color: Color(0xFF43A047), size: 30),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Pilih hasil perhitungan Network ID yang benar:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          _tryOptionItem(0, 'A. 192.168.10.0'),
+          _tryOptionItem(1, 'B. 192.168.0.0'),
+          _tryOptionItem(2, 'C. 192.168.10.45'),
+          _tryOptionItem(3, 'D. 255.255.255.0'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _trySubmitted = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF43A047),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Periksa Perhitungan Network ID'),
+          ),
+          if (_trySubmitted) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _selectedTryAnswer == 0
+                    ? const Color(0xFFE8F5E9)
+                    : const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _selectedTryAnswer == 0
+                    ? 'Tepat sekali! Dengan prefix /24 (255.255.255.0), 3 oktet pertama menjadi Network ID (`192.168.10.0`) dan oktet terakhir untuk host.'
+                    : 'Belum tepat. Pada subnet mask /24, oktet terakhir diset menjadi 0 untuk menentukan Network ID.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _selectedTryAnswer == 0
+                      ? Colors.green.shade800
+                      : Colors.red.shade800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _tryOptionItem(int index, String text) {
+    bool isSelected = _selectedTryAnswer == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedTryAnswer = index;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF43A047).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF43A047) : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? const Color(0xFF43A047) : Colors.grey,
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
           ],
         ),
-      );
+      ),
+    );
+  }
 
-  Widget _info(String text) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(15),
-        decoration: const BoxDecoration(color: light, border: Border(left: BorderSide(color: primary, width: 4))),
-        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Icon(Icons.lightbulb_outline_rounded, color: primary, size: 22),
+  Widget _buildCheck() {
+    return _contentCard(
+      title: 'Uji Evaluasi (CHECK): Kuis Kompetensi IP Address',
+      icon: Icons.fact_check_rounded,
+      color: const Color(0xFF8E24AA),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Pertanyaan 1 dari 2:\nBerapakah jumlah total bit yang menyusun satu alamat IPv4 secara keseluruhan dalam format standar?',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, height: 1.5),
+          ),
+          const SizedBox(height: 14),
+          _checkOptionItem(0, 'A. 8 bit'),
+          _checkOptionItem(1, 'B. 16 bit'),
+          _checkOptionItem(2, 'C. 32 bit'),
+          _checkOptionItem(3, 'D. 128 bit'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _checkSubmitted = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8E24AA),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Kirim Jawaban Kuis'),
+          ),
+          if (_checkSubmitted) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _selectedCheckAnswer == 2
+                    ? const Color(0xFFE8F5E9)
+                    : const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _selectedCheckAnswer == 2
+                    ? 'Luar biasa! Jawaban Anda tepat. IPv4 terdiri dari 32 bit yang dibagi ke dalam 4 oktet (masing-masing 8 bit).'
+                    : 'Belum tepat. Ingat bahwa 128 bit adalah ukuran untuk IPv6, sedangkan IPv4 berukuran 32 bit.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _selectedCheckAnswer == 2
+                      ? Colors.green.shade800
+                      : Colors.red.shade800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _checkOptionItem(int index, String text) {
+    bool isSelected = _selectedCheckAnswer == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedCheckAnswer = index;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF8E24AA).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF8E24AA) : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? const Color(0xFF8E24AA) : Colors.grey,
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReflect() {
+    return _contentCard(
+      title: 'Refleksi Analitis (REFLECT): Pemikiran Kritis IP Address',
+      icon: Icons.psychology_rounded,
+      color: const Color(0xFFE53935),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Renungkan dan jawab pertanyaan analitis berikut untuk memperdalam penguasaan pengalamatan jaringan:',
+            style: TextStyle(fontSize: 14, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          _reflectionPrompt(
+            '1. Mengapa keterbatasan jumlah alamat IPv4 di dunia mendorong adopsi teknologi NAT (Network Address Translation) dan migrasi bertahap ke IPv6?',
+          ),
+          const SizedBox(height: 14),
+          _reflectionPrompt(
+            '2. Bagaimana teknik subnetting membantu administrator jaringan dalam meningkatkan efisiensi alokasi IP dan memperkuat keamanan segmen jaringan perusahaan?',
+          ),
+          const SizedBox(height: 14),
+          _reflectionPrompt(
+            '3. Apa kendala operasional yang akan terjadi jika dua perangkat dalam satu segmen LAN memiliki alamat IP statis yang identik (IP Conflict), dan bagaimana cara mendeteksinya?',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _reflectionPrompt(String prompt) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            prompt,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const TextField(
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Tuliskan analisis dan refleksi Anda di sini...',
+              filled: true,
+              fillColor: Color(0xFFF9FAFC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _contentCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          child,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Row(
+      children: [
+        if (_activeStep > 0)
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _activeStep--;
+                });
+              },
+              icon: const Icon(Icons.arrow_back_rounded),
+              label: const Text('Sebelumnya'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        if (_activeStep > 0 && _activeStep < _steps.length - 1)
+          const SizedBox(width: 10),
+        if (_activeStep < _steps.length - 1)
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _activeStep++;
+                });
+              },
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: const Text('Lanjut'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFAD8B73),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _ConceptItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const _ConceptItem({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 22,
+            color: const Color(0xFFAD8B73),
+          ),
           const SizedBox(width: 12),
-          Expanded(child: Text(text, style: const TextStyle(color: dark, fontSize: 13, height: 1.55, fontWeight: FontWeight.w600))),
-        ]),
-      );
-
-  Widget _keyPoint(int c) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(color: dark, borderRadius: BorderRadius.circular(10)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [const Icon(Icons.push_pin_rounded, color: Color(0xFF90CAF9), size: 17), const SizedBox(width: 7), const Text('POIN PENTING', style: TextStyle(color: Color(0xFF90CAF9), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1))]),
-          const SizedBox(height: 9),
-          Text(_keyTexts[c], style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.55, fontWeight: FontWeight.w600)),
-        ]),
-      );
-
-  static const List<String> _keyTexts = [
-    'IP Address memberi identitas logis dan membantu menentukan tujuan paket pada jaringan.',
-    'IPv4 terdiri dari 32 bit dan dibagi menjadi empat oktet desimal.',
-    'Private digunakan untuk jaringan lokal, public untuk komunikasi yang dapat dirutekan di internet, dan loopback untuk pengujian lokal.',
-    'Subnet mask dan prefix menentukan bagian network dan host pada sebuah alamat.',
-    'Subnetting membagi jaringan besar menjadi subnet yang lebih terkelola.',
-    'DHCP mempermudah pemberian konfigurasi IP secara otomatis, sedangkan static IP diatur manual.',
-    'IPv6 memakai 128 bit untuk menyediakan ruang alamat yang jauh lebih besar.',
-    'Troubleshooting IP dilakukan bertahap dari konfigurasi lokal menuju gateway, DNS, dan koneksi internet.',
-  ];
-
-  Widget _navigation(BuildContext context, int c) => Row(children: [
-        Expanded(
-          child: OutlinedButton.icon(
-            onPressed: c == 0 ? null : () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => IpAddressMateriScreen(index: c - 1))),
-            icon: const Icon(Icons.arrow_back_rounded, size: 18),
-            label: const Text('Sebelumnya'),
-            style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48), foregroundColor: textGrey, side: const BorderSide(color: border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 12.5,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: c == titles.length - 1 ? () => Navigator.pop(context) : () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => IpAddressMateriScreen(index: c + 1))),
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
-            label: Text(c == titles.length - 1 ? 'Selesai' : 'Berikutnya'),
-            style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48), backgroundColor: primary, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-          ),
-        ),
-      ]);
-
-  String _two(int n) => n.toString().padLeft(2, '0');
+        ],
+      ),
+    );
+  }
 }

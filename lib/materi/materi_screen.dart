@@ -1,26 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'dasar_tkj/dasar_tkj_screen.dart';
 import 'k3/k3_screen.dart';
 import 'komponen_komputer/komponen_komputer_screen.dart';
 import 'perangkat_jaringan/perangkat_jaringan_screen.dart';
 import 'dasar_jaringan/dasar_jaringan_screen.dart';
 import 'ip_address/ip_address_screen.dart';
 import 'kabel_jaringan/kabel_jaringan_screen.dart';
-import 'dasar_jaringan/pengertian_jaringan_screen.dart';
 class MateriScreen extends StatelessWidget {
   const MateriScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> materi = [
-      {
-        'title': 'Dasar TKJ',
-        'subtitle': 'Pengenalan dasar Teknik Komputer dan Jaringan',
-        'icon': Icons.computer_rounded,
-        'color': const Color(0xFFAD8B73),
-        'screen': const DasarTkjScreen(),
-      },
       {
         'title': 'K3',
         'subtitle': 'Keselamatan dan kesehatan kerja di bidang TKJ',

@@ -1,303 +1,808 @@
 import 'package:flutter/material.dart';
 
-class KomponenKomputerMateriScreen extends StatelessWidget {
+class KomponenKomputerMateriScreen extends StatefulWidget {
   final int index;
-  const KomponenKomputerMateriScreen({super.key, required this.index});
+  const KomponenKomputerMateriScreen({super.key, this.index = 0});
 
-  static const Color primary = Color(0xFF6A1B9A);
-  static const Color dark = Color(0xFF4A148C);
-  static const Color light = Color(0xFFF3E5F5);
-  static const Color textDark = Color(0xFF263238);
-  static const Color textGrey = Color(0xFF607D8B);
-  static const Color border = Color(0xFFDCE3EA);
-  static const Color soft = Color(0xFFF1F5F8);
+  @override
+  State<KomponenKomputerMateriScreen> createState() =>
+      _KomponenKomputerMateriScreenState();
+}
 
-  static const List<String> titles = [
-    'Pengenalan Komponen Komputer',
-    'CPU / Processor',
-    'Motherboard',
-    'RAM dan Penyimpanan',
-    'Power Supply dan Casing',
-    'GPU dan Grafis',
-    'Input, Output, dan Port',
-    'Pendinginan dan Perawatan',
+class _KomponenKomputerMateriScreenState
+    extends State<KomponenKomputerMateriScreen> {
+  int _activeStep = 0;
+  int? _selectedTryAnswer;
+  int? _selectedCheckAnswer;
+  bool _trySubmitted = false;
+  bool _checkSubmitted = false;
+
+  final List<Map<String, dynamic>> _steps = [
+    {
+      'title': 'OBSERVE',
+      'subtitle': 'Amati',
+      'icon': Icons.visibility_rounded,
+      'color': Color(0xFFCEAB93),
+    },
+    {
+      'title': 'THINK',
+      'subtitle': 'Pahami',
+      'icon': Icons.lightbulb_rounded,
+      'color': Color(0xFFFF9800),
+    },
+    {
+      'title': 'TRY',
+      'subtitle': 'Coba',
+      'icon': Icons.handyman_rounded,
+      'color': Color(0xFF43A047),
+    },
+    {
+      'title': 'CHECK',
+      'subtitle': 'Periksa',
+      'icon': Icons.fact_check_rounded,
+      'color': Color(0xFF8E24AA),
+    },
+    {
+      'title': 'REFLECT',
+      'subtitle': 'Refleksi',
+      'icon': Icons.psychology_rounded,
+      'color': Color(0xFFE53935),
+    },
   ];
-
-  static const List<String> subtitles = [
-    'Mengenal kelompok komponen utama yang bekerja bersama membentuk sebuah sistem komputer.',
-    'Memahami fungsi CPU sebagai pusat pengolah instruksi dan data.',
-    'Mengenal papan utama yang menghubungkan processor, memori, penyimpanan, dan perangkat lain.',
-    'Membedakan memori sementara dengan media penyimpanan data jangka panjang.',
-    'Memahami fungsi PSU dan casing untuk catu daya, perlindungan, dan pengelolaan komponen.',
-    'Mengenal GPU dan perannya dalam pengolahan grafis, visual, dan beban komputasi tertentu.',
-    'Membedakan perangkat input, output, serta port yang digunakan untuk koneksi.',
-    'Menjaga suhu komponen dan melakukan perawatan agar komputer tetap stabil dan awet.',
-  ];
-
-  int get current => index.clamp(0, titles.length - 1);
 
   @override
   Widget build(BuildContext context) {
-    final c = current;
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FB),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: textDark,
+        title: const Text('Komponen Komputer & Arsitektur Hardware'),
+        backgroundColor: const Color(0xFFAD8B73),
+        foregroundColor: Colors.white,
         elevation: 0,
-        scrolledUnderElevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => Navigator.pop(context)),
-        title: const Text('Komponen Komputer', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)),
-            child: Text('${c + 1} / ${titles.length}', style: const TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w700)),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3),
-          child: Container(height: 3, alignment: Alignment.centerLeft, child: FractionallySizedBox(widthFactor: (c + 1) / titles.length, child: Container(color: primary))),
-        ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            _header(c),
-            const SizedBox(height: 26),
-            _visual(c),
-            const SizedBox(height: 28),
-            ..._sections(c),
-            const SizedBox(height: 22),
-            _keyPoint(c),
-            const SizedBox(height: 32),
-            _navigation(context, c),
-          ]),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 20),
+            _buildLearningFlow(),
+            const SizedBox(height: 20),
+            _buildActiveLearningContent(),
+            const SizedBox(height: 20),
+            _buildNavigationButtons(),
+            const SizedBox(height: 20),
+          ],
         ),
       ),
     );
   }
 
-  Widget _header(int c) => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        _materialBadge(c + 1),
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.computer_rounded,
+            color: Colors.white,
+            size: 44,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Arsitektur Hardware & Komponen Sistem PC',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              height: 1.2,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Eksplorasi mendalam mengenai Central Processing Unit (CPU), Motherboard chipset, '
+            'hierarki memori RAM & NVMe SSD, manajemen daya PSU, dan sistem pendingin.',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLearningFlow() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Alur Pembelajaran Komponen Komputer',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Pahami perangkat keras secara profesional dan komprehensif.',
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 13,
+          ),
+        ),
         const SizedBox(height: 14),
-        Text(_titleWithBreak(c), style: const TextStyle(color: dark, fontSize: 29, fontWeight: FontWeight.w800, height: 1.12, letterSpacing: -.5)),
-        const SizedBox(height: 12),
-        Text(subtitles[c], style: const TextStyle(color: textGrey, fontSize: 15, height: 1.55)),
-      ]);
+        SizedBox(
+          height: 105,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: _steps.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final step = _steps[index];
+              final bool active = _activeStep == index;
 
-  Widget _materialBadge(int number) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(color: primary, borderRadius: BorderRadius.circular(6)),
-        child: Text('MATERI ${_two(number)}', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: .5)),
-      );
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _activeStep = index;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 105,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: active ? step['color'] as Color : Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: step['color'] as Color,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        step['icon'] as IconData,
+                        color: active ? Colors.white : step['color'] as Color,
+                        size: 25,
+                      ),
+                      const SizedBox(height: 7),
+                      Text(
+                        step['title'] as String,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: active ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        step['subtitle'] as String,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: active ? Colors.white70 : Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 
-  String _titleWithBreak(int c) => const [
-        'Pengenalan Komponen\nKomputer',
-        'CPU dan\nProcessor',
-        'Motherboard dan\nKonektor',
-        'RAM dan\nStorage',
-        'PSU dan\nCasing',
-        'GPU /\nKartu Grafis',
-        'Input, Output,\ndan Port',
-        'Pendinginan dan\nPerawatan',
-      ][c];
-
-  Widget _visual(int c) {
-    switch (c) {
-      case 0: return _diagramCard('Hubungan Komponen', _overview(), Icons.computer_rounded);
-      case 1: return _diagramCard('Alur Kerja CPU', _cpu(), Icons.memory_rounded);
-      case 2: return _diagramCard('Motherboard Sebagai Penghubung', _motherboard(), Icons.developer_board_rounded);
-      case 3: return _diagramCard('RAM vs Storage', _memory(), Icons.sd_storage_rounded);
-      case 4: return _diagramCard('Alur Daya', _power(), Icons.power_rounded);
-      case 5: return _diagramCard('Peran GPU', _gpu(), Icons.graphic_eq_rounded);
-      case 6: return _diagramCard('Input → Proses → Output', _io(), Icons.swap_horiz_rounded);
-      default: return _diagramCard('Perawatan Sistem', _cooling(), Icons.ac_unit_rounded);
+  Widget _buildActiveLearningContent() {
+    switch (_activeStep) {
+      case 0:
+        return _buildObserve();
+      case 1:
+        return _buildThink();
+      case 2:
+        return _buildTry();
+      case 3:
+        return _buildCheck();
+      case 4:
+        return _buildReflect();
+      default:
+        return const SizedBox();
     }
   }
 
-  Widget _diagramCard(String title, Widget child, IconData icon) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(color: Colors.white, border: Border.all(color: border), borderRadius: BorderRadius.circular(12)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(children: [
-            Container(width: 36, height: 36, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 19)),
+  Widget _buildObserve() {
+    return _contentCard(
+      title: 'Observasi Mendalam: Komponen Fisik dalam Casing PC',
+      icon: Icons.visibility_rounded,
+      color: const Color(0xFFCEAB93),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Amati 5 komponen utama yang membentuk arsitektur sistem komputer modern di dalam casing:',
+            style: TextStyle(fontSize: 14, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          _detailedObservationItem(
+            '1. Socket & Chipset Processor (CPU)',
+            'Perhatikan soket LGA/PGA pada motherboard tempat CPU diletakkan dengan presisi tinggi. Chipset (PCH) mengatur jalur komunikasi data antara CPU dengan memori dan perangkat I/O.',
+            Icons.memory_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '2. Slot RAM (DIMM) & Konfigurasi Dual Channel',
+            'Slot memori DDR4/DDR5 dengan kancing pengunci di kedua sisi. Penggunaan dua keping RAM identik pada slot warna berselang-seling mengaktifkan mode dual-channel untuk bandwidth data dua kali lipat.',
+            Icons.developer_board_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '3. Form Factor Motherboard & Slot Ekspansi PCIe',
+            'Papan sirkuit (ATX, Micro-ATX) yang dilengkapi slot PCIe x16 untuk kartu grafis (GPU) berkecepatan tinggi serta slot M.2 NVMe untuk SSD berukuran kecil langsung menempel di PCB.',
+            Icons.extension_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '4. Storage Modern (SSD SATA vs M.2 NVMe)',
+            'Perbedaan evolusi penyimpanan dari HDD mekanis berputar ke SSD SATA 2.5 inci hingga M.2 NVMe berbasis protokol PCIe yang mampu menembus kecepatan baca/tulis hingga ribuan MB per detik.',
+            Icons.sd_storage_rounded,
+          ),
+          const SizedBox(height: 12),
+          _detailedObservationItem(
+            '5. Power Supply Unit (PSU) & Manajemen Kabel',
+            'Catu daya yang mengubah arus AC PLN menjadi DC (+12V, +5V, +3.3V). PSU berkualitas tinggi dilengkapi sertifikasi 80+ Bronze/Gold serta sistem kabel modular untuk kerapian airflow casing.',
+            Icons.power_rounded,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailedObservationItem(String title, String desc, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFAD8B73).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFFAD8B73), size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 12.5,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThink() {
+    return _contentCard(
+      title: 'Konseptualisasi Mendalam: Teori Arsitektur Komputer',
+      icon: Icons.lightbulb_rounded,
+      color: const Color(0xFFFF9800),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Sistem komputer bekerja berdasarkan Arsitektur Von Neumann, di mana data dan instruksi program disimpan dalam memori yang sama dan dieksekusi secara sekuensial oleh unit pemrosesan.',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Pilar Teori Hardware Komputer:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+          SizedBox(height: 12),
+          _ConceptItem(
+            icon: Icons.memory_rounded,
+            title: '1. Siklus Instruksi CPU (Fetch, Decode, Execute)',
+            description: 'CPU mengambil instruksi dari memori (Fetch), menerjemahkannya di Control Unit (Decode), lalu memprosesnya melalui Arithmetic Logic Unit / ALU (Execute).',
+          ),
+          _ConceptItem(
+            icon: Icons.layers_rounded,
+            title: '2. Hierarki Memori (Speed vs Capacity)',
+            description: 'Mulai dari Register CPU (tercepat, kapasitas terkecil) -> Cache L1/L2/L3 -> RAM (Volatile) -> SSD/HDD (Non-volatile, kapasitas besar, kecepatan lebih rendah).',
+          ),
+          _ConceptItem(
+            icon: Icons.hub_rounded,
+            title: '3. Bus Sistem & Jalur Komunikasi PCIe Lanes',
+            description: 'Jalur komunikasi digital berkecepatan tinggi yang menghubungkan CPU dengan GPU, SSD NVMe, dan perangkat ekspansi tanpa bottleneck.',
+          ),
+          _ConceptItem(
+            icon: Icons.ac_unit_rounded,
+            title: '4. Manajemen Termal (Thermal Management)',
+            description: 'Disipasi panas menggunakan pasta termal, heatsink tembaga/aluminium, dan kipas PWM / pendingin cairan (liquid cooling) untuk mencegah fenomena thermal throttling.',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTry() {
+    return _contentCard(
+      title: 'Prosedur Praktis (TRY): Simulasi Perakitan Hardware',
+      icon: Icons.handyman_rounded,
+      color: const Color(0xFF43A047),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Studi Kasus: Anda sedang melakukan perakitan unit PC baru di lab TKJ. Langkah manakah yang merupakan prosedur benar saat memasang Processor (CPU) Intel/AMD ke soket Motherboard?',
+            style: TextStyle(fontSize: 14, height: 1.6),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F5E9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.handyman_rounded, color: Color(0xFF43A047), size: 30),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Pilih prosedur pemasangan CPU yang paling tepat:',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          _tryOptionItem(0, 'A. Menekan CPU dengan kuat menggunakan obeng agar pin soket cepat masuk.'),
+          _tryOptionItem(1, 'B. Membuka tuas soket, menyelaraskan tanda segitiga emas CPU dengan segitiga di soket tanpa tekanan, lalu mengunci kembali.'),
+          _tryOptionItem(2, 'C. Mengoleskan lem Korea di bawah CPU agar menempel permanen pada motherboard.'),
+          _tryOptionItem(3, 'D. Memasang CPU terbalik menghadap ke bawah agar bagian pin terlindungi.'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _trySubmitted = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF43A047),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Periksa Prosedur Perakitan'),
+          ),
+          if (_trySubmitted) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _selectedTryAnswer == 1
+                    ? const Color(0xFFE8F5E9)
+                    : const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _selectedTryAnswer == 1
+                    ? 'Sempurna! Pemasangan CPU harus selalu memperhatikan tanda segitiga (pin 1 alignment) dan diletakkan secara presisi tanpa tekanan berlebih sebelum tuas dikunci.'
+                    : 'Belum tepat. Prosedur tersebut dapat merusak pin pada soket motherboard atau merusak CPU.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _selectedTryAnswer == 1
+                      ? Colors.green.shade800
+                      : Colors.red.shade800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _tryOptionItem(int index, String text) {
+    bool isSelected = _selectedTryAnswer == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedTryAnswer = index;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF43A047).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF43A047) : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? const Color(0xFF43A047) : Colors.grey,
+            ),
             const SizedBox(width: 10),
-            Expanded(child: Text(title, style: const TextStyle(color: textDark, fontSize: 13, fontWeight: FontWeight.w700))),
-          ]),
-          const SizedBox(height: 20),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCheck() {
+    return _contentCard(
+      title: 'Uji Evaluasi (CHECK): Kuis Kompetensi Hardware',
+      icon: Icons.fact_check_rounded,
+      color: const Color(0xFF8E24AA),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Pertanyaan 1 dari 2:\nManakah jenis komponen penyimpanan di bawah ini yang bersifat non-volatile (data tidak hilang saat komputer dimatikan) dan memiliki kecepatan baca/tulis tercepat berbasis slot PCIe?',
+            style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, height: 1.5),
+          ),
+          const SizedBox(height: 14),
+          _checkOptionItem(0, 'A. RAM (Random Access Memory) DDR4'),
+          _checkOptionItem(1, 'B. Cache L3 Processor'),
+          _checkOptionItem(2, 'C. SSD M.2 NVMe'),
+          _checkOptionItem(3, 'D. Virtual Memory Pagefile'),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                _checkSubmitted = true;
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF8E24AA),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Kirim Jawaban Kuis'),
+          ),
+          if (_checkSubmitted) ...[
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _selectedCheckAnswer == 2
+                    ? const Color(0xFFE8F5E9)
+                    : const Color(0xFFFFEBEE),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                _selectedCheckAnswer == 2
+                    ? 'Luar biasa! Jawaban Anda tepat. SSD M.2 NVMe menggunakan jalur PCIe berkecepatan tinggi dan menyimpan data secara permanen (non-volatile).'
+                    : 'Belum tepat. Perhatikan kembali perbedaan sifat volatile (RAM/Cache) dan non-volatile (Storage SSD).',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: _selectedCheckAnswer == 2
+                      ? Colors.green.shade800
+                      : Colors.red.shade800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _checkOptionItem(int index, String text) {
+    bool isSelected = _selectedCheckAnswer == index;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedCheckAnswer = index;
+        });
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF8E24AA).withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF8E24AA) : Colors.grey.shade300,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+              color: isSelected ? const Color(0xFF8E24AA) : Colors.grey,
+            ),
+            const SizedBox(width: 10),
+            Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReflect() {
+    return _contentCard(
+      title: 'Refleksi Analitis (REFLECT): Pemikiran Kritis Hardware',
+      icon: Icons.psychology_rounded,
+      color: const Color(0xFFE53935),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Renungkan dan jawab pertanyaan analitis berikut untuk memperdalam penguasaan perangkat keras komputer:',
+            style: TextStyle(fontSize: 14, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          _reflectionPrompt(
+            '1. Bagaimana sinergi kecepatan antara CPU, RAM berkapasitas besar, dan SSD NVMe menentukan performa keseluruhan sebuah sistem komputer saat menjalankan aplikasi berat?',
+          ),
+          const SizedBox(height: 14),
+          _reflectionPrompt(
+            '2. Mengapa pemilihan Power Supply Unit (PSU) dengan sertifikasi daya yang tepat sangat krusial dalam menjaga umur panjang (durability) seluruh komponen mahal di dalam PC?',
+          ),
+          const SizedBox(height: 14),
+          _reflectionPrompt(
+            '3. Apa tantangan utama dalam melakukan troubleshooting ketika komputer gagal booting (No Display) dan bagaimana langkah sistematis Anda mengatasinya?',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _reflectionPrompt(String prompt) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            prompt,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 12),
+          const TextField(
+            maxLines: 3,
+            decoration: InputDecoration(
+              hintText: 'Tuliskan analisis dan refleksi Anda di sini...',
+              filled: true,
+              fillColor: Color(0xFFF9FAFC),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _contentCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required Widget child,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, color: color),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
           child,
-        ]),
-      );
+        ],
+      ),
+    );
+  }
 
-  Widget _node(String t, IconData i, {bool main = false}) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-        decoration: BoxDecoration(color: main ? primary : light, borderRadius: BorderRadius.circular(10), border: Border.all(color: main ? primary : const Color(0xFFD7BCE2))),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [Icon(i, color: main ? Colors.white : primary, size: 19), const SizedBox(width: 8), Text(t, style: TextStyle(color: main ? Colors.white : dark, fontSize: 11, fontWeight: FontWeight.w800))]),
-      );
+  Widget _buildNavigationButtons() {
+    return Row(
+      children: [
+        if (_activeStep > 0)
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _activeStep--;
+                });
+              },
+              icon: const Icon(Icons.arrow_back_rounded),
+              label: const Text('Sebelumnya'),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        if (_activeStep > 0 && _activeStep < _steps.length - 1)
+          const SizedBox(width: 10),
+        if (_activeStep < _steps.length - 1)
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _activeStep++;
+                });
+              },
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: const Text('Lanjut'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFAD8B73),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
-  Widget _flow3(Widget left, Widget middle, Widget right) => LayoutBuilder(builder: (context, constraints) {
-    if (constraints.maxWidth < 410) {
-      return Column(children: [left, const Padding(padding: EdgeInsets.symmetric(vertical: 7), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)), middle, const Padding(padding: EdgeInsets.symmetric(vertical: 7), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)), right]);
-    }
-    return Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [left, const Icon(Icons.arrow_forward_rounded, color: primary, size: 21), middle, const Icon(Icons.arrow_forward_rounded, color: primary, size: 21), right]);
+class _ConceptItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String description;
+
+  const _ConceptItem({
+    required this.icon,
+    required this.title,
+    required this.description,
   });
 
-  Widget _overview() => Column(children: [
-        _node('CPU / Processor', Icons.memory_rounded, main: true),
-        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-        Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [_node('RAM', Icons.sd_storage_rounded), _node('Motherboard', Icons.developer_board_rounded), _node('Storage', Icons.storage_rounded), _node('GPU', Icons.graphic_eq_rounded), _node('PSU', Icons.power_rounded)]),
-      ]);
-
-  Widget _cpu() => _flow3(_node('Instruksi', Icons.menu_book_outlined), _node('CPU', Icons.memory_rounded, main: true), _node('Hasil', Icons.check_circle_outline_rounded));
-
-  Widget _motherboard() => Column(children: [
-        _node('Motherboard', Icons.developer_board_rounded, main: true),
-        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-        Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [_node('CPU', Icons.memory_rounded), _node('RAM', Icons.sd_storage_rounded), _node('Storage', Icons.storage_rounded), _node('GPU / PCIe', Icons.graphic_eq_rounded), _node('Port I/O', Icons.usb_rounded)]),
-      ]);
-
-  Widget _memory() => Row(children: [
-        Expanded(child: _memoryCard(Icons.memory_rounded, 'RAM', 'Sementara', 'Data kerja yang sedang digunakan program dan CPU.')),
-        const SizedBox(width: 10),
-        Expanded(child: _memoryCard(Icons.storage_rounded, 'Storage', 'Jangka panjang', 'Menyimpan sistem operasi, aplikasi, dan file.')),
-      ]);
-
-  Widget _memoryCard(IconData icon, String title, String badge, String desc) => Container(
-        padding: const EdgeInsets.all(13),
-        decoration: BoxDecoration(color: soft, border: Border.all(color: border), borderRadius: BorderRadius.circular(10)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(width: 34, height: 34, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 18)),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(color: dark, fontSize: 13, fontWeight: FontWeight.w800)),
-          const SizedBox(height: 4),
-          Text(badge, style: const TextStyle(color: primary, fontSize: 10, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 7),
-          Text(desc, style: const TextStyle(color: textGrey, fontSize: 10.5, height: 1.4)),
-        ]),
-      );
-
-  Widget _power() => _flow3(_node('Listrik AC', Icons.electrical_services_rounded), _node('PSU', Icons.power_rounded, main: true), _node('Komponen', Icons.computer_rounded));
-
-  Widget _gpu() => Column(children: [
-        _node('GPU / Kartu Grafis', Icons.graphic_eq_rounded, main: true),
-        const Padding(padding: EdgeInsets.symmetric(vertical: 8), child: Icon(Icons.arrow_downward_rounded, color: primary, size: 21)),
-        Wrap(alignment: WrapAlignment.center, spacing: 8, runSpacing: 8, children: [_node('Monitor', Icons.monitor_rounded), _node('Game / 3D', Icons.videogame_asset_outlined), _node('Video', Icons.movie_outlined)]),
-      ]);
-
-  Widget _io() => _flow3(_node('Input', Icons.keyboard_rounded), _node('Proses', Icons.memory_rounded, main: true), _node('Output', Icons.monitor_rounded));
-
-  Widget _cooling() => Column(children: [
-        _care(Icons.air_rounded, 'Airflow', 'Pastikan jalur masuk dan keluar udara tidak tertutup.'),
-        _care(Icons.toys_rounded, 'Kipas', 'Bersihkan debu dan periksa kipas berputar normal.'),
-        _care(Icons.thermostat_rounded, 'Suhu', 'Perhatikan tanda panas berlebih atau penurunan performa.'),
-        _care(Icons.cleaning_services_rounded, 'Kebersihan', 'Bersihkan area kerja dan bagian dalam komputer secara berkala.'),
-      ]);
-
-  Widget _care(IconData icon, String title, String desc) => Container(
-        margin: const EdgeInsets.only(bottom: 9),
-        padding: const EdgeInsets.all(11),
-        decoration: BoxDecoration(color: soft, border: Border.all(color: border), borderRadius: BorderRadius.circular(10)),
-        child: Row(children: [
-          Container(width: 38, height: 38, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 19)),
-          const SizedBox(width: 10),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(color: dark, fontSize: 11.5, fontWeight: FontWeight.w800)), const SizedBox(height: 3), Text(desc, style: const TextStyle(color: textGrey, fontSize: 10.5, height: 1.4))])),
-        ]),
-      );
-
-  List<Widget> _sections(int c) {
-    const data = <List<Map<String, String>>>[
-      [
-        {'t': 'Komponen utama', 'd': 'Komputer terdiri dari komponen pemrosesan, memori, penyimpanan, catu daya, perangkat input-output, dan komponen pendukung lainnya.'},
-        {'t': 'Saling bergantung', 'd': 'Kinerja sistem tidak hanya ditentukan oleh satu komponen. CPU, RAM, storage, motherboard, PSU, dan perangkat lain bekerja sebagai satu sistem.'},
-        {'t': 'Perbedaan fungsi', 'd': 'Setiap komponen memiliki tugas berbeda sehingga identifikasi komponen menjadi dasar penting saat merakit dan melakukan perawatan komputer.'},
-      ],
-      [
-        {'t': 'Fungsi CPU', 'd': 'CPU menjalankan instruksi program dan melakukan operasi logika maupun aritmetika yang dibutuhkan sistem.'},
-        {'t': 'Clock dan core', 'd': 'Kecepatan clock dan jumlah core merupakan beberapa karakteristik CPU, tetapi performa nyata juga dipengaruhi arsitektur dan beban kerja.'},
-        {'t': 'Perawatan', 'd': 'Pastikan pendinginan baik dan hindari kondisi suhu yang terlalu tinggi.'},
-      ],
-      [
-        {'t': 'Pusat koneksi', 'd': 'Motherboard menyediakan jalur dan konektor untuk menghubungkan processor, RAM, storage, kartu ekspansi, serta perangkat I/O.'},
-        {'t': 'Slot dan port', 'd': 'Contohnya slot RAM, PCIe, konektor storage, USB header, serta konektor daya.'},
-        {'t': 'Kompatibilitas', 'd': 'Saat memilih komponen, periksa socket CPU, tipe RAM, slot ekspansi, form factor, dan konektor daya.'},
-      ],
-      [
-        {'t': 'RAM', 'd': 'RAM digunakan menyimpan data dan instruksi yang sedang aktif sehingga dapat diakses dengan cepat oleh sistem.'},
-        {'t': 'Storage', 'd': 'HDD dan SSD menyimpan data secara lebih permanen dibanding RAM.'},
-        {'t': 'Contoh penggunaan', 'd': 'RAM membantu multitasking, sedangkan storage menyimpan sistem operasi, aplikasi, dan file pengguna.'},
-      ],
-      [
-        {'t': 'PSU', 'd': 'Power Supply Unit mengubah dan menyediakan daya yang dibutuhkan berbagai komponen komputer.'},
-        {'t': 'Casing', 'd': 'Casing melindungi komponen, mengatur tata letak, dan membantu aliran udara.'},
-        {'t': 'Keseimbangan sistem', 'd': 'PSU harus sesuai kebutuhan sistem dan memiliki konektor yang dibutuhkan oleh komponen.'},
-      ],
-      [
-        {'t': 'Pengolah grafis', 'd': 'GPU menangani pengolahan grafis sehingga membantu rendering tampilan, video, 3D, dan beban kerja komputasi tertentu.'},
-        {'t': 'Terintegrasi vs diskrit', 'd': 'GPU dapat terintegrasi dengan CPU atau chipset, atau menggunakan kartu grafis terpisah dengan memori khusus.'},
-        {'t': 'Kebutuhan', 'd': 'Pemilihan GPU sebaiknya mengikuti kebutuhan, resolusi, aplikasi, dan batas daya serta pendinginan sistem.'},
-      ],
-      [
-        {'t': 'Input', 'd': 'Keyboard, mouse, scanner, dan mikrofon menerima data atau perintah dari pengguna.'},
-        {'t': 'Output', 'd': 'Monitor, printer, dan speaker menyajikan hasil pemrosesan kepada pengguna.'},
-        {'t': 'Port', 'd': 'USB, HDMI, DisplayPort, audio, dan Ethernet adalah contoh antarmuka koneksi yang sering dijumpai.'},
-      ],
-      [
-        {'t': 'Debu dan airflow', 'd': 'Debu yang menumpuk dapat menghambat aliran udara dan mengurangi efisiensi pendinginan.'},
-        {'t': 'Pasta termal', 'd': 'Pada sistem tertentu, pasta termal membantu perpindahan panas dari chip ke heatsink dan dapat perlu diperbarui saat perawatan.'},
-        {'t': 'Perawatan berkala', 'd': 'Matikan dan lepaskan sumber daya sebelum membersihkan bagian internal, lalu pasang kembali komponen dengan benar.'},
-      ],
-    ];
-
-    const icons = [Icons.computer_rounded, Icons.memory_rounded, Icons.developer_board_rounded, Icons.sd_storage_rounded, Icons.power_rounded, Icons.graphic_eq_rounded, Icons.usb_rounded, Icons.ac_unit_rounded];
-    return data[c].asMap().entries.map((entry) => _section(_two(entry.key + 1), entry.value['t']!, entry.value['d']!, icons[c])).toList();
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 22,
+            color: const Color(0xFFAD8B73),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: 12.5,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
-
-  Widget _section(String number, String title, String desc, IconData icon) => Padding(
-        padding: const EdgeInsets.only(bottom: 24),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(number, style: const TextStyle(color: primary, fontSize: 13, fontWeight: FontWeight.w800)),
-            const SizedBox(width: 10),
-            Container(width: 32, height: 32, decoration: BoxDecoration(color: light, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: primary, size: 17)),
-            const SizedBox(width: 10),
-            Expanded(child: Text(title, style: const TextStyle(color: textDark, fontSize: 19, fontWeight: FontWeight.w800, height: 1.25))),
-          ]),
-          const SizedBox(height: 12),
-          Text(desc, style: const TextStyle(color: Color(0xFF455A64), fontSize: 14, height: 1.7)),
-        ]),
-      );
-
-  Widget _keyPoint(int c) => Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(color: dark, borderRadius: BorderRadius.circular(10)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Row(children: [Icon(Icons.push_pin_rounded, color: Color(0xFFCE93D8), size: 17), SizedBox(width: 7), Text('POIN PENTING', style: TextStyle(color: Color(0xFFCE93D8), fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1))]),
-          const SizedBox(height: 9),
-          Text(_keyTexts[c], style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.55, fontWeight: FontWeight.w600)),
-        ]),
-      );
-
-  static const List<String> _keyTexts = [
-    'Komponen komputer memiliki fungsi berbeda tetapi bekerja sebagai satu sistem.',
-    'CPU memproses instruksi dan data yang dijalankan oleh sistem.',
-    'Motherboard menjadi pusat koneksi antar-komponen utama.',
-    'RAM digunakan untuk kerja sementara, sedangkan storage menyimpan data lebih permanen.',
-    'PSU menyuplai daya dan casing membantu perlindungan serta pengaturan airflow.',
-    'GPU memproses grafis dan dapat berupa grafis terintegrasi maupun kartu terpisah.',
-    'Perangkat input memberi data, komponen memproses, dan output menampilkan hasil.',
-    'Pendinginan, kebersihan, dan perawatan berkala membantu menjaga kestabilan komputer.',
-  ];
-
-  Widget _navigation(BuildContext context, int c) => Row(children: [
-        Expanded(child: OutlinedButton.icon(onPressed: c == 0 ? null : () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => KomponenKomputerMateriScreen(index: c - 1))), icon: const Icon(Icons.arrow_back_rounded, size: 18), label: const Text('Sebelumnya'), style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48), foregroundColor: textGrey, side: const BorderSide(color: border), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))))),
-        const SizedBox(width: 12),
-        Expanded(child: ElevatedButton.icon(onPressed: c == titles.length - 1 ? () => Navigator.pop(context) : () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => KomponenKomputerMateriScreen(index: c + 1))), icon: const Icon(Icons.arrow_forward_rounded, size: 18), label: Text(c == titles.length - 1 ? 'Selesai' : 'Berikutnya'), style: ElevatedButton.styleFrom(minimumSize: const Size(0, 48), backgroundColor: primary, foregroundColor: Colors.white, elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))))),
-      ]);
-
-  String _two(int n) => n.toString().padLeft(2, '0');
 }
