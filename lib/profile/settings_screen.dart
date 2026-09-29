@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/theme_manager.dart';
 import '../screens/login_screen.dart';
+import '../screens/notification_screen.dart';
+import '../services/settings_service.dart';
+import '../services/localization_service.dart';
 import 'edit_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -12,6 +15,105 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  final SettingsService _settingsService = SettingsService();
+  String _reminderTime = 'Belum diatur';
+  int _dailyTarget = 30;
+  bool _isReminderEnabled = false;
+  int _streakCount = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final time = await _settingsService.getReminderTime();
+    final target = await _settingsService.getDailyTarget();
+    final enabled = await _settingsService.isReminderEnabled();
+    final streak = await _settingsService.getStreak();
+    setState(() {
+      _reminderTime = time ?? 'Belum diatur';
+      _dailyTarget = target;
+      _isReminderEnabled = enabled;
+      _streakCount = streak;
+    });
+  }
+
+  Future<void> _selectReminderTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFAD8B73),
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final formattedTime = picked.format(context);
+      await _settingsService.setReminderTime(formattedTime);
+      await _settingsService.setReminderEnabled(true);
+      setState(() {
+        _reminderTime = formattedTime;
+        _isReminderEnabled = true;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Pengingat diatur ke $_reminderTime')),
+        );
+      }
+    }
+  }
+
+  Future<void> _setDailyTarget() async {
+    final TextEditingController controller = TextEditingController(text: _dailyTarget.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Target Belajar Harian'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Masukkan target belajar harian kamu dalam menit.'),
+            const SizedBox(height: 15),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                suffixText: 'menit',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+            onPressed: () async {
+              final val = int.tryParse(controller.text);
+              if (val != null && val > 0) {
+                await _settingsService.setDailyTarget(val);
+                setState(() => _dailyTarget = val);
+                if (mounted) Navigator.pop(context);
+              }
+            },
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _logout() async {
     try {
       await FirebaseAuth.instance.signOut();
@@ -47,6 +149,82 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void _showStreakInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 28),
+            SizedBox(width: 8),
+            Text('Streak Belajar'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$_streakCount Hari Berturut-turut! 🔥',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Kamu telah belajar secara konsisten. Pertahankan streak belajarmu setiap hari!',
+              style: TextStyle(fontSize: 14, height: 1.4),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _selectLanguage() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Pilih Bahasa / Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Text('🇮🇩', style: TextStyle(fontSize: 24)),
+              title: const Text('Bahasa Indonesia'),
+              trailing: localizationService.currentLanguage == 'id'
+                  ? const Icon(Icons.check_rounded, color: Color(0xFFAD8B73))
+                  : null,
+              onTap: () async {
+                await localizationService.setLanguage('id');
+                if (mounted) Navigator.pop(context);
+                setState(() {});
+              },
+            ),
+            ListTile(
+              leading: const Text('🇬🇧', style: TextStyle(fontSize: 24)),
+              title: const Text('English'),
+              trailing: localizationService.currentLanguage == 'en'
+                  ? const Icon(Icons.check_rounded, color: Color(0xFFAD8B73))
+                  : null,
+              onTap: () async {
+                await localizationService.setLanguage('en');
+                if (mounted) Navigator.pop(context);
+                setState(() {});
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +255,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildSettingsGroup(
             title: 'Preferensi',
             items: [
-              _buildSettingsItem(Icons.notifications_none_rounded, 'Notifikasi', onTap: () {}),
+              _buildSettingsItem(
+                Icons.notifications_none_rounded,
+                'Notifikasi',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationScreen(),
+                    ),
+                  );
+                },
+              ),
               ListenableBuilder(
                 listenable: themeManager,
                 builder: (context, child) {
@@ -91,15 +280,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   );
                 },
               ),
-              _buildSettingsItem(Icons.language_rounded, 'Bahasa', subtitle: 'Bahasa Indonesia', onTap: () {}),
+              ListenableBuilder(
+                listenable: localizationService,
+                builder: (context, child) {
+                  return _buildSettingsItem(
+                    Icons.language_rounded,
+                    'Bahasa',
+                    subtitle: localizationService.currentLanguage == 'en' ? 'English' : 'Bahasa Indonesia',
+                    onTap: _selectLanguage,
+                  );
+                },
+              ),
             ],
           ),
           const SizedBox(height: 25),
           _buildSettingsGroup(
             title: 'Pembelajaran',
             items: [
-              _buildSettingsItem(Icons.alarm_rounded, 'Pengingat Belajar', onTap: () {}),
-              _buildSettingsItem(Icons.track_changes_rounded, 'Target Belajar Harian', onTap: () {}),
+              _buildSettingsItem(
+                Icons.alarm_rounded,
+                'Pengingat Belajar',
+                subtitle: _reminderTime,
+                trailing: Switch(
+                  value: _isReminderEnabled,
+                  onChanged: (val) async {
+                    await _settingsService.setReminderEnabled(val);
+                    setState(() => _isReminderEnabled = val);
+                    if (val && _reminderTime == 'Belum diatur') {
+                      _selectReminderTime();
+                    }
+                  },
+                ),
+                onTap: _selectReminderTime,
+              ),
+              _buildSettingsItem(
+                Icons.track_changes_rounded,
+                'Target Belajar Harian',
+                subtitle: '$_dailyTarget menit per hari',
+                onTap: _setDailyTarget,
+              ),
+              _buildSettingsItem(
+                Icons.local_fire_department_rounded,
+                'Streak Belajar',
+                subtitle: '$_streakCount Hari Berturut-turut',
+                titleColor: Colors.orange,
+                onTap: _showStreakInfo,
+              ),
             ],
           ),
           const SizedBox(height: 25),
@@ -110,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildSettingsItem(Icons.logout_rounded, 'Keluar', titleColor: Colors.red, onTap: _showLogoutDialog),
             ],
           ),
-          const SizedBox(height: 40),
+          const SizedBox(height: 50),
           const Center(
             child: Text(
               "Netropia v1.0.0",

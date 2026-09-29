@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/progress_service.dart';
+import '../services/settings_service.dart';
+import '../services/notification_service.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
 import '../kalkulator_subnet/subnet_calculator_screen.dart';
@@ -9,7 +11,9 @@ import '../absensi/teacher_attendance_screen.dart';
 import '../peminjaman/borrowing_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
 import '../peminjaman/teacher_borrowing_screen.dart';
-import 'package:netropia/project/project_screen.dart';
+import '../project/project_screen.dart';
+import 'notification_screen.dart';
+
 class DashboardScreen extends StatelessWidget {
   final String username;
   final String role;
@@ -38,6 +42,55 @@ class DashboardScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const SubnetCalculatorScreen(),
+      ),
+    );
+  }
+
+  // ============================================================
+  // STREAK DIALOG
+  // ============================================================
+
+  void _showStreakDialog(BuildContext context, int streak) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.local_fire_department_rounded,
+              color: Colors.orange,
+              size: 28,
+            ),
+            SizedBox(width: 8),
+            Text('Streak Belajar'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$streak Hari Berturut-turut! 🔥',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Hebat! Kamu telah belajar secara konsisten. Pertahankan semangat belajarmu setiap hari untuk menjaga streak!',
+              style: TextStyle(fontSize: 14, height: 1.4),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
       ),
     );
   }
@@ -98,16 +151,98 @@ class DashboardScreen extends StatelessWidget {
         ),
 
         actions: [
-          IconButton(
-            onPressed: () {
-              _showComingSoon(
-                context,
-                'Notifikasi',
+          // STREAK BELAJAR BADGE
+          FutureBuilder<int>(
+            future: SettingsService().getStreak(),
+            builder: (context, snapshot) {
+              final streak = snapshot.data ?? 3;
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _showStreakDialog(context, streak),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.local_fire_department_rounded,
+                              color: Colors.orange,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$streak',
+                              style: const TextStyle(
+                                color: Color(0xFF5C3D2E),
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               );
             },
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-            ),
+          ),
+          const SizedBox(width: 4),
+          FutureBuilder<int>(
+            future: NotificationService().getUnreadCount(),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data ?? 0;
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.notifications_none_rounded,
+                    ),
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.redAccent,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
           const SizedBox(width: 8),
         ],

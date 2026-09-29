@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
+import 'help_support_screen.dart';
+import 'about_app_screen.dart';
 import '../progres/progres_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -34,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
                   _buildAchievementsSection(context),
                   const SizedBox(height: 30),
                   _buildMenuSection(context),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 75),
                 ],
               ),
             ),
@@ -259,13 +261,15 @@ class ProfileScreen extends StatelessWidget {
           _buildMenuItem(context, Icons.trending_up_rounded, "Progress Belajar", () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => ProgresScreen()));
           }),
-          _buildMenuItem(context, Icons.emoji_events_outlined, "Achievement", () {}),
-          _buildMenuItem(context, Icons.history_rounded, "Riwayat Aktivitas", () {}),
           _buildMenuItem(context, Icons.settings_outlined, "Pengaturan", () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
           }),
-          _buildMenuItem(context, Icons.help_outline_rounded, "Bantuan", () {}),
-          _buildMenuItem(context, Icons.info_outline_rounded, "Tentang Netropia", () {}),
+          _buildMenuItem(context, Icons.help_outline_rounded, "Bantuan", () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
+          }),
+          _buildMenuItem(context, Icons.info_outline_rounded, "Tentang Netropia", () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutAppScreen()));
+          }),
         ],
       ),
     );
