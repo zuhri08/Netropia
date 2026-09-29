@@ -1,6 +1,9 @@
-import 'dart:async';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_ai/firebase_ai.dart';
+import 'package:flutter/foundation.dart';
+
+// ============================================================
+// MODEL PESAN CHAT
+// ============================================================
 
 class ChatMessage {
   final String id;
@@ -16,184 +19,420 @@ class ChatMessage {
   });
 }
 
+// ============================================================
+// NETROPIA AI SERVICE
+// ============================================================
+
 class AiService {
-  static const String _apiKeyPref = 'gemini_api_key';
+  // Konfigurasi model Gemini
+  late final GenerativeModel _model =
+  FirebaseAI.googleAI().generativeModel(
+    model: 'gemini-3.5-flash-lite',
+    systemInstruction: Content.system(_systemInstruction),
+  );
 
-  Future<String?> getStoredApiKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_apiKeyPref);
-  }
+  ChatSession? _chatSession;
 
-  Future<void> saveApiKey(String apiKey) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_apiKeyPref, apiKey.trim());
-  }
+  // Pengaturan percobaan ulang
+  static const int _maxAttempts = 3;
 
-  Future<void> removeApiKey() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_apiKeyPref);
-  }
+  // ==========================================================
+  // SYSTEM INSTRUCTION
+  // ==========================================================
+
+  static const String _systemInstruction = '''
+Kamu adalah Netropia AI, asisten belajar yang ramah untuk siswa SMK kelas 10.
+Kamu dapat menjawab pertanyaan umum dan membantu siswa belajar TKJ.
+
+Panduan menjawab:
+1. Gunakan bahasa Indonesia yang mudah dipahami.
+2. Jelaskan materi secara bertahap, mulai dari konsep dasar.
+3. Untuk praktik jaringan, bantu siswa menganalisis gejala, kemungkinan penyebab,
+   cara pemeriksaan, dan langkah perbaikan.
+4. Berikan contoh dan langkah penyelesaian, bukan hanya jawaban akhir.
+5. Jika pertanyaan kurang jelas, tanyakan informasi yang diperlukan.
+6. Jika tidak yakin, sampaikan ketidakpastian dan jangan mengarang.
+7. Untuk topik di luar TKJ, tetap jawab dengan wajar dan informatif.
+8. Jangan meminta atau membagikan kata sandi, API key, atau data pribadi siswa.
+9. Gunakan format poin atau tahapan jika membuat penjelasan lebih mudah dibaca.
+''';
+
+  // ==========================================================
+  // MENGIRIM PESAN KE GEMINI
+  // ==========================================================
 
   Future<String> getChatResponse(String prompt) async {
-    final apiKey = await getStoredApiKey();
-
-    if (apiKey != null && apiKey.trim().isNotEmpty) {
+    for (int attempt = 1; attempt <= _maxAttempts; attempt++) {
       try {
-        final model = GenerativeModel(
-          model: 'gemini-1.5-flash',
-          apiKey: apiKey.trim(),
-          systemInstruction: Content.system(
-            'Kamu adalah Netropia AI, asisten pintar dan ramah khusus siswa SMK jurusan Teknik Komputer dan Jaringan (TKJ). '
-            'Tugasmu adalah memberikan penjelasan yang jelas, mudah dipahami, akurat, dan terstruktur mengenai materi TKJ (Jaringan Komputer, Hardware, Sistem Operasi, Subnetting, Mikrotik, Cisco, Kabel UTP/Fiber, K3LH, dan Troubleshooting). '
-            'Gunakan bahasa Indonesia yang ramah, suportif, dan gunakan format poin-poin jika menjelaskan langkah-langkah.',
-          ),
+        // Memulai sesi jika belum tersedia.
+        _chatSession ??= _model.startChat();
+
+        final response = await _chatSession!.sendMessage(
+          Content.text(prompt),
         );
 
-        final content = [Content.text(prompt)];
-        final response = await model.generateContent(content);
+        final answer = response.text?.trim();
 
-        if (response.text != null && response.text!.trim().isNotEmpty) {
-          return response.text!.trim();
+        if (answer != null && answer.isNotEmpty) {
+          return answer;
         }
-      } catch (e) {
-        // Log error and provide fallback notice if online mode failed
-        final localResponse = _getLocalAiResponse(prompt);
-        return '⚠️ **Kendala Mode Online (Gemini AI):**\n_${e.toString().replaceAll("Exception: ", "")}_\n\n---\n\n'
-            '🔄 **Jawaban dari Engine Lokal TKJ:**\n\n$localResponse';
+
+        return 'Maaf, AI belum menghasilkan jawaban. '
+            'Coba tuliskan pertanyaan dengan lebih spesifik.';
+      } catch (error, stackTrace) {
+        debugPrint(
+          'NETROPIA AI ERROR (percobaan $attempt): $error',
+        );
+
+        // Mencoba kembali jika masih ada kesempatan.
+        if (attempt < _maxAttempts) {
+          final delaySeconds = attempt * 2;
+
+          debugPrint(
+            'Mencoba kembali dalam $delaySeconds detik...',
+          );
+
+          await Future.delayed(
+            Duration(seconds: delaySeconds),
+          );
+
+          continue;
+        }
+
+        debugPrint('STACK TRACE: $stackTrace');
+
+        // Menggunakan jawaban lokal jika semua percobaan gagal.
+        return _getFallbackResponse(prompt);
       }
     }
 
-    // Local TKJ Engine Fallback
-    await Future.delayed(const Duration(milliseconds: 600));
-    return _getLocalAiResponse(prompt);
+    return _getFallbackResponse(prompt);
   }
 
+  // ==========================================================
+  // RESET PERCAKAPAN
+  // ==========================================================
+
+  void resetChat() {
+    _chatSession = null;
+  }
+
+  // ==========================================================
+  // FALLBACK RESPONSE
+  // ==========================================================
+
+  String _getFallbackResponse(String prompt) {
+    final localResponse = _getLocalAiResponse(prompt);
+
+    return 'Netropia AI sedang mengalami gangguan pada layanan AI. '
+        'Berikut bantuan dari materi lokal Netropia:\n\n'
+        '$localResponse';
+  }
+
+  // ==========================================================
+  // JAWABAN LOKAL BERDASARKAN MATERI TKJ
+  // ==========================================================
+
   String _getLocalAiResponse(String prompt) {
-    final String lower = prompt.toLowerCase();
+    final lower = prompt.toLowerCase();
 
-    // 1. SUBNETTING & IP ADDRESS
+    // --------------------------------------------------------
+    // 1. SUBNETTING
+    // --------------------------------------------------------
+
     if (lower.contains('subnetting')) {
-      return '📊 **Subnetting** adalah teknik membagi satu jaringan IP besar menjadi beberapa sub-jaringan yang lebih kecil (subnet).\n\n'
-          '**Fungsi Utama Subnetting:**\n'
-          '• Menghemat alokasi IP Address\n'
-          '• Mengurangi lalu lintas broadcast (traffic jam) pada jaringan\n'
-          '• Meningkatkan keamanan dan isolasi antar divisi/ruangan\n\n'
-          '**Contoh Notasi CIDR:**\n'
-          '• **/24**: 255.255.255.0 (254 host)\n'
-          '• **/25**: 255.255.255.128 (126 host)\n'
-          '• **/30**: 255.255.255.252 (2 host, cocok untuk p2p router)';
+      return '''
+📊 **Subnetting**
+
+Subnetting adalah teknik membagi satu jaringan IP besar menjadi beberapa sub-jaringan yang lebih kecil.
+
+**Fungsi subnetting:**
+- Menghemat alokasi IP Address.
+- Mengurangi lalu lintas broadcast.
+- Meningkatkan keamanan dan isolasi jaringan.
+
+**Contoh notasi CIDR:**
+- `/24` : 255.255.255.0 (254 host)
+- `/25` : 255.255.255.128 (126 host)
+- `/30` : 255.255.255.252 (2 host)
+''';
     }
 
-    if (lower.contains('ip address') || lower.contains('alamat ip') || lower.contains('ipv4') || lower.contains('ipv6')) {
-      return '🌐 **IP Address (Internet Protocol Address)** adalah alamat identitas numerik perangkat dalam jaringan komputer.\n\n'
-          '**1. IPv4 (32 bit):**\n'
-          '• Terdiri dari 4 oktet, contoh: `192.168.1.1`\n'
-          '• Kelas A (1-126), Kelas B (128-191), Kelas C (192-223)\n'
-          '• IP Private (Lokal): `192.168.x.x`, `10.x.x.x`, `172.16.x.x`\n\n'
-          '**2. IPv6 (128 bit):**\n'
-          '• Menggunakan format heksadesimal 8 kelompok, contoh: `fe80::1`';
+    // --------------------------------------------------------
+    // 2. IP ADDRESS
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'ip address',
+      'alamat ip',
+      'ipv4',
+      'ipv6',
+    ])) {
+      return '''
+🌐 **IP Address**
+
+IP Address adalah alamat numerik yang digunakan untuk mengidentifikasi perangkat dalam jaringan komputer.
+
+**1. IPv4**
+- Memiliki panjang 32 bit.
+- Terdiri dari 4 oktet.
+- Contoh: `192.168.1.1`.
+
+**2. IPv6**
+- Memiliki panjang 128 bit.
+- Menggunakan format heksadesimal.
+- Contoh: `fe80::1`.
+''';
     }
 
-    // 2. KABEL & CRIMPING
-    if (lower.contains('kabel') || lower.contains('crimping') || lower.contains('rj45') || lower.contains('utp') || lower.contains('t568')) {
-      return '🧵 **Pengkabelan Jaringan (UTP & RJ45)**\n\n'
-          '**Urutan Warna Standar T568B:**\n'
-          '1. Putih-Oranye | 2. Oranye\n'
-          '3. Putih-Hijau  | 4. Biru\n'
-          '5. Putih-Biru   | 6. Hijau\n'
-          '7. Putih-Cokelat| 8. Cokelat\n\n'
-          '**Tipe Kabel:**\n'
-          '• **Straight-Through**: Ujung A (T568B) & Ujung B (T568B) -> Menghubungkan perangkat BERBEDA (PC ke Switch)\n'
-          '• **Crossover**: Ujung A (T568A) & Ujung B (T568B) -> Menghubungkan perangkat SEJENIS (PC ke PC)\n'
-          '• **Fiber Optic**: Menggunakan serat kaca & sinyal cahaya untuk jarak jauh tanpa interferensi.';
+    // --------------------------------------------------------
+    // 3. KABEL JARINGAN
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'kabel',
+      'crimping',
+      'rj45',
+      'utp',
+      't568',
+    ])) {
+      return '''
+🧵 **Pengkabelan Jaringan**
+
+**Urutan warna standar T568B:**
+
+1. Putih-Oranye
+2. Oranye
+3. Putih-Hijau
+4. Biru
+5. Putih-Biru
+6. Hijau
+7. Putih-Cokelat
+8. Cokelat
+
+**Jenis kabel:**
+
+- **Straight-Through:** kedua ujung menggunakan standar yang sama, umumnya untuk menghubungkan perangkat berbeda.
+- **Crossover:** kedua ujung menggunakan standar berbeda, yaitu T568A dan T568B.
+- **Fiber Optic:** menggunakan cahaya untuk mengirimkan data melalui serat optik.
+''';
     }
 
-    // 3. PERANGKAT JARINGAN
-    if (lower.contains('router') || lower.contains('switch') || lower.contains('hub') || lower.contains('access point') || lower.contains('modem')) {
-      return '🔌 **Perangkat Utama Jaringan Komputer:**\n\n'
-          '1. **Router**: Menghubungkan 2 atau lebih jaringan beda subnet (Layer 3 IP Address).\n'
-          '2. **Switch**: Menghubungkan perangkat dalam 1 LAN berbasis MAC Address (Layer 2).\n'
-          '3. **Access Point**: Memancarkan sinyal nirkabel (Wi-Fi) ke perangkat klien.\n'
-          '4. **Modem**: Mengonversi sinyal analog ISP menjadi sinyal digital.\n'
-          '5. **Firewall**: Mengamankan dan menyaring paket data jaringan.';
+    // --------------------------------------------------------
+    // 4. PERANGKAT JARINGAN
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'router',
+      'switch',
+      'hub',
+      'access point',
+      'modem',
+    ])) {
+      return '''
+🔌 **Perangkat Jaringan**
+
+1. **Router:** menghubungkan jaringan yang berbeda.
+2. **Switch:** menghubungkan perangkat dalam jaringan LAN menggunakan MAC Address.
+3. **Access Point:** menyediakan koneksi jaringan nirkabel.
+4. **Modem:** menghubungkan jaringan pengguna dengan layanan penyedia internet.
+5. **Firewall:** menyaring lalu lintas jaringan berdasarkan aturan keamanan.
+''';
     }
 
-    // 4. OSI LAYER & PROTOKOL
-    if (lower.contains('osi layer') || lower.contains('osi')) {
-      return '🏗️ **7 Lapisan OSI Layer:**\n\n'
-          '7. **Application** (HTTP, HTTPS, FTP, DNS)\n'
-          '6. **Presentation** (SSL, TLS, Enkripsi)\n'
-          '5. **Session** (NetBIOS, PPTP)\n'
-          '4. **Transport** (TCP, UDP)\n'
-          '3. **Network** (IP Address, Router, ICMP)\n'
-          '2. **Data Link** (MAC Address, Switch, Ethernet)\n'
-          '1. **Physical** (Kabel UTP, Sinyal Listrik/Cahaya, Hub)';
+    // --------------------------------------------------------
+    // 5. OSI LAYER
+    // --------------------------------------------------------
+
+    if (lower.contains('osi')) {
+      return '''
+🏗️ **7 Lapisan OSI**
+
+7. Application — HTTP, HTTPS, FTP
+6. Presentation — Enkripsi dan format data
+5. Session — Pengelolaan sesi komunikasi
+4. Transport — TCP dan UDP
+3. Network — IP Address dan Router
+2. Data Link — MAC Address dan Switch
+1. Physical — Kabel dan sinyal
+''';
     }
 
-    if (lower.contains('tcp') || lower.contains('udp')) {
-      return '🔄 **Perbedaan TCP vs UDP:**\n\n'
-          '• **TCP (Transmission Control Protocol):** Connection-oriented, menjamin data sampai tanpa error. Cocok untuk Web (HTTP), Email (SMTP), File (FTP).\n'
-          '• **UDP (User Datagram Protocol):** Connectionless, sangat cepat namun tidak menjamin paket ulang. Cocok untuk Video Streaming, Gaming Online, VoIP.';
+    // --------------------------------------------------------
+    // 6. TCP DAN UDP
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, ['tcp', 'udp'])) {
+      return '''
+🔄 **Perbedaan TCP dan UDP**
+
+**TCP (Transmission Control Protocol):**
+- Berorientasi koneksi.
+- Memastikan data diterima secara berurutan dan dapat mengirim ulang data yang hilang.
+- Contoh penggunaan: HTTP, HTTPS, dan FTP.
+
+**UDP (User Datagram Protocol):**
+- Tidak memerlukan koneksi terlebih dahulu.
+- Tidak menjamin pengiriman ulang paket.
+- Contoh penggunaan: streaming, VoIP, dan game online.
+''';
     }
 
-    if (lower.contains('dns') || lower.contains('dhcp') || lower.contains('nat')) {
-      return '🛠️ **Layanan Jaringan Penting:**\n\n'
-          '• **DNS (Domain Name System)**: Menerjemahkan nama domain (`google.com`) menjadi IP Address (`142.250.x.x`).\n'
-          '• **DHCP**: Memberikan alamat IP secara otomatis ke komputer klien.\n'
-          '• **NAT**: Menerjemahkan IP Private lokal menjadi IP Public agar PC dapat terhubung ke Internet.';
+    // --------------------------------------------------------
+    // 7. DNS, DHCP, DAN NAT
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, ['dns', 'dhcp', 'nat'])) {
+      return '''
+🛠️ **Layanan Jaringan**
+
+- **DNS:** menerjemahkan nama domain menjadi IP Address.
+- **DHCP:** memberikan konfigurasi IP secara otomatis kepada perangkat klien.
+- **NAT:** menerjemahkan alamat IP agar perangkat dalam jaringan dapat berkomunikasi dengan jaringan lain.
+''';
     }
 
-    // 5. TROUBLESHOOTING & COMMANDS
-    if (lower.contains('ping') || lower.contains('ipconfig') || lower.contains('tracert') || lower.contains('cmd')) {
-      return '💻 **Command Prompt (CMD) Penting untuk TKJ:**\n\n'
-          '• `ping [IP/Domain]`: Uji tes konektivitas antarperangkat.\n'
-          '• `ipconfig /all`: Melihat detail alamat IP, Subnet, Gateway, & MAC Address PC.\n'
-          '• `ipconfig /flushdns`: Membersihkan cache DNS yang error.\n'
-          '• `tracert [IP/Domain]`: Melacak rute perjalanan paket data dari PC ke server tujuan.';
+    // --------------------------------------------------------
+    // 8. PERINTAH CMD
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'ping',
+      'ipconfig',
+      'tracert',
+      'cmd',
+    ])) {
+      return '''
+💻 **Perintah CMD untuk TKJ**
+
+- `ping [IP/Domain]` — menguji konektivitas.
+- `ipconfig` — melihat konfigurasi IP.
+- `ipconfig /all` — melihat informasi jaringan secara lengkap.
+- `ipconfig /flushdns` — membersihkan cache DNS.
+- `tracert [IP/Domain]` — melacak rute menuju tujuan.
+''';
     }
 
-    if (lower.contains('internet') || lower.contains('tidak bisa') || lower.contains('troubleshoot') || lower.contains('request time out') || lower.contains('rto')) {
-      return '🔧 **Langkah Troubleshooting Internet / RTO:**\n\n'
-          '1. **Cek Fisik**: Pastikan kabel LAN klik rapat atau WiFi terhubung.\n'
-          '2. **Cek IP**: Ketik `ipconfig` di CMD, pastikan dapat IP & Default Gateway.\n'
-          '3. **Ping Gateway**: Ketik `ping [IP_Gateway]` (misal `ping 192.168.1.1`).\n'
-          '4. **Ping DNS Public**: Ketik `ping 8.8.8.8` (uji internet).\n'
-          '5. **Ping Domain**: Ketik `ping google.com` (uji fungsi DNS).';
+    // --------------------------------------------------------
+    // 9. TROUBLESHOOTING INTERNET
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'internet',
+      'tidak bisa',
+      'troubleshoot',
+      'request time out',
+      'rto',
+    ])) {
+      return '''
+🔧 **Troubleshooting Internet**
+
+Jika komputer tidak dapat terhubung ke internet, lakukan pemeriksaan berikut:
+
+1. Periksa kabel LAN atau koneksi Wi-Fi.
+2. Jalankan `ipconfig` untuk melihat konfigurasi IP.
+3. Pastikan komputer memiliki Default Gateway.
+4. Jalankan `ping [IP_Gateway]` untuk menguji koneksi ke router.
+5. Jalankan `ping 8.8.8.8` untuk menguji koneksi ke alamat IP publik.
+6. Jalankan `ping google.com` untuk menguji resolusi DNS.
+''';
     }
 
-    // 6. HARDWARE KOMPUTER
-    if (lower.contains('ram') || lower.contains('cpu') || lower.contains('processor') || lower.contains('motherboard') || lower.contains('ssd') || lower.contains('psu')) {
-      return '🖥️ **Komponen Komputer (Hardware TKJ):**\n\n'
-          '• **CPU (Prosesor)**: Otak pemroses instruksi data sistem.\n'
-          '• **RAM**: Memori kerja sementara (Volatile).\n'
-          '• **SSD NVMe**: Storage permanen kecepatan tinggi tanpa komponen berputar.\n'
-          '• **Motherboard**: Papan sirkuit utama penghubung seluruh komponen.\n'
-          '• **PSU**: Penyuplai arus listrik DC berkualitas tinggi ke komponen.';
+    // --------------------------------------------------------
+    // 10. HARDWARE KOMPUTER
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'ram',
+      'cpu',
+      'processor',
+      'motherboard',
+      'ssd',
+      'psu',
+    ])) {
+      return '''
+🖥️ **Komponen Hardware Komputer**
+
+- **CPU:** memproses instruksi dan data.
+- **RAM:** menyimpan data sementara saat komputer bekerja.
+- **SSD:** menyimpan data secara permanen.
+- **Motherboard:** menghubungkan komponen utama komputer.
+- **PSU:** menyuplai daya listrik ke komponen komputer.
+''';
     }
 
-    // 7. MIKROTIK & CISCO
-    if (lower.contains('mikrotik') || lower.contains('winbox') || lower.contains('cisco')) {
-      return '🚀 **MikroTik & Cisco Networking:**\n\n'
-          '• **MikroTik (RouterOS & Winbox)**: Sangat populer di sekolah & industri untuk manajemen bandwidth (Queue), Hotspot Voucher, Firewall Filter, & NAT.\n'
-          '• **Cisco**: Standar industri berskala besar menggunakan Command Line Interface (CLI) IOS (Internetwork Operating System) untuk Switch/Router enterprise.';
+    // --------------------------------------------------------
+    // 11. MIKROTIK DAN CISCO
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'mikrotik',
+      'winbox',
+      'cisco',
+    ])) {
+      return '''
+🚀 **MikroTik dan Cisco**
+
+**MikroTik:**
+- Menggunakan RouterOS.
+- Dapat dikonfigurasi melalui Winbox atau terminal.
+- Digunakan untuk routing, firewall, hotspot, dan manajemen bandwidth.
+
+**Cisco:**
+- Banyak digunakan pada jaringan skala perusahaan.
+- Perangkatnya dapat dikonfigurasi melalui Cisco IOS.
+- Menggunakan CLI untuk konfigurasi router dan switch.
+''';
     }
 
-    // 8. SOAL / KUIS
-    if (lower.contains('soal') || lower.contains('kuis') || lower.contains('latihan')) {
-      return '📝 **Latihan Soal TKJ:**\n\n'
-          '1. Berapakah jumlah host maksimal pada Subnet Mask `/26`?\n'
-          '2. Urutan warna pin ke-3 pada standar kabel UTP T568B adalah?\n'
-          '3. Perangkat apakah yang bekerja pada Layer 3 OSI Layer?\n\n'
-          '💡 *Cobalah jawab pertanyaan ini, lalu tanyakan jawabanmu ke Netropia AI untuk saya koreksi!*';
+    // --------------------------------------------------------
+    // 12. SOAL DAN KUIS
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'soal',
+      'kuis',
+      'latihan',
+    ])) {
+      return '''
+📝 **Latihan Soal TKJ**
+
+1. Berapakah jumlah host maksimal pada subnet `/26`?
+2. Apa warna kabel pada pin ke-3 standar T568B?
+3. Perangkat jaringan apakah yang bekerja pada Layer 3 OSI?
+
+Cobalah jawab terlebih dahulu, kemudian kirimkan jawabanmu untuk dibahas.
+''';
     }
 
-    // DYNAMIC INTELLIGENT FALLBACK
-    return '🤖 **Netropia AI (Asisten Belajar TKJ)**\n\n'
-        'Saya mengerti pertanyaanmu tentang: "*$prompt*".\n\n'
-        'Untuk topik tersebut dalam materi **Teknik Komputer dan Jaringan (TKJ)**, kamu dapat mengeksplorasi:\n'
-        '1. **Konsep Dasar**: Pahami fungsi utama dan perannya dalam sistem komputer/jaringan.\n'
-        '2. **Praktik & Konfigurasi**: Coba simulasikan pada Virtual Lab Netropia atau Cisco Packet Tracer.\n'
-        '3. **Troubleshooting**: Periksa konektivitas kabel, konfigurasi IP, dan status perangkat.\n\n'
-        '💡 *Tips: Kamu bisa menanyakan topik spesifik seperti "Jelaskan Subnetting /24", "Cara crimping kabel UTP", "Troubleshooting RTO", atau "Fungsi Router".*';
+    // --------------------------------------------------------
+    // 13. JAWABAN UMUM
+    // --------------------------------------------------------
+
+    return '''
+🤖 **Netropia AI — Asisten Belajar TKJ**
+
+Saya memahami pertanyaanmu tentang:
+
+**"$prompt"**
+
+Layanan AI sedang tidak tersedia, sehingga saya belum dapat memberikan penjelasan khusus untuk pertanyaan tersebut.
+
+Kamu dapat mencoba menanyakan topik yang lebih spesifik, seperti:
+
+- Jelaskan subnetting `/24`.
+- Bagaimana cara melakukan crimping kabel UTP?
+- Apa penyebab Request Time Out?
+- Apa fungsi router dan switch?
+- Bagaimana cara melakukan troubleshooting jaringan?
+''';
+  }
+
+  // ==========================================================
+  // FUNGSI PEMBANTU
+  // ==========================================================
+
+  bool _containsAny(String text, List<String> keywords) {
+    return keywords.any((keyword) => text.contains(keyword));
   }
 }

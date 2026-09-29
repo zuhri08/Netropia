@@ -16,6 +16,10 @@ import 'ip_address/ip_address_materi_screen.dart';
 import 'perangkat_jaringan/materi_perangkat_layout.dart';
 import 'dasar_jaringan/pengertian_jaringan_screen.dart';
 import 'kabel_jaringan/pengertian_kabel_screen.dart';
+import 'dasar_jaringan/portofolio_screen.dart';
+import 'dasar_jaringan/refleksi_screen.dart';
+import 'dasar_jaringan/evaluasi_screen.dart';
+
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
@@ -348,7 +352,48 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
       return;
     }
+// =========================
+// PENUGASAN DASAR JARINGAN
+// =========================
+    if (name == 'Penugasan' && _getMateriId() == 'dasar_jaringan') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PenugasanScreen(),
+        ),
+      );
 
+      return;
+    }
+    if (name == 'Portofolio') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const PortofolioScreen(),
+        ),
+      );
+      return;
+    }
+    if (name == 'Refleksi' &&
+        _getMateriId() == 'dasar_jaringan') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const RefleksiScreen(),
+        ),
+      );
+      return;
+    }
+    if (name == 'Evaluasi' &&
+        _getMateriId() == 'dasar_jaringan') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const EvaluasiScreen(),
+        ),
+      );
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(

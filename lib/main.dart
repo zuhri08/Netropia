@@ -1,7 +1,10 @@
+
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart'; // Untuk kIsWeb dan !kReleaseMode
+import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart'; // Import device_preview
+import 'package:device_preview/device_preview.dart';
+
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
@@ -14,9 +17,15 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // App Check untuk pengujian lokal Android.
+  if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: AndroidProvider.debug,
+    );
+  }
+
   runApp(
     DevicePreview(
-      // Frame HP hanya akan muncul saat di-run di Web atau mode Debug biasa
       enabled: kIsWeb || !kReleaseMode,
       builder: (context) => const NetropiaApp(),
     ),
@@ -32,12 +41,10 @@ class NetropiaApp extends StatelessWidget {
       listenable: themeManager,
       builder: (context, child) {
         return MaterialApp(
-          // KODE ANTI-ERROR: Menggunakan konfigurasi builder global dari Device Preview
           locale: DevicePreview.locale(context),
           builder: (context, child) {
             return DevicePreview.appBuilder(context, child);
           },
-
           debugShowCheckedModeBanner: false,
           title: 'Netropia',
           theme: AppTheme.lightTheme,
@@ -49,4 +56,3 @@ class NetropiaApp extends StatelessWidget {
     );
   }
 }
-
