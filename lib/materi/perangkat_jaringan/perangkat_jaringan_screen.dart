@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../materi_detail_layout.dart';
-import 'pengenalan_perangkat_screen.dart';
+import 'perangkat_jaringan_materi_screen.dart';
 
 class PerangkatJaringanScreen extends StatelessWidget {
   const PerangkatJaringanScreen({super.key});
@@ -14,7 +14,7 @@ class PerangkatJaringanScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const PengenalanPerangkatScreen(),
+            builder: (context) => const PerangkatJaringanMateriScreen(),
           ),
         );
       },

@@ -1,24 +1,24 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-
-import 'dasar_jaringan/video_screen.dart';
-import 'package:netropia/materi/referensi/referensi_screen.dart';
-import '../screens/learning_feature_screen.dart';
 import 'package:netropia/services/progress_service.dart';
-import 'dasar_jaringan/pre_test_screen.dart';
-import 'dasar_jaringan/post_test_screen.dart';
-import 'dasar_jaringan/penugasan_screen.dart';
-import 'k3/k3_materi_screen.dart';
-import 'komponen_komputer/komponen_komputer_materi_screen.dart';
-import 'ip_address/ip_address_materi_screen.dart';
-import 'perangkat_jaringan/materi_perangkat_layout.dart';
-import 'dasar_jaringan/pengertian_jaringan_screen.dart';
-import 'kabel_jaringan/pengertian_kabel_screen.dart';
-import 'dasar_jaringan/portofolio_screen.dart';
-import 'dasar_jaringan/refleksi_screen.dart';
-import 'dasar_jaringan/evaluasi_screen.dart';
+import 'package:netropia/materi/referensi/referensi_screen.dart';
+
+import '../screens/learning_feature_screen.dart';
 import '../services/localization_service.dart';
+import 'dasar_jaringan/evaluasi_screen.dart';
+import 'dasar_jaringan/penugasan_screen.dart';
+import 'dasar_jaringan/portofolio_screen.dart';
+import 'dasar_jaringan/post_test_screen.dart';
+import 'dasar_jaringan/pre_test_screen.dart';
+import 'dasar_jaringan/pengertian_jaringan_screen.dart';
+import 'dasar_jaringan/refleksi_screen.dart';
+import 'dasar_jaringan/video_screen.dart';
+import 'ip_address/ip_address_materi_screen.dart';
+import 'k3/k3_materi_screen.dart';
+import 'kabel_jaringan/pengertian_kabel_screen.dart';
+import 'komponen_komputer/komponen_komputer_materi_screen.dart';
+import 'perangkat_jaringan/perangkat_jaringan_materi_screen.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
@@ -39,20 +39,35 @@ class MateriDetailLayout extends StatefulWidget {
 class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   final ProgressService _progressService = ProgressService();
 
-  final List<String> _motivations = [
-    "Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia. - Nelson Mandela",
-    "Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya. - Mahatma Gandhi",
-    "Jangan pernah berhenti belajar, karena hidup tidak pernah berhenti mengajar.",
-    "Kesuksesan bukanlah kunci kebahagiaan. Kebahagiaanlah kunci kesuksesan. Jika Anda mencintai apa yang Anda kerjakan, Anda akan sukses.",
-    "Masa depan adalah milik mereka yang percaya pada keindahan mimpi mereka. - Eleanor Roosevelt",
-    "Jenius adalah 1% inspirasi dan 99% keringat. - Thomas Alva Edison",
-    "Tetaplah lapar, tetaplah bodoh. - Steve Jobs",
-    "Peluang besar biasanya disamarkan sebagai kerja keras, sehingga kebanyakan orang tidak mengenalinya.",
-    "Ilmu itu seperti air. Jika ia berhenti mengalir, ia menjadi keruh. - Imam Syafi'i",
-    "Barangsiapa tidak mau merasakan pahitnya belajar, ia akan merasakan hinanya kebodohan sepanjang hidupnya. - Imam Syafi'i",
+  late final String _currentMotivation;
+
+  static const List<String> _motivations = [
+    'Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia. - Nelson Mandela',
+    'Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya. - Mahatma Gandhi',
+    'Jangan pernah berhenti belajar, karena hidup tidak pernah berhenti mengajar.',
+    'Kesuksesan bukanlah kunci kebahagiaan. Kebahagiaanlah kunci kesuksesan. Jika Anda mencintai apa yang Anda kerjakan, Anda akan sukses.',
+    'Masa depan adalah milik mereka yang percaya pada keindahan mimpi mereka. - Eleanor Roosevelt',
+    'Jenius adalah 1% inspirasi dan 99% keringat. - Thomas Alva Edison',
+    'Tetaplah lapar, tetaplah bodoh. - Steve Jobs',
+    'Peluang besar biasanya disamarkan sebagai kerja keras, sehingga kebanyakan orang tidak mengenalinya.',
+    'Ilmu itu seperti air. Jika ia berhenti mengalir, ia menjadi keruh. - Imam Syafi\'i',
+    'Barangsiapa tidak mau merasakan pahitnya belajar, ia akan merasakan hinanya kebodohan sepanjang hidupnya. - Imam Syafi\'i',
   ];
 
-  late String _currentMotivation;
+  static const Map<String, String> _englishNames = {
+    'Materi': 'Material',
+    'Video': 'Video',
+    'Peta Konsep': 'Concept Map',
+    'Referensi': 'Reference',
+    'Pre Test': 'Pre Test',
+    'Post Test': 'Post Test',
+    'Penugasan': 'Assignment',
+    'Portofolio': 'Portfolio',
+    'Forum Diskusi': 'Discussion Forum',
+    'Refleksi': 'Reflection',
+    'Evaluasi': 'Evaluation',
+    'Feedback': 'Feedback',
+  };
 
   @override
   void initState() {
@@ -63,21 +78,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   }
 
   String _getEnglishName(String name) {
-    switch (name) {
-      case 'Materi': return 'Material';
-      case 'Video': return 'Video';
-      case 'Peta Konsep': return 'Concept Map';
-      case 'Referensi': return 'Reference';
-      case 'Pre Test': return 'Pre Test';
-      case 'Post Test': return 'Post Test';
-      case 'Penugasan': return 'Assignment';
-      case 'Portofolio': return 'Portfolio';
-      case 'Forum Diskusi': return 'Discussion Forum';
-      case 'Refleksi': return 'Reflection';
-      case 'Evaluasi': return 'Evaluation';
-      case 'Feedback': return 'Feedback';
-      default: return name;
-    }
+    return _englishNames[name] ?? name;
   }
 
   @override
@@ -114,8 +115,12 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     );
   }
 
+  // ============================================================
+  // MENU GRID
+  // ============================================================
+
   Widget _buildGrid() {
-    final List<Map<String, dynamic>> menuItems = [
+    final menuItems = [
       {
         'name': 'Materi',
         'icon': Icons.menu_book_rounded,
@@ -180,7 +185,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
+        final crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -196,9 +201,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             final item = menuItems[index];
 
             return _buildMenuItem(
-              name: item['name'],
-              icon: item['icon'],
-              iconColor: item['color'],
+              name: item['name'] as String,
+              icon: item['icon'] as IconData,
+              iconColor: item['color'] as Color,
             );
           },
         );
@@ -211,7 +216,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     required IconData icon,
     required Color iconColor,
   }) {
-    final displayName = localizationService.isEnglish ? _getEnglishName(name) : name;
+    final displayName = localizationService.isEnglish
+        ? _getEnglishName(name)
+        : name;
 
     return Material(
       color: Colors.transparent,
@@ -260,166 +267,149 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     );
   }
 
+  // ============================================================
+  // MENU NAVIGATION
+  // ============================================================
+
   void _handleMenuTap(String name) {
     if (name == 'Materi') {
-      if (widget.onMateriTap != null) {
-        widget.onMateriTap!();
-        return;
-      }
-
-      final materiId = _getMateriId();
-      Widget materiScreen;
-      switch (materiId) {
-        case 'k3':
-          materiScreen = const K3MateriScreen(index: 0);
-          break;
-        case 'komponen_komputer':
-          materiScreen = const KomponenKomputerMateriScreen(index: 0);
-          break;
-        case 'ip_address':
-          materiScreen = const IpAddressMateriScreen(index: 0);
-          break;
-        case 'perangkat_jaringan':
-          materiScreen = const PerangkatMateriScreen(index: 0);
-          break;
-        case 'dasar_jaringan':
-          materiScreen = const PengertianJaringanScreen();
-          break;
-        case 'kabel_jaringan':
-          materiScreen = const PengertianKabelScreen();
-          break;
-        default:
-          materiScreen = const K3MateriScreen(index: 0);
-          break;
-      }
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => materiScreen,
-        ),
-      );
-
+      _handleMateriTap();
       return;
     }
 
-    if (name == 'Video') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const VideoScreen(),
-        ),
-      );
+    final materiId = _getMateriId();
 
-      return;
-    }
+    switch (name) {
+      case 'Video':
+        _navigateTo(const VideoScreen());
+        break;
 
-    if (name == 'Referensi') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ReferensiScreen(
-            materiId: _getMateriId(),
+      case 'Referensi':
+        _navigateTo(
+          ReferensiScreen(
+            materiId: materiId,
             materiTitle: widget.title,
           ),
-        ),
-      );
+        );
+        break;
 
-      return;
-    }
-
-    if (name == 'Pre Test') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PreTestScreen(
-            materiId: _getMateriId(),
+      case 'Pre Test':
+        _navigateTo(
+          PreTestScreen(
+            materiId: materiId,
             materiTitle: widget.title,
             themeColor: widget.themeColor,
           ),
-        ),
-      );
+        );
+        break;
 
-      return;
-    }
-
-    if (name == 'Post Test') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PostTestScreen(
-            materiId: _getMateriId(),
+      case 'Post Test':
+        _navigateTo(
+          PostTestScreen(
+            materiId: materiId,
             materiTitle: widget.title,
             themeColor: widget.themeColor,
           ),
-        ),
-      );
+        );
+        break;
 
-      return;
-    }
-
-    if (name == 'Penugasan') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PenugasanScreen(
-            materiId: _getMateriId(),
+      case 'Penugasan':
+        _navigateTo(
+          PenugasanScreen(
+            materiId: materiId,
             materiTitle: widget.title,
           ),
-        ),
-      );
+        );
+        break;
 
-      return;
-    }
-
-    if (name == 'Portofolio') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => PortofolioScreen(
-            materiId: _getMateriId(),
+      case 'Portofolio':
+        _navigateTo(
+          PortofolioScreen(
+            materiId: materiId,
             materiTitle: widget.title,
           ),
-        ),
-      );
-      return;
-    }
+        );
+        break;
 
-    if (name == 'Refleksi') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RefleksiScreen(
-            materiId: _getMateriId(),
+      case 'Refleksi':
+        _navigateTo(
+          RefleksiScreen(
+            materiId: materiId,
             materiTitle: widget.title,
           ),
-        ),
-      );
-      return;
-    }
+        );
+        break;
 
-    if (name == 'Evaluasi') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EvaluasiScreen(
-            materiId: _getMateriId(),
+      case 'Evaluasi':
+        _navigateTo(
+          EvaluasiScreen(
+            materiId: materiId,
             materiTitle: widget.title,
           ),
-        ),
-      );
+        );
+        break;
+
+      default:
+        _navigateTo(
+          LearningFeatureScreen(
+            materiId: materiId,
+            materiTitle: widget.title,
+            feature: name,
+            themeColor: widget.themeColor,
+          ),
+        );
+    }
+  }
+
+  void _handleMateriTap() {
+    final materiId = _getMateriId();
+
+    // Callback tetap digunakan untuk materi lainnya.
+    if (widget.onMateriTap != null) {
+      widget.onMateriTap!();
       return;
     }
 
+    final Widget materiScreen;
+
+    switch (materiId) {
+      case 'k3':
+        materiScreen = const K3MateriScreen(index: 0);
+        break;
+
+      case 'komponen_komputer':
+        materiScreen = const KomponenKomputerMateriScreen(index: 0);
+        break;
+
+      case 'perangkat_jaringan':
+        materiScreen = const PerangkatJaringanMateriScreen(index: 0);
+        break;
+
+      case 'dasar_jaringan':
+        materiScreen = const PengertianJaringanScreen();
+        break;
+
+      case 'kabel_jaringan':
+        materiScreen = const PengertianKabelScreen();
+        break;
+
+      case 'ip_address':
+        materiScreen = const IpAddressMateriScreen(index: 0);
+        break;
+
+      default:
+        materiScreen = const K3MateriScreen(index: 0);
+        break;
+    }
+
+    _navigateTo(materiScreen);
+  }
+
+  void _navigateTo(Widget screen) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => LearningFeatureScreen(
-          materiId: _getMateriId(),
-          materiTitle: widget.title,
-          feature: name,
-          themeColor: widget.themeColor,
-        ),
+        builder: (context) => screen,
       ),
     );
   }
@@ -449,8 +439,13 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     }
   }
 
+  // ============================================================
+  // LEARNING PROGRESS
+  // ============================================================
+
   Widget _buildProgressSection() {
     final materiId = _getMateriId();
+
     final activities = <String>[
       '${materiId}_pre_test',
       '${materiId}_post_test',
@@ -462,10 +457,18 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     ];
 
     return FutureBuilder<List<bool>>(
-      future: Future.wait(activities.map((activity) => _progressService.isLessonCompleted(activity))),
+      future: Future.wait(
+        activities.map(
+              (activity) => _progressService.isLessonCompleted(activity),
+        ),
+      ),
       builder: (context, snapshot) {
-        final completed = snapshot.data?.where((done) => done).length ?? 0;
-        final progressValue = activities.isEmpty ? 0.0 : completed / activities.length;
+        final completed =
+            snapshot.data?.where((done) => done).length ?? 0;
+
+        final progressValue = activities.isEmpty
+            ? 0.0
+            : completed / activities.length;
 
         return Container(
           padding: const EdgeInsets.all(18),
@@ -511,7 +514,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                   value: progressValue,
                   minHeight: 8,
                   backgroundColor: widget.themeColor.withOpacity(0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(widget.themeColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    widget.themeColor,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -519,7 +524,10 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                 localizationService.isEnglish
                     ? '$completed of ${activities.length} main activities completed.'
                     : '$completed dari ${activities.length} aktivitas utama selesai.',
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ],
           ),
@@ -527,6 +535,10 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       },
     );
   }
+
+  // ============================================================
+  // DAILY MOTIVATION
+  // ============================================================
 
   Widget _buildMotivationSection() {
     return Container(
@@ -563,7 +575,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           ),
           const SizedBox(height: 8),
           Text(
-            localizationService.isEnglish ? '- Daily Motivation -' : '- Motivasi Hari Ini -',
+            localizationService.isEnglish
+                ? '- Daily Motivation -'
+                : '- Motivasi Hari Ini -',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
