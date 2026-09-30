@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'project_work_screen.dart';
+import '../services/localization_service.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({super.key});
@@ -11,12 +12,12 @@ class ProjectScreen extends StatefulWidget {
 class _ProjectScreenState extends State<ProjectScreen> {
   int selectedCategory = 0;
 
-  final List<String> categories = [
-    'Semua',
-    'Jaringan',
-    'Komputer',
-    'Troubleshooting',
-  ];
+  List<String> get categories {
+    if (localizationService.isEnglish) {
+      return ['All', 'Networking', 'Computer', 'Troubleshooting'];
+    }
+    return ['Semua', 'Jaringan', 'Komputer', 'Troubleshooting'];
+  }
 
   final List<ProjectData> projects = [
     ProjectData(
@@ -28,7 +29,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '2–3 Pertemuan',
       icon: Icons.lan_rounded,
       progress: 0,
-      color: Color(0xFFAD8B73),
+      color: const Color(0xFFAD8B73),
       steps: [
         'Memahami masalah',
         'Membuat perencanaan',
@@ -46,7 +47,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '1–2 Pertemuan',
       icon: Icons.cable_rounded,
       progress: 0,
-      color: Color(0xFF00897B),
+      color: const Color(0xFF00897B),
       steps: [
         'Mengenal kabel',
         'Menentukan susunan warna',
@@ -63,7 +64,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '2–3 Pertemuan',
       icon: Icons.computer_rounded,
       progress: 0,
-      color: Color(0xFF6A1B9A),
+      color: const Color(0xFF6A1B9A),
       steps: [
         'Mengenal komponen',
         'Mempersiapkan alat',
@@ -80,7 +81,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '1–2 Pertemuan',
       icon: Icons.build_circle_rounded,
       progress: 0,
-      color: Color(0xFFEF6C00),
+      color: const Color(0xFFEF6C00),
       steps: [
         'Mengidentifikasi masalah',
         'Mencari penyebab',
@@ -95,7 +96,12 @@ class _ProjectScreenState extends State<ProjectScreen> {
       return projects;
     }
 
-    final category = categories[selectedCategory];
+    final catMap = {
+      1: 'Jaringan',
+      2: 'Komputer',
+      3: 'Troubleshooting',
+    };
+    final category = catMap[selectedCategory] ?? 'Jaringan';
 
     return projects
         .where((project) => project.category == category)
@@ -104,49 +110,50 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverToBoxAdapter(
-              child: _buildHeader(),
-            ),
-            SliverToBoxAdapter(
-              child: _buildLearningSummary(),
-            ),
-            SliverToBoxAdapter(
-              child: _buildCategoryFilter(),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSectionTitle(),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-              sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                    final project = filteredProjects[index];
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: _buildProjectCard(project),
-                    );
-                  },
-                  childCount: filteredProjects.length,
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: _buildHeader(),
                 ),
-              ),
+                SliverToBoxAdapter(
+                  child: _buildLearningSummary(),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildCategoryFilter(),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildSectionTitle(),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final project = filteredProjects[index];
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildProjectCard(project),
+                        );
+                      },
+                      childCount: filteredProjects.length,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
-
-  // ============================================================
-  // HEADER
-  // ============================================================
 
   Widget _buildHeader() {
     return Padding(
@@ -160,17 +167,19 @@ class _ProjectScreenState extends State<ProjectScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Project',
+                  localizationService.translate('project'),
                   style: TextStyle(
                     fontSize: 27,
                     fontWeight: FontWeight.w800,
-                    color: const Color(0xFF17202A),
+                    color: Theme.of(context).textTheme.titleLarge?.color,
                     letterSpacing: -0.6,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  'Belajar dengan membuat sesuatu yang nyata.',
+                  localizationService.isEnglish
+                      ? 'Learn by creating something real.'
+                      : 'Belajar dengan membuat sesuatu yang nyata.',
                   style: TextStyle(
                     fontSize: 13.5,
                     color: Colors.grey.shade600,
@@ -188,18 +197,18 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
   Widget _buildBackButton() {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
         onTap: () => Navigator.pop(context),
-        child: const SizedBox(
+        child: SizedBox(
           width: 44,
           height: 44,
           child: Icon(
             Icons.arrow_back_rounded,
             size: 21,
-            color: Color(0xFF263238),
+            color: Theme.of(context).textTheme.bodyLarge?.color,
           ),
         ),
       ),
@@ -208,7 +217,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
   Widget _buildInfoButton() {
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -225,10 +234,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
       ),
     );
   }
-
-  // ============================================================
-  // LEARNING SUMMARY
-  // ============================================================
 
   Widget _buildLearningSummary() {
     return Container(
@@ -289,10 +294,10 @@ class _ProjectScreenState extends State<ProjectScreen> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Belajar sambil berkarya',
-                      style: TextStyle(
+                      localizationService.isEnglish ? 'Learn by creating' : 'Belajar sambil berkarya',
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
@@ -301,36 +306,16 @@ class _ProjectScreenState extends State<ProjectScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
-              const Text(
-                'Project membuat kamu tidak hanya memahami teori, tetapi juga mencoba, menguji, dan menyelesaikan masalah seperti teknisi TKJ.',
+              const SizedBox(height: 14),
+              Text(
+                localizationService.isEnglish
+                    ? 'Project-based learning helps you solve real-world technical challenges step by step.'
+                    : 'Pembelajaran berbasis proyek membantumu memecahkan masalah nyata dan memahami konsep secara mendalam.',
                 style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.5,
-                  height: 1.55,
+                  color: Colors.white.withOpacity(0.92),
+                  fontSize: 13,
+                  height: 1.5,
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  _buildSummaryItem(
-                    icon: Icons.folder_copy_rounded,
-                    value: '${projects.length}',
-                    label: 'Project',
-                  ),
-                  const SizedBox(width: 28),
-                  _buildSummaryItem(
-                    icon: Icons.check_circle_outline_rounded,
-                    value: '0',
-                    label: 'Selesai',
-                  ),
-                  const SizedBox(width: 28),
-                  _buildSummaryItem(
-                    icon: Icons.trending_up_rounded,
-                    value: '0%',
-                    label: 'Progress',
-                  ),
-                ],
               ),
             ],
           ),
@@ -339,136 +324,69 @@ class _ProjectScreenState extends State<ProjectScreen> {
     );
   }
 
-  Widget _buildSummaryItem({
-    required IconData icon,
-    required String value,
-    required String label,
-  }) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 17,
-          color: Colors.white.withOpacity(0.85),
-        ),
-        const SizedBox(width: 7),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.72),
-                fontSize: 10.5,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // CATEGORY
-  // ============================================================
-
   Widget _buildCategoryFilter() {
+    final cats = categories;
+
     return SizedBox(
-      height: 45,
+      height: 44,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 9),
+        itemCount: cats.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final selected = selectedCategory == index;
+          final isSelected = selectedCategory == index;
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedCategory = index;
-              });
+          return ChoiceChip(
+            label: Text(cats[index]),
+            selected: isSelected,
+            onSelected: (selected) {
+              if (selected) {
+                setState(() {
+                  selectedCategory = index;
+                });
+              }
             },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
-              padding: const EdgeInsets.symmetric(horizontal: 17),
-              decoration: BoxDecoration(
-                color: selected
-                    ? const Color(0xFFAD8B73)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: selected
-                      ? const Color(0xFFAD8B73)
-                      : const Color(0xFFE3E7EC),
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                categories[index],
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight:
-                  selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected
-                      ? Colors.white
-                      : const Color(0xFF54616D),
-                ),
-              ),
+            selectedColor: const Color(0xFFAD8B73),
+            backgroundColor: Theme.of(context).cardColor,
+            labelStyle: TextStyle(
+              color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+              fontSize: 12.5,
             ),
+            side: BorderSide(
+              color: isSelected ? const Color(0xFFAD8B73) : Colors.grey.withOpacity(0.2),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
           );
         },
       ),
     );
   }
 
-  // ============================================================
-  // SECTION TITLE
-  // ============================================================
-
   Widget _buildSectionTitle() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 25, 20, 14),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 14),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Project tersedia',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1C252C),
-                  ),
-                ),
-                SizedBox(height: 3),
-                Text(
-                  'Pilih project dan mulai tantanganmu.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF7A858F),
-                  ),
-                ),
-              ],
+          Text(
+            localizationService.isEnglish ? 'Project List' : 'Daftar Project',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: Theme.of(context).textTheme.titleLarge?.color,
             ),
           ),
           Text(
-            '${filteredProjects.length} project',
-            style: const TextStyle(
-              fontSize: 11.5,
+            '${filteredProjects.length} ${localizationService.isEnglish ? 'projects' : 'project'}',
+            style: TextStyle(
+              fontSize: 12.5,
               fontWeight: FontWeight.w600,
-              color: Color(0xFFAD8B73),
+              color: Colors.grey.shade500,
             ),
           ),
         ],
@@ -476,21 +394,34 @@ class _ProjectScreenState extends State<ProjectScreen> {
     );
   }
 
-  // ============================================================
-  // PROJECT CARD
-  // ============================================================
-
   Widget _buildProjectCard(ProjectData project) {
-    final isStarted = project.progress > 0;
-
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         borderRadius: BorderRadius.circular(22),
-        onTap: () => _openProject(project),
-        child: Padding(
-          padding: const EdgeInsets.all(17),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProjectWorkScreen(
+                projectTitle: project.title,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.035),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -498,680 +429,157 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 54,
-                    height: 54,
+                    width: 52,
+                    height: 52,
                     decoration: BoxDecoration(
-                      color: project.color.withOpacity(0.10),
-                      borderRadius: BorderRadius.circular(17),
+                      color: project.color.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Icon(
                       project.icon,
                       color: project.color,
-                      size: 27,
+                      size: 26,
                     ),
                   ),
-                  const SizedBox(width: 13),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          project.category.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 9.5,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.8,
-                            color: project.color,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
                           project.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: Color(0xFF202930),
-                            height: 1.2,
+                            color: Theme.of(context).textTheme.titleMedium?.color,
+                            height: 1.3,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _badge(
+                              text: project.category,
+                              color: project.color,
+                            ),
+                            const SizedBox(width: 6),
+                            _badge(
+                              text: project.difficulty,
+                              color: Colors.grey.shade600,
+                              isOutlined: true,
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 9,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F5F7),
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: Text(
-                      project.difficulty,
-                      style: const TextStyle(
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF66717B),
-                      ),
-                    ),
-                  ),
                 ],
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 14),
               Text(
                 project.description,
-                style: const TextStyle(
-                  fontSize: 12.5,
-                  color: Color(0xFF68747E),
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _buildMeta(
-                    Icons.schedule_rounded,
-                    project.duration,
-                  ),
-                  const SizedBox(width: 14),
-                  _buildMeta(
-                    Icons.layers_rounded,
-                    '${project.steps.length} tahap',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 17),
-              _buildProjectProgress(project),
-              const SizedBox(height: 17),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      isStarted
-                          ? '${project.progress}% selesai'
-                          : 'Belum dimulai',
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: isStarted
-                            ? project.color
-                            : const Color(0xFF7A858F),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: project.color,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          isStarted ? 'Lanjutkan' : 'Mulai Project',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.arrow_forward_rounded,
-                          color: Colors.white,
-                          size: 15,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMeta(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 14,
-          color: const Color(0xFF8A959E),
-        ),
-        const SizedBox(width: 5),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 10.5,
-            color: Color(0xFF727E87),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProjectProgress(ProjectData project) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Expanded(
-              child: Text(
-                'Progress project',
-                style: TextStyle(
-                  fontSize: 10.5,
-                  color: Color(0xFF7A858F),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Text(
-              '${project.progress}%',
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w700,
-                color: project.color,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 7),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: LinearProgressIndicator(
-            value: project.progress / 100,
-            minHeight: 6,
-            backgroundColor: const Color(0xFFECEFF2),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              project.color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // ACTIONS
-  // ============================================================
-
-  Future<void> _openProject(ProjectData project) async {
-    final result = await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProjectPreviewScreen(
-          project: project,
-        ),
-      ),
-    );
-
-    if (result == true) {
-      setState(() {
-        project.progress = 100;
-      });
-    }
-  }
-  void _showProjectInfo() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(26),
-        ),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(22, 10, 22, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 38,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD8DDE2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
-              const Text(
-                'Tentang Project',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF202930),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Project dirancang agar kamu dapat menerapkan materi TKJ melalui sebuah tantangan nyata. Setiap project memiliki beberapa tahap yang harus diselesaikan.',
                 style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF68747E),
-                  height: 1.55,
+                  color: Colors.grey.shade600,
+                  height: 1.45,
                 ),
               ),
               const SizedBox(height: 18),
-              _buildInfoRow(
-                Icons.lightbulb_outline_rounded,
-                'Pahami masalah',
-              ),
-              _buildInfoRow(
-                Icons.edit_note_rounded,
-                'Rencanakan solusi',
-              ),
-              _buildInfoRow(
-                Icons.handyman_outlined,
-                'Kerjakan project',
-              ),
-              _buildInfoRow(
-                Icons.fact_check_outlined,
-                'Uji hasilnya',
-              ),
-              _buildInfoRow(
-                Icons.forum_outlined,
-                'Lakukan refleksi',
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildInfoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 13),
-      child: Row(
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F5FB),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(
-              Icons.check_rounded,
-              size: 18,
-              color: Color(0xFFAD8B73),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF45515A),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================
-// PROJECT PREVIEW
-// ============================================================
-
-class ProjectPreviewScreen extends StatelessWidget {
-  final ProjectData project;
-
-  const ProjectPreviewScreen({
-    super.key,
-    required this.project,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F7FA),
-        elevation: 0,
-        surfaceTintColor: Colors.transparent,
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.arrow_back_rounded),
-          color: const Color(0xFF263238),
-        ),
-        title: const Text(
-          'Detail Project',
-          style: TextStyle(
-            color: Color(0xFF202930),
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 5, 20, 30),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHero(),
-            const SizedBox(height: 22),
-            _buildSection(
-              title: 'Tantangan',
-              icon: Icons.flag_rounded,
-              child: Text(
-                project.description,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF66717B),
-                  height: 1.55,
-                ),
-              ),
-            ),
-            const SizedBox(height: 15),
-            _buildSection(
-              title: 'Tahapan Project',
-              icon: Icons.route_rounded,
-              child: _buildSteps(),
-            ),
-            const SizedBox(height: 15),
-            _buildSection(
-              title: 'Yang akan kamu latih',
-              icon: Icons.psychology_alt_rounded,
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildSkillChip('Problem Solving'),
-                  _buildSkillChip('Praktik TKJ'),
-                  _buildSkillChip('Analisis'),
-                  _buildSkillChip('Kreativitas'),
-                  _buildSkillChip('Kerja Sistematis'),
-                ],
-              ),
-            ),
-            const SizedBox(height: 22),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ProjectWorkScreen(
-                          projectTitle: project.title,
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.access_time_rounded,
+                        size: 15,
+                        color: Colors.grey.shade500,
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        project.duration,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    );
-                  },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: project.color,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  minimumSize: const Size.fromHeight(54),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    ],
                   ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.play_arrow_rounded,
-                      size: 22,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Mulai Project',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                  Row(
+                    children: [
+                      Text(
+                        localizationService.isEnglish ? 'Start Project' : 'Mulai Project',
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFAD8B73),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHero() {
-    return Container(
-      padding: const EdgeInsets.all(21),
-      decoration: BoxDecoration(
-        color: project.color,
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.14),
-              borderRadius: BorderRadius.circular(17),
-            ),
-            child: Icon(
-              project.icon,
-              color: Colors.white,
-              size: 29,
-            ),
-          ),
-          const SizedBox(height: 17),
-          Text(
-            project.category.toUpperCase(),
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.72),
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1,
-            ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            project.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 23,
-              fontWeight: FontWeight.w800,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 15),
-          Row(
-            children: [
-              _buildHeroMeta(
-                Icons.signal_cellular_alt_rounded,
-                project.difficulty,
-              ),
-              const SizedBox(width: 18),
-              _buildHeroMeta(
-                Icons.schedule_rounded,
-                project.duration,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeroMeta(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: Colors.white.withOpacity(0.82),
-          size: 15,
-        ),
-        const SizedBox(width: 5),
-        Text(
-          text,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.88),
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required IconData icon,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 35,
-                height: 35,
-                decoration: BoxDecoration(
-                  color: project.color.withOpacity(0.09),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  color: project.color,
-                  size: 19,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF202930),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          child,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSteps() {
-    return Column(
-      children: List.generate(
-        project.steps.length,
-            (index) {
-          final isLast = index == project.steps.length - 1;
-
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    width: 29,
-                    height: 29,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: project.color.withOpacity(0.10),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: project.color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 16,
+                        color: Color(0xFFAD8B73),
                       ),
-                    ),
+                    ],
                   ),
-                  if (!isLast)
-                    Container(
-                      width: 2,
-                      height: 30,
-                      margin: const EdgeInsets.symmetric(vertical: 3),
-                      color: project.color.withOpacity(0.12),
-                    ),
                 ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Text(
-                    project.steps[index],
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      color: Color(0xFF5F6B74),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildSkillChip(String text) {
+  Widget _badge({
+    required String text,
+    required Color color,
+    bool isOutlined = false,
+  }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 11,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F7F9),
-        borderRadius: BorderRadius.circular(10),
+        color: isOutlined ? Colors.transparent : color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: isOutlined ? Border.all(color: color.withOpacity(0.3)) : null,
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 10.5,
-          color: Color(0xFF68747E),
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
+          color: color,
         ),
       ),
     );
   }
-}
 
-// ============================================================
-// MODEL
-// ============================================================
+  void _showProjectInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          localizationService.isEnglish ? 'About Projects' : 'Tentang Project',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: Text(
+          localizationService.isEnglish
+              ? 'Projects contain practical tasks that you can complete step by step. Complete each task to increase your understanding!'
+              : 'Project berisi tugas praktik yang dapat kamu selesaikan secara bertahap. Selesaikan setiap tugas untuk meningkatkan pemahamanmu!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(localizationService.translate('close')),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class ProjectData {
   final String title;
@@ -1180,7 +588,7 @@ class ProjectData {
   final String difficulty;
   final String duration;
   final IconData icon;
-  int progress;
+  final int progress;
   final Color color;
   final List<String> steps;
 

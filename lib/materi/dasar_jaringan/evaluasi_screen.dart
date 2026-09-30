@@ -1,8 +1,14 @@
-
 import 'package:flutter/material.dart';
 
 class EvaluasiScreen extends StatefulWidget {
-  const EvaluasiScreen({super.key});
+  final String materiId;
+  final String materiTitle;
+
+  const EvaluasiScreen({
+    super.key,
+    this.materiId = 'dasar_jaringan',
+    this.materiTitle = 'Dasar Jaringan',
+  });
 
   @override
   State<EvaluasiScreen> createState() => _EvaluasiScreenState();
@@ -13,10 +19,10 @@ class _EvaluasiScreenState extends State<EvaluasiScreen> {
   // KONSTANTA TAMPILAN
   // ============================================================
 
-  static const Color _primary = Color(0xFF4169E1);
-  static const Color _primaryDark = Color(0xFF3159C9);
+  static const Color _primary = Color(0xFFAD8B73);
+  static const Color _primaryDark = Color(0xFF8E6F5B);
   static const Color _dark = Color(0xFF202A44);
-  static const Color _lightBlue = Color(0xFFEAF0FF);
+  static const Color _lightBlue = Color(0xFFFFF8E8);
   static const Color _border = Color(0xFFE8ECF4);
   static const Color _background = Color(0xFFF6F7FB);
 
@@ -148,187 +154,152 @@ class _EvaluasiScreenState extends State<EvaluasiScreen> {
     }
   }
 
-  String _ratingMessage(int rating) {
-    switch (rating) {
-      case 1:
-        return 'Kami akan berusaha memperbaikinya.';
-      case 2:
-        return 'Terima kasih, masukanmu sangat berarti.';
-      case 3:
-        return 'Masih ada ruang untuk menjadi lebih baik.';
-      case 4:
-        return 'Senang mengetahui pengalaman belajarmu baik!';
-      case 5:
-        return 'Wah, berarti pengalaman belajarmu sangat baik!';
-      default:
-        return 'Pilih emoji yang paling menggambarkan penilaianmu.';
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _suggestionController.dispose();
+    for (final controller in _comments.values) {
+      controller.dispose();
     }
-  }
-
-  bool _canContinue() {
-    if (_currentStep <= 2) {
-      final category = ['Materi', 'Media', 'Proses'][_currentStep];
-      return (_ratings[category] ?? 0) > 0;
-    }
-
-    return true;
+    super.dispose();
   }
 
   // ============================================================
-  // NAVIGASI
+  // NAVIGASI LANGKAH
   // ============================================================
 
   void _nextStep() {
-    if (!_canContinue()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Berikan penilaian terlebih dahulu.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
     if (_currentStep < _steps.length - 1) {
-      setState(() {
-        _currentStep++;
-      });
-
-      _pageController.animateToPage(
-        _currentStep,
-        duration: const Duration(milliseconds: 350),
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
       );
-    } else {
-      _submitEvaluation();
     }
   }
 
   void _previousStep() {
-    if (_currentStep == 0) return;
-
-    setState(() {
-      _currentStep--;
-    });
-
-    _pageController.animateToPage(
-      _currentStep,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOut,
-    );
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
-  // ============================================================
-  // KIRIM EVALUASI
-  // ============================================================
-
-  void _submitEvaluation() {
+  void _submitEvaluasi() {
     showDialog(
       context: context,
-      barrierDismissible: false,
       builder: (dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(20),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8F7EE),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  size: 42,
-                  color: Color(0xFF269653),
-                ),
-              ),
-              const SizedBox(height: 18),
-              const Text(
-                'Evaluasi Selesai!',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                  color: _dark,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Terima kasih atas penilaian dan masukanmu. '
-                    'Pendapatmu membantu pengembangan pembelajaran Netropia.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black54,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+          title: const Text('Kirim evaluasi?'),
+          content: const Text(
+            'Terima kasih atas penilaian dan masukan yang kamu berikan. '
+                'Evaluasimu sangat berharga untuk pengembangan Netropia.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Evaluasi berhasil dikirim. Terima kasih!'),
+                    behavior: SnackBarBehavior.floating,
                   ),
-                  child: const Text('Selesai'),
-                ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primary,
+                foregroundColor: Colors.white,
               ),
-            ],
-          ),
+              child: const Text('Kirim'),
+            ),
+          ],
         );
       },
     );
   }
 
   // ============================================================
-  // HEADER DAN PROGRESS
+  // BUILD
   // ============================================================
 
-  Widget _buildHeader() {
-    final step = _steps[_currentStep];
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _primaryDark,
-            Color(0xFF6387F0),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(25),
-          bottomRight: Radius.circular(25),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: _background,
+      appBar: AppBar(
+        backgroundColor: _primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Evaluasi - ${widget.materiTitle}',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeaderProgress(),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentStep = index;
+                  });
+                },
+                children: [
+                  _buildRatingStep('Materi'),
+                  _buildRatingStep('Media'),
+                  _buildRatingStep('Proses'),
+                  _buildSaranStep(),
+                  _buildSummaryStep(),
+                ],
+              ),
+            ),
+            _buildBottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // HEADER PROGRESS
+  // ============================================================
+
+  Widget _buildHeaderProgress() {
+    final current = _steps[_currentStep];
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.16),
-                  borderRadius: BorderRadius.circular(13),
+                  color: _primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  step['icon'] as IconData,
-                  color: Colors.white,
-                  size: 23,
+                  current['icon'] as IconData,
+                  color: _primary,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
@@ -337,53 +308,42 @@ class _EvaluasiScreenState extends State<EvaluasiScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LANGKAH ${_currentStep + 1} DARI ${_steps.length}',
+                      current['title'] as String,
                       style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
+                        color: _dark,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
-                      step['title'] as String,
+                      current['subtitle'] as String,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.grey,
                       ),
                     ),
                   ],
                 ),
               ),
               Text(
-                '${(_progress * 100).round()}%',
+                'Langkah ${_currentStep + 1}/${_steps.length}',
                 style: const TextStyle(
-                  color: Colors.white,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
+                  color: _primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 14),
           ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: _progress,
-              minHeight: 7,
-              backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 11),
-          Text(
-            step['subtitle'] as String,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
+              minHeight: 6,
+              backgroundColor: _border,
+              valueColor: const AlwaysStoppedAnimation<Color>(_primary),
             ),
           ),
         ],
@@ -392,747 +352,401 @@ class _EvaluasiScreenState extends State<EvaluasiScreen> {
   }
 
   // ============================================================
-  // KARTU PENILAIAN EMOJI INTERAKTIF
+  // STEP PENILAIAN
   // ============================================================
 
-  Widget _buildEmojiRating(String category, int rating) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _border),
-      ),
+  Widget _buildRatingStep(String category) {
+    final currentRating = _ratings[category] ?? 0;
+    final reasons = _reasonOptions[category] ?? [];
+    final selectedReasons = _selectedReasons[category] ?? {};
+    final commentController = _comments[category]!;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _border),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Seberapa baik $category dalam materi ${widget.materiTitle}?',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: _dark,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _ratingLabel(currentRating),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: currentRating > 0 ? _primary : Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(5, (index) {
+                    final ratingValue = index + 1;
+                    final isSelected = currentRating >= ratingValue;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _ratings[category] = ratingValue;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? _primary.withOpacity(0.12)
+                              : Colors.transparent,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isSelected
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          size: 36,
+                          color: isSelected ? _primary : Colors.grey.shade400,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (currentRating > 0) ...[
+            const Text(
+              'Apa alasan penilaiamu?',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: _dark,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: reasons.map((reason) {
+                final isSelected = selectedReasons.contains(reason);
+
+                return FilterChip(
+                  label: Text(reason),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        selectedReasons.add(reason);
+                      } else {
+                        selectedReasons.remove(reason);
+                      }
+                    });
+                  },
+                  selectedColor: _primary.withOpacity(0.15),
+                  checkmarkColor: _primary,
+                  labelStyle: TextStyle(
+                    color: isSelected ? _primary : Colors.black87,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 12,
+                  ),
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isSelected ? _primary : _border,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 20),
+          ],
+          const Text(
+            'Catatan tambahan (Opsional)',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _dark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: commentController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Tulis tanggapanmu tentang $category di modul ${widget.materiTitle}...',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _primary, width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // STEP SARAN
+  // ============================================================
+
+  Widget _buildSaranStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: _border),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb_outline_rounded, color: _primary, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Masukanmu sangat berarti bagi kami untuk meningkatkan kualitas modul ${widget.materiTitle}.',
+                    style: const TextStyle(fontSize: 13, height: 1.4, color: _dark),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Saran & Masukan',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _dark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _suggestionController,
+            maxLines: 6,
+            decoration: InputDecoration(
+              hintText: 'Berikan ide atau masukan untuk pengembangan modul ${widget.materiTitle}...',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _border),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: _primary, width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ============================================================
+  // STEP RINGKASAN
+  // ============================================================
+
+  Widget _buildSummaryStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Bagaimana penilaianmu?',
+            'Ringkasan Evaluasi',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: _dark,
             ),
           ),
-          const SizedBox(height: 18),
-          Row(
-            children: List.generate(5, (index) {
-              final value = index + 1;
-              final selected = rating == value;
+          const SizedBox(height: 12),
+          ..._ratings.entries.map((entry) {
+            final category = entry.key;
+            final rating = entry.value;
+            final reasons = _selectedReasons[category] ?? {};
+            final comment = _comments[category]?.text ?? '';
 
-              return Expanded(
-                child: Semantics(
-                  button: true,
-                  label: 'Nilai $value, ${_ratingLabel(value)}',
-                  selected: selected,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _ratings[category] = value;
-                      });
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOut,
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 12,
-                        horizontal: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: selected ? _lightBlue : Colors.transparent,
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(
-                          color: selected
-                              ? _primary
-                              : Colors.transparent,
-                          width: 1.5,
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        category,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: _dark,
                         ),
                       ),
-                      child: Column(
+                      Row(
                         children: [
-                          AnimatedScale(
-                            scale: selected ? 1.25 : 1,
-                            duration: const Duration(milliseconds: 220),
-                            child: Text(
-                              _ratingEmoji(value),
-                              style: const TextStyle(fontSize: 27),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
+                          Text(_ratingEmoji(rating)),
+                          const SizedBox(width: 4),
                           Text(
-                            '$value',
-                            style: TextStyle(
+                            _ratingLabel(rating),
+                            style: const TextStyle(
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
-                              color: selected ? _primary : Colors.black45,
+                              color: _primary,
                             ),
                           ),
                         ],
                       ),
+                    ],
+                  ),
+                  if (reasons.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      'Alasan: ${reasons.join(', ')}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 18),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: Column(
-              key: ValueKey(rating),
-              children: [
-                Text(
-                  _ratingLabel(rating),
-                  style: const TextStyle(
-                    color: _primary,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  _ratingMessage(rating),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // HALAMAN PENILAIAN MATERI, MEDIA, DAN PROSES
-  // ============================================================
-
-  Widget _buildRatingStep({
-    required String category,
-    required String question,
-    required String description,
-  }) {
-    final rating = _ratings[category] ?? 0;
-    final reasons = _selectedReasons[category]!;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          question,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          description,
-          style: const TextStyle(
-            color: Colors.black54,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 22),
-
-        _buildEmojiRating(category, rating),
-
-        const SizedBox(height: 24),
-
-        const Text(
-          'Apa alasan penilaianmu?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Pilih satu atau beberapa hal yang sesuai.',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.black54,
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: _reasonOptions[category]!.map((reason) {
-            final selected = reasons.contains(reason);
-
-            return FilterChip(
-              label: Text(reason),
-              selected: selected,
-              showCheckmark: true,
-              selectedColor: _lightBlue,
-              checkmarkColor: _primary,
-              labelStyle: TextStyle(
-                fontSize: 12,
-                color: selected
-                    ? _primaryDark
-                    : const Color(0xFF414B61),
-                fontWeight:
-                selected ? FontWeight.bold : FontWeight.normal,
+                  ],
+                  if (comment.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      'Catatan: "$comment"',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: _dark,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              side: BorderSide(
-                color: selected ? _primary : const Color(0xFFE1E5ED),
-              ),
-              onSelected: (value) {
-                setState(() {
-                  if (value) {
-                    reasons.add(reason);
-                  } else {
-                    reasons.remove(reason);
-                  }
-                });
-              },
             );
-          }).toList(),
-        ),
-
-        const SizedBox(height: 23),
-
-        const Text(
-          'Komentar tambahan (opsional)',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        TextField(
-          controller: _comments[category],
-          minLines: 3,
-          maxLines: 5,
-          maxLength: 300,
-          decoration: InputDecoration(
-            hintText: 'Tuliskan pendapatmu di sini...',
-            hintStyle: const TextStyle(
-              fontSize: 12,
-              color: Colors.black38,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: _border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: _border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: _primary),
-            ),
-          ),
-        ),
-
-        _buildInfo(
-          'Penilaianmu digunakan sebagai masukan untuk memperbaiki pengalaman belajar.',
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // HALAMAN SARAN
-  // ============================================================
-
-  Widget _buildSuggestionStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Apa yang ingin kamu sampaikan?',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Masukanmu dapat membantu materi, media, dan proses '
-              'pembelajaran menjadi lebih baik.',
-          style: TextStyle(
-            color: Colors.black54,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 22),
-
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: _lightBlue,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                Icons.volunteer_activism_rounded,
-                color: _primary,
-                size: 25,
+          }),
+          if (_suggestionController.text.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _border),
               ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Tidak ada jawaban benar atau salah. Sampaikan '
-                      'pendapatmu dengan jujur dan sopan.',
-                  style: TextStyle(
-                    color: Color(0xFF3455A4),
-                    height: 1.5,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 22),
-
-        const Text(
-          'Saran untuk pembelajaran berikutnya',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        TextField(
-          controller: _suggestionController,
-          minLines: 6,
-          maxLines: 8,
-          maxLength: 500,
-          decoration: InputDecoration(
-            hintText:
-            'Contoh: Saya berharap materi dilengkapi lebih banyak simulasi...',
-            hintStyle: const TextStyle(
-              fontSize: 12,
-              color: Colors.black38,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: _border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: _border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: _primary),
-            ),
-          ),
-        ),
-
-        _buildInfo(
-          'Bagian saran boleh dikosongkan jika kamu tidak memiliki masukan tambahan.',
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // KARTU RINGKASAN
-  // ============================================================
-
-  Widget _buildSummaryCard(String category) {
-    final rating = _ratings[category] ?? 0;
-    final reasons = _selectedReasons[category]!;
-    final comment = _comments[category]!.text.trim();
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 13),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: _border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  category,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: _dark,
-                  ),
-                ),
-              ),
-              Text(
-                _ratingEmoji(rating),
-                style: const TextStyle(fontSize: 22),
-              ),
-              const SizedBox(width: 6),
-              Text(
-                '$rating/5',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Text(
-            _ratingLabel(rating),
-            style: const TextStyle(
-              color: _primary,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-          ),
-
-          if (reasons.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: reasons.map((reason) {
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _lightBlue,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    reason,
-                    style: const TextStyle(
-                      color: _primaryDark,
-                      fontSize: 11,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-
-          if (comment.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Text(
-              comment,
-              style: const TextStyle(
-                color: Colors.black54,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // HALAMAN RINGKASAN
-  // ============================================================
-
-  Widget _buildSummaryStep() {
-    final suggestion = _suggestionController.text.trim();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Periksa evaluasimu',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Pastikan penilaian sudah sesuai sebelum kamu mengirimkannya.',
-          style: TextStyle(
-            color: Colors.black54,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        _buildSummaryCard('Materi'),
-        _buildSummaryCard('Media'),
-        _buildSummaryCard('Proses'),
-
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(17),
-            border: Border.all(color: _border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Saran dan masukan',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: _dark,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                suggestion.isEmpty
-                    ? 'Tidak ada saran tambahan.'
-                    : suggestion,
-                style: const TextStyle(
-                  color: Colors.black54,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        _buildInfo(
-          'Terima kasih sudah memberikan penilaian. '
-              'Masukanmu berarti bagi pengembangan Netropia.',
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // KOMPONEN INFORMASI
-  // ============================================================
-
-  Widget _buildInfo(String message) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 14),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: _lightBlue,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.lightbulb_outline_rounded,
-            color: _primary,
-            size: 20,
-          ),
-          const SizedBox(width: 9),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Color(0xFF3455A4),
-                fontSize: 12,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // PEMILIH HALAMAN
-  // ============================================================
-
-  Widget _buildCurrentPageFor(int index) {
-    switch (index) {
-      case 0:
-        return _buildRatingStep(
-          category: 'Materi',
-          question: 'Bagaimana kualitas materi yang kamu pelajari?',
-          description:
-          'Nilai kejelasan penjelasan, kemudahan memahami materi, '
-              'dan kesesuaian contoh dengan pembelajaran.',
-        );
-
-      case 1:
-        return _buildRatingStep(
-          category: 'Media',
-          question: 'Bagaimana media pembelajaran Netropia?',
-          description:
-          'Nilai tampilan aplikasi, kemudahan penggunaan, '
-              'serta fitur yang membantu kegiatan belajarmu.',
-        );
-
-      case 2:
-        return _buildRatingStep(
-          category: 'Proses',
-          question: 'Bagaimana pengalamanmu selama belajar?',
-          description:
-          'Nilai alur pembelajaran, instruksi kegiatan, '
-              'dan kenyamanan mengikuti setiap aktivitas.',
-        );
-
-      case 3:
-        return _buildSuggestionStep();
-
-      default:
-        return _buildSummaryStep();
-    }
-  }
-
-  // ============================================================
-  // NAVIGASI BAWAH
-  // ============================================================
-
-  Widget _buildBottomNavigation() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(18, 13, 18, 18),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: _border),
-        ),
-      ),
-      child: Row(
-        children: [
-          if (_currentStep > 0) ...[
-            Expanded(
-              child: OutlinedButton(
-                onPressed: _previousStep,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: _primary,
-                  side: const BorderSide(color: _primary),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: const Text('Kembali'),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Expanded(
-            flex: 2,
-            child: ElevatedButton(
-              onPressed: _nextStep,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _currentStep == _steps.length - 1
-                        ? 'Kirim Evaluasi'
-                        : 'Lanjut',
-                    style: const TextStyle(
+                  const Text(
+                    'Saran & Masukan',
+                    style: TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
+                      color: _dark,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Icon(
-                    _currentStep == _steps.length - 1
-                        ? Icons.send_rounded
-                        : Icons.arrow_forward_rounded,
-                    size: 18,
+                  const SizedBox(height: 6),
+                  Text(
+                    '"${_suggestionController.text}"',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                      color: _dark,
+                    ),
                   ),
                 ],
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 
   // ============================================================
-  // DISPOSE
+  // BOTTOM NAVIGATION
   // ============================================================
 
-  @override
-  void dispose() {
-    _pageController.dispose();
+  Widget _buildBottomNavigation() {
+    final isLastStep = _currentStep == _steps.length - 1;
 
-    for (final controller in _comments.values) {
-      controller.dispose();
-    }
-
-    _suggestionController.dispose();
-
-    super.dispose();
-  }
-
-  // ============================================================
-  // BUILD UTAMA
-  // ============================================================
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _background,
-      appBar: AppBar(
-        title: const Text(
-          'Evaluasi Pembelajaran',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: _dark,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: _dark,
-        elevation: 0,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: _border)),
       ),
-      body: Column(
+      child: Row(
         children: [
-          _buildHeader(),
+          if (_currentStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _previousStep,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _dark,
+                  side: const BorderSide(color: _border),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Sebelumnya'),
+              ),
+            ),
+          if (_currentStep > 0) const SizedBox(width: 12),
           Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _steps.length,
-              onPageChanged: (index) {
-                if (_currentStep != index) {
-                  setState(() {
-                    _currentStep = index;
-                  });
-                }
-              },
-              itemBuilder: (context, index) {
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildCurrentPageFor(index),
-                );
-              },
+            child: ElevatedButton(
+              onPressed: isLastStep ? _submitEvaluasi : _nextStep,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(isLastStep ? 'Kirim Evaluasi' : 'Lanjut'),
             ),
           ),
-          _buildBottomNavigation(),
         ],
       ),
     );

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 
 class PenugasanScreen extends StatefulWidget {
-  const PenugasanScreen({super.key});
+  final String materiId;
+  final String materiTitle;
+
+  const PenugasanScreen({
+    super.key,
+    this.materiId = 'dasar_jaringan',
+    this.materiTitle = 'Dasar Jaringan',
+  });
 
   @override
   State<PenugasanScreen> createState() => _PenugasanScreenState();
@@ -12,16 +19,16 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
   final TextEditingController _answerController = TextEditingController();
 
   final List<String> _steps = [
-    'Tentukan kebutuhan jaringan untuk minimal 10 komputer.',
-    'Pilih topologi dan jelaskan alasan pemilihannya.',
-    'Tentukan perangkat jaringan yang diperlukan.',
-    'Buat diagram rancangan jaringan.',
-    'Jelaskan cara komputer saling berkomunikasi.',
+    'Tentukan kebutuhan dan pemahaman terkait materi.',
+    'Pilih metode atau komponen yang sesuai dan jelaskan alasannya.',
+    'Tentukan langkah-langkah pengerjaan yang diperlukan.',
+    'Buat ringkasan atau diagram rancangan.',
+    'Jelaskan kesimpulan dan hasil pengerjaan.',
   ];
 
   final List<bool> _checkedSteps = List.filled(5, false);
 
-  static const Color primary = Color(0xFF2563EB);
+  static const Color primary = Color(0xFFAD8B73);
   static const Color dark = Color(0xFF172B4D);
   static const Color muted = Color(0xFF718096);
   static const Color background = Color(0xFFF4F7FB);
@@ -41,17 +48,17 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     return Scaffold(
       backgroundColor: background,
       appBar: AppBar(
-        backgroundColor: background,
-        foregroundColor: dark,
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        title: const Text(
-          'Ruang Penugasan',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        title: Text(
+          'Ruang Penugasan - ${widget.materiTitle}',
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 8, 18, 32),
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -71,7 +78,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             const SizedBox(height: 12),
             _buildMaterials(),
             const SizedBox(height: 26),
-            _buildSectionHeading('Lembar jawaban', 'Ceritakan hasil rancanganmu.'),
+            _buildSectionHeading('Lembar jawaban', 'Ceritakan hasil pengerjaanmu.'),
             const SizedBox(height: 12),
             _buildAnswer(),
             const SizedBox(height: 18),
@@ -91,7 +98,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
         gradient: const LinearGradient(
-          colors: [Color(0xFF1D4ED8), Color(0xFF3984F6)],
+          colors: [Color(0xFFAD8B73), Color(0xFFCEAB93)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -102,7 +109,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             right: -8,
             top: 4,
             child: Icon(
-              Icons.hub_rounded,
+              Icons.assignment_turned_in_rounded,
               size: 112,
               color: Colors.white.withOpacity(0.12),
             ),
@@ -116,9 +123,9 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
                   color: Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Text(
-                  'TUGAS PRAKTIK • DASAR JARINGAN',
-                  style: TextStyle(
+                child: Text(
+                  'TUGAS PRAKTIK • ${widget.materiTitle.toUpperCase()}',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
@@ -127,20 +134,19 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
                 ),
               ),
               const SizedBox(height: 22),
-              const Text(
-                'Rancang jaringan\nLAN versimu!',
-                style: TextStyle(
+              Text(
+                'Penugasan Praktik\n${widget.materiTitle}',
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 27,
+                  fontSize: 25,
                   height: 1.15,
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Saatnya menerapkan konsep jaringan komputer '
-                    'ke dalam sebuah laboratorium sekolah.',
-                style: TextStyle(
+              Text(
+                'Saatnya menerapkan pemahaman modul ${widget.materiTitle} dalam tugas praktik interaktif.',
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
                   height: 1.5,
@@ -279,15 +285,15 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             icon: Icons.flag_rounded,
             title: 'Tujuan pembelajaran',
             description:
-            'Menerapkan konsep dasar jaringan komputer melalui rancangan LAN sederhana.',
-            color: const Color(0xFF2563EB),
+            'Menerapkan konsep ${widget.materiTitle} dalam penyelesaian studi kasus atau tugas praktik.',
+            color: const Color(0xFFAD8B73),
           ),
           const Divider(height: 1, indent: 18, endIndent: 18),
           _overviewItem(
             icon: Icons.assignment_rounded,
             title: 'Tantanganmu',
             description:
-            'Rancang jaringan LAN untuk laboratorium sekolah dengan minimal 10 komputer.',
+            'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
             color: const Color(0xFF0D9488),
           ),
           const Divider(height: 1, indent: 18, endIndent: 18),
@@ -295,7 +301,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             icon: Icons.task_alt_rounded,
             title: 'Hasil akhir',
             description:
-            'Diagram jaringan yang jelas, lengkap, dan sesuai kebutuhan laboratorium.',
+            'Laporan atau rangkuman jawaban penugasan yang jelas, rapi, dan sistematis.',
             color: const Color(0xFFEA8A18),
           ),
         ],
@@ -420,9 +426,9 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   Widget _buildMaterials() {
     final materials = [
-      (Icons.draw_rounded, 'Kertas atau aplikasi diagram'),
-      (Icons.menu_book_rounded, 'Referensi materi Dasar Jaringan'),
-      (Icons.devices_rounded, 'Daftar perangkat jaringan'),
+      (Icons.draw_rounded, 'Catatan atau aplikasi pendukung'),
+      (Icons.menu_book_rounded, 'Referensi materi ${widget.materiTitle}'),
+      (Icons.devices_rounded, 'Perangkat pendukung penugasan'),
     ];
 
     return Wrap(
@@ -473,7 +479,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
-                  'Tuliskan hasil rancanganmu',
+                  'Tuliskan hasil pengerjaanmu',
                   style: TextStyle(
                     color: dark,
                     fontWeight: FontWeight.w800,
@@ -488,9 +494,9 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Jelaskan perangkat, topologi, dan cara kerja jaringan yang kamu rancang.',
-            style: TextStyle(color: muted, fontSize: 12, height: 1.5),
+          Text(
+            'Jelaskan solusi dan jawabanmu terkait materi ${widget.materiTitle}.',
+            style: const TextStyle(color: muted, fontSize: 12, height: 1.5),
           ),
           const SizedBox(height: 14),
           TextField(
@@ -505,7 +511,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               height: 1.5,
             ),
             decoration: InputDecoration(
-              hintText: 'Mulai tulis ide dan rancanganmu di sini...',
+              hintText: 'Mulai tulis jawaban dan analisis di sini...',
               hintStyle: const TextStyle(color: Color(0xFFA0AAB8), fontSize: 12),
               filled: true,
               fillColor: const Color(0xFFF8FAFD),
@@ -528,7 +534,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
+              color: const Color(0xFFFFF8E8),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
@@ -538,8 +544,8 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Tips: Susun jawaban secara berurutan agar rancanganmu mudah dipahami.',
-                    style: TextStyle(color: Color(0xFF315B9D), fontSize: 11, height: 1.4),
+                    'Tips: Susun jawaban secara runtut agar mudah dipahami.',
+                    style: TextStyle(color: Color(0xFF5C3D2E), fontSize: 11, height: 1.4),
                   ),
                 ),
               ],

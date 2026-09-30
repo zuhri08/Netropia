@@ -1,165 +1,171 @@
 import 'package:flutter/material.dart';
 import '../virtual_lab/device_3d_viewer_screen.dart';
+import '../services/localization_service.dart';
 
 class Device3DListScreen extends StatelessWidget {
   const Device3DListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text('Perangkat 3D', style: TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const Text(
-            'Kategori Perangkat 3D',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            title: Text(
+              localizationService.translate('device_3d'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
+            backgroundColor: const Color(0xFFAD8B73),
+            foregroundColor: Colors.white,
+            elevation: 0,
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Pilih kategori perangkat untuk melihat model 3D interaktif.',
-            style: TextStyle(color: Colors.grey, fontSize: 13),
-          ),
-          const SizedBox(height: 25),
-
-          _buildCategoryCard(
-            context,
-            title: 'Perangkat Jaringan',
-            subtitle: 'Router, Switch, Server, Repeater, Kabel, dan perangkat jaringan lainnya.',
-            icon: Icons.router_rounded,
-            color: const Color(0xFFAD8B73),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const Device3DSubGridScreen(
-                    categoryTitle: 'Perangkat Jaringan',
-                    devices: [
-                      {
-                        'name': 'WiFi Repeater',
-                        'icon': Icons.wifi_tethering_rounded,
-                        'url': 'https://sketchfab.com/models/defc9bc6ae30485985fdde4f2fab6eed/embed'
-                      },
-                      {
-                        'name': 'Router Wi-Fi',
-                        'icon': Icons.router_rounded,
-                        'url': 'https://sketchfab.com/models/41ff5f5fe0774f43a5896e33ecbe7ad0/embed'
-                      },
-                      {
-                        'name': 'Router Jaringan',
-                        'icon': Icons.settings_input_component_rounded,
-                        'url': 'https://sketchfab.com/models/0888c1540bd049c1b40ccd01f159f324/embed'
-                      },
-                      {
-                        'name': 'Core Router',
-                        'icon': Icons.dns_rounded,
-                        'url': 'https://sketchfab.com/models/054e2e270bb54f08a494c98b182e77bb/embed'
-                      },
-                      {
-                        'name': 'Switch Jaringan',
-                        'icon': Icons.settings_input_hdmi_rounded,
-                        'url': 'https://sketchfab.com/models/90636d8681c84b84a3fb2df6ebb6d461/embed?ui_infos=0'
-                      },
-                      {
-                        'name': 'Rack Server',
-                        'icon': Icons.storage_rounded,
-                        'url': 'https://sketchfab.com/models/5532b05f53504abeb8fb8646a6a68e16/embed'
-                      },
-                      {
-                        'name': 'Patch Panel',
-                        'icon': Icons.lan_rounded,
-                        'url': 'https://sketchfab.com/models/b13195f60ce142039dc22e208fd0b7a4/embed'
-                      },
-                      {
-                        'name': 'Antena Jaringan',
-                        'icon': Icons.settings_input_antenna_rounded,
-                        'url': 'https://sketchfab.com/models/b06c79711c4d49aca5c53aec157ef873/embed'
-                      },
-                      {
-                        'name': 'Wireless Adapter',
-                        'icon': Icons.memory_rounded,
-                        'url': 'https://sketchfab.com/models/1ae13e4a364849f0ac213f26b101f71e/embed'
-                      },
-                    ],
-                  ),
+          body: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              Text(
+                localizationService.isEnglish ? '3D Device Categories' : 'Kategori Perangkat 3D',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
-              );
-            },
-          ),
-
-          _buildCategoryCard(
-            context,
-            title: 'Perangkat Komputer',
-            subtitle: 'CPU, Motherboard, Power Supply, RAM, Monitor, Keyboard, Storage, dan Printer.',
-            icon: Icons.computer_rounded,
-            color: const Color(0xFFCEAB93),
-            onTap: () {
-              Navigator.push(
+              ),
+              const SizedBox(height: 8),
+              Text(
+                localizationService.isEnglish
+                    ? 'Select a device category to view interactive 3D models.'
+                    : 'Pilih kategori perangkat untuk melihat model 3D interaktif.',
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+              const SizedBox(height: 25),
+              _buildCategoryCard(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const Device3DSubGridScreen(
-                    categoryTitle: 'Perangkat Komputer',
-                    devices: [
-                      {
-                        'name': 'CPU Komputer',
-                        'icon': Icons.memory_rounded,
-                        'url': 'https://sketchfab.com/models/2e11c4583ebe4fc98c073fd8a2690a06/embed'
-                      },
-                      {
-                        'name': 'Motherboard',
-                        'icon': Icons.developer_board_rounded,
-                        'url': 'https://sketchfab.com/models/3bc94057328243d4b341a55f59160f8a/embed'
-                      },
-                      {
-                        'name': 'Power Supply',
-                        'icon': Icons.bolt_rounded,
-                        'url': 'https://sketchfab.com/models/bfb1f77fffb0410f9ee0d0be6fb5fc88/embed'
-                      },
-                      {
-                        'name': 'Monitor',
-                        'icon': Icons.desktop_windows_rounded,
-                        'url': 'https://sketchfab.com/models/fd0a3a8fcb2d4732b32e5029f330dfe3/embed'
-                      },
-                      {
-                        'name': 'RAM Memori',
-                        'icon': Icons.sd_storage_rounded,
-                        'url': 'https://sketchfab.com/models/3a032229faa84790abdb75e349594b6a/embed'
-                      },
-                      {
-                        'name': 'Processor',
-                        'icon': Icons.settings_suggest_rounded,
-                        'url': 'https://sketchfab.com/models/912c9c42d2dc40fe95574345aae51ea0/embed'
-                      },
-                      {
-                        'name': 'Keyboard',
-                        'icon': Icons.keyboard_rounded,
-                        'url': 'https://sketchfab.com/models/c1e5e07153d84978a1ad7256d720220a/embed'
-                      },
-                      {
-                        'name': 'Media Penyimpanan',
-                        'icon': Icons.storage_rounded,
-                        'url': 'https://sketchfab.com/models/bdd5fd67a7674359ab8648204b5c0575/embed'
-                      },
-                      {
-                        'name': 'Printer',
-                        'icon': Icons.print_rounded,
-                        'url': 'https://sketchfab.com/models/0842a4c0d76746ee8c9290733f209694/embed'
-                      },
-                    ],
-                  ),
-                ),
-              );
-            },
+                title: localizationService.isEnglish ? 'Network Devices' : 'Perangkat Jaringan',
+                subtitle: localizationService.isEnglish
+                    ? 'Routers, Switches, Servers, Repeaters, Cables, and other network equipment.'
+                    : 'Router, Switch, Server, Repeater, Kabel, dan perangkat jaringan lainnya.',
+                icon: Icons.router_rounded,
+                color: const Color(0xFFAD8B73),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Device3DSubGridScreen(
+                        categoryTitle: localizationService.isEnglish ? 'Network Devices' : 'Perangkat Jaringan',
+                        devices: const [
+                          {
+                            'name': 'WiFi Repeater',
+                            'icon': Icons.wifi_tethering_rounded,
+                            'url': 'https://sketchfab.com/models/defc9bc6ae30485985fdde4f2fab6eed/embed'
+                          },
+                          {
+                            'name': 'Router Wi-Fi',
+                            'icon': Icons.router_rounded,
+                            'url': 'https://sketchfab.com/models/41ff5f5fe0774f43a5896e33ecbe7ad0/embed'
+                          },
+                          {
+                            'name': 'Router Jaringan',
+                            'icon': Icons.settings_input_component_rounded,
+                            'url': 'https://sketchfab.com/models/0888c1540bd049c1b40ccd01f159f324/embed'
+                          },
+                          {
+                            'name': 'Core Router',
+                            'icon': Icons.dns_rounded,
+                            'url': 'https://sketchfab.com/models/054e2e270bb54f08a494c98b182e77bb/embed'
+                          },
+                          {
+                            'name': 'Switch Jaringan',
+                            'icon': Icons.settings_input_hdmi_rounded,
+                            'url': 'https://sketchfab.com/models/90636d8681c84b84a3fb2df6ebb6d461/embed?ui_infos=0'
+                          },
+                          {
+                            'name': 'Rack Server',
+                            'icon': Icons.storage_rounded,
+                            'url': 'https://sketchfab.com/models/5532b05f53504abeb8fb8646a6a68e16/embed'
+                          },
+                          {
+                            'name': 'Patch Panel',
+                            'icon': Icons.lan_rounded,
+                            'url': 'https://sketchfab.com/models/b13195f60ce142039dc22e208fd0b7a4/embed'
+                          },
+                          {
+                            'name': 'Antena Jaringan',
+                            'icon': Icons.settings_input_antenna_rounded,
+                            'url': 'https://sketchfab.com/models/b06c79711c4d49aca5c53aec157ef873/embed'
+                          },
+                          {
+                            'name': 'Wireless Adapter',
+                            'icon': Icons.memory_rounded,
+                            'url': 'https://sketchfab.com/models/1ae13e4a364849f0ac213f26b101f71e/embed'
+                          },
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              _buildCategoryCard(
+                context,
+                title: localizationService.isEnglish ? 'Computer Devices' : 'Perangkat Komputer',
+                subtitle: localizationService.isEnglish
+                    ? 'CPU, Motherboard, Power Supply, RAM, Monitor, Keyboard, Storage, and Printers.'
+                    : 'CPU, Motherboard, Power Supply, RAM, Monitor, Keyboard, Storage, dan Printer.',
+                icon: Icons.computer_rounded,
+                color: const Color(0xFFCEAB93),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Device3DSubGridScreen(
+                        categoryTitle: localizationService.isEnglish ? 'Computer Devices' : 'Perangkat Komputer',
+                        devices: const [
+                          {
+                            'name': 'CPU Komputer',
+                            'icon': Icons.memory_rounded,
+                            'url': 'https://sketchfab.com/models/2e11c4583ebe4fc98c073fd8a2690a06/embed'
+                          },
+                          {
+                            'name': 'Motherboard',
+                            'icon': Icons.developer_board_rounded,
+                            'url': 'https://sketchfab.com/models/3bc94057328243d4b341a55f59160f8a/embed'
+                          },
+                          {
+                            'name': 'Power Supply Unit',
+                            'icon': Icons.power_rounded,
+                            'url': 'https://sketchfab.com/models/ee1527ef0c164fc98971f11a88a03c05/embed'
+                          },
+                          {
+                            'name': 'Memori RAM',
+                            'icon': Icons.memory_rounded,
+                            'url': 'https://sketchfab.com/models/3a232f3f4c0a4e5cae2840d710f6e520/embed'
+                          },
+                          {
+                            'name': 'Harddisk Drive',
+                            'icon': Icons.storage_rounded,
+                            'url': 'https://sketchfab.com/models/b237f8f94df6461a9c37cbef7946caec/embed'
+                          },
+                          {
+                            'name': 'Keyboard PC',
+                            'icon': Icons.keyboard_rounded,
+                            'url': 'https://sketchfab.com/models/4d2a1a8c3d9c490f8bfd90ee85890737/embed'
+                          },
+                          {
+                            'name': 'Monitor PC',
+                            'icon': Icons.desktop_windows_rounded,
+                            'url': 'https://sketchfab.com/models/95465ef0b9bb47ceba7f0931536b04a8/embed'
+                          },
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -178,7 +184,7 @@ class Device3DListScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(8),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -196,7 +202,7 @@ class Device3DListScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: color.withAlpha(26),
+                    color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(icon, color: color, size: 30),
@@ -208,9 +214,10 @@ class Device3DListScreen extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.bodyLarge?.color,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -250,14 +257,15 @@ class Device3DSubGridScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(categoryTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-        elevation: 0,
+        backgroundColor: const Color(0xFFAD8B73),
+        foregroundColor: Colors.white,
       ),
       body: GridView.builder(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: 15,
-          mainAxisSpacing: 15,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
           childAspectRatio: 1.1,
         ),
         itemCount: devices.length,
@@ -269,44 +277,39 @@ class Device3DSubGridScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => Device3DViewerScreen(
-                    deviceName: device['name'] as String,
-                    embedUrl: device['url'] as String,
+                    deviceName: device['name'],
+                    embedUrl: device['url'],
                   ),
                 ),
               );
             },
+            borderRadius: BorderRadius.circular(18),
             child: Container(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(8),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
                 ],
-                border: Border.all(color: Colors.black.withAlpha(13)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFAD8B73).withAlpha(26),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(device['icon'] as IconData, color: const Color(0xFFAD8B73), size: 28),
-                  ),
+                  Icon(device['icon'] as IconData, size: 40, color: const Color(0xFFAD8B73)),
                   const SizedBox(height: 12),
                   Text(
                     device['name'] as String,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
                   ),
                 ],
               ),

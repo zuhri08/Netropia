@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'dasar_tkj/pages/materi/materi_dasar_tkj_screen.dart';
 import 'dasar_jaringan/video_screen.dart';
 import 'package:netropia/materi/referensi/referensi_screen.dart';
 import '../screens/learning_feature_screen.dart';
@@ -19,6 +18,7 @@ import 'kabel_jaringan/pengertian_kabel_screen.dart';
 import 'dasar_jaringan/portofolio_screen.dart';
 import 'dasar_jaringan/refleksi_screen.dart';
 import 'dasar_jaringan/evaluasi_screen.dart';
+import '../services/localization_service.dart';
 
 class MateriDetailLayout extends StatefulWidget {
   final String title;
@@ -62,32 +62,55 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     _motivations[Random().nextInt(_motivations.length)];
   }
 
+  String _getEnglishName(String name) {
+    switch (name) {
+      case 'Materi': return 'Material';
+      case 'Video': return 'Video';
+      case 'Peta Konsep': return 'Concept Map';
+      case 'Referensi': return 'Reference';
+      case 'Pre Test': return 'Pre Test';
+      case 'Post Test': return 'Post Test';
+      case 'Penugasan': return 'Assignment';
+      case 'Portofolio': return 'Portfolio';
+      case 'Forum Diskusi': return 'Discussion Forum';
+      case 'Refleksi': return 'Reflection';
+      case 'Evaluasi': return 'Evaluation';
+      case 'Feedback': return 'Feedback';
+      default: return name;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(widget.title),
-        backgroundColor: widget.themeColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildGrid(),
-              const SizedBox(height: 20),
-              _buildProgressSection(),
-              const SizedBox(height: 20),
-              _buildMotivationSection(),
-              const SizedBox(height: 20),
-            ],
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            title: Text(widget.title),
+            backgroundColor: widget.themeColor,
+            foregroundColor: Colors.white,
+            elevation: 0,
           ),
-        ),
-      ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildGrid(),
+                  const SizedBox(height: 20),
+                  _buildProgressSection(),
+                  const SizedBox(height: 20),
+                  _buildMotivationSection(),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -96,7 +119,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       {
         'name': 'Materi',
         'icon': Icons.menu_book_rounded,
-        'color': Color(0xFFAD8B73),
+        'color': const Color(0xFFAD8B73),
       },
       {
         'name': 'Video',
@@ -111,7 +134,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       {
         'name': 'Referensi',
         'icon': Icons.library_books_rounded,
-        'color': Color(0xFFCEAB93),
+        'color': const Color(0xFFCEAB93),
       },
       {
         'name': 'Pre Test',
@@ -157,14 +180,12 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final int crossAxisCount =
-        constraints.maxWidth >= 600 ? 6 : 4;
+        final int crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
 
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
@@ -190,6 +211,8 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     required IconData icon,
     required Color iconColor,
   }) {
+    final displayName = localizationService.isEnglish ? _getEnglishName(name) : name;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -220,17 +243,14 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               ),
               const SizedBox(height: 7),
               Text(
-                name,
+                displayName,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context)
-                      .textTheme
-                      .bodyLarge
-                      ?.color,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -241,9 +261,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   }
 
   void _handleMenuTap(String name) {
-    // =========================
-    // MATERI
-    // =========================
     if (name == 'Materi') {
       if (widget.onMateriTap != null) {
         widget.onMateriTap!();
@@ -286,9 +303,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       return;
     }
 
-    // =========================
-    // VIDEO
-    // =========================
     if (name == 'Video') {
       Navigator.push(
         context,
@@ -300,9 +314,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       return;
     }
 
-    // =========================
-    // REFERENSI
-    // =========================
     if (name == 'Referensi') {
       Navigator.push(
         context,
@@ -317,9 +328,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       return;
     }
 
-    // =========================
-    // PRE TEST
-    // =========================
     if (name == 'Pre Test') {
       Navigator.push(
         context,
@@ -335,9 +343,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       return;
     }
 
-    // =========================
-    // POST TEST
-    // =========================
     if (name == 'Post Test') {
       Navigator.push(
         context,
@@ -352,48 +357,60 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
       return;
     }
-// =========================
-// PENUGASAN DASAR JARINGAN
-// =========================
-    if (name == 'Penugasan' && _getMateriId() == 'dasar_jaringan') {
+
+    if (name == 'Penugasan') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const PenugasanScreen(),
+          builder: (context) => PenugasanScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+          ),
         ),
       );
 
       return;
     }
+
     if (name == 'Portofolio') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const PortofolioScreen(),
+          builder: (context) => PortofolioScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+          ),
         ),
       );
       return;
     }
-    if (name == 'Refleksi' &&
-        _getMateriId() == 'dasar_jaringan') {
+
+    if (name == 'Refleksi') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const RefleksiScreen(),
+          builder: (context) => RefleksiScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+          ),
         ),
       );
       return;
     }
-    if (name == 'Evaluasi' &&
-        _getMateriId() == 'dasar_jaringan') {
+
+    if (name == 'Evaluasi') {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const EvaluasiScreen(),
+          builder: (context) => EvaluasiScreen(
+            materiId: _getMateriId(),
+            materiTitle: widget.title,
+          ),
         ),
       );
       return;
     }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -427,7 +444,6 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       case 'Kabel Jaringan':
         return 'kabel_jaringan';
 
-      case 'K3':
       default:
         return 'k3';
     }
@@ -471,7 +487,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Progres Belajar',
+                    localizationService.translate('learning_progress'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -500,7 +516,9 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               ),
               const SizedBox(height: 8),
               Text(
-                '$completed dari ${activities.length} aktivitas utama selesai.',
+                localizationService.isEnglish
+                    ? '$completed of ${activities.length} main activities completed.'
+                    : '$completed dari ${activities.length} aktivitas utama selesai.',
                 style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
               ),
             ],
@@ -518,24 +536,17 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
         vertical: 18,
       ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            widget.themeColor.withOpacity(0.05),
-            widget.themeColor.withOpacity(0.1),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: widget.themeColor.withOpacity(0.1),
+          color: widget.themeColor.withOpacity(0.2),
         ),
       ),
       child: Column(
         children: [
           Icon(
             Icons.format_quote_rounded,
-            color: widget.themeColor.withOpacity(0.4),
+            color: widget.themeColor.withOpacity(0.5),
             size: 32,
           ),
           const SizedBox(height: 8),
@@ -545,18 +556,18 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             style: TextStyle(
               fontSize: 13,
               fontStyle: FontStyle.italic,
-              color: widget.themeColor.withOpacity(0.8),
+              color: Theme.of(context).textTheme.bodyMedium?.color,
               height: 1.5,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            '- Motivasi Hari Ini -',
+            localizationService.isEnglish ? '- Daily Motivation -' : '- Motivasi Hari Ini -',
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: widget.themeColor.withOpacity(0.5),
+              color: widget.themeColor,
               letterSpacing: 1.1,
             ),
           ),

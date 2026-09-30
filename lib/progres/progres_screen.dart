@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/progress_service.dart';
 import '../services/settings_service.dart';
 import '../services/notification_service.dart';
+import '../services/localization_service.dart';
 import '../screens/notification_screen.dart';
 import '../materi/k3/k3_screen.dart';
 import '../materi/komponen_komputer/komponen_komputer_screen.dart';
@@ -177,15 +178,15 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.local_fire_department_rounded,
               color: Colors.orange,
               size: 28,
             ),
-            SizedBox(width: 8),
-            Text('Streak Belajar'),
+            const SizedBox(width: 8),
+            Text(localizationService.translate('streak')),
           ],
         ),
         content: Column(
@@ -193,7 +194,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$streak Hari Berturut-turut! 🔥',
+              '$streak${localizationService.translate('streak_days')} 🔥',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -201,16 +202,16 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Hebat! Kamu telah belajar secara konsisten. Pertahankan semangat belajarmu setiap hari untuk menjaga streak!',
-              style: TextStyle(fontSize: 14, height: 1.4),
+            Text(
+              localizationService.translate('streak_desc'),
+              style: const TextStyle(fontSize: 14, height: 1.4),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
+            child: Text(localizationService.translate('close')),
           ),
         ],
       ),
@@ -219,310 +220,227 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: const Text(
-          'Progres Belajar',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFFAD8B73),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'Perbarui Data',
-            onPressed: () {
-              setState(() => _isLoading = true);
-              refreshData();
-            },
-          ),
-          const SizedBox(width: 2),
-          // STREAK BELAJAR BADGE
-          FutureBuilder<int>(
-            future: SettingsService().getStreak(),
-            builder: (context, snapshot) {
-              final streak = snapshot.data ?? 3;
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: InkWell(
-                    onTap: () => _showStreakDialog(context, streak),
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.08),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.local_fire_department_rounded,
-                            color: Colors.orange,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$streak',
-                            style: const TextStyle(
-                              color: Color(0xFF5C3D2E),
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 4),
-          FutureBuilder<int>(
-            future: NotificationService().getUnreadCount(),
-            builder: (context, snapshot) {
-              final unreadCount = snapshot.data ?? 0;
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NotificationScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(
-                      Icons.notifications_none_rounded,
-                    ),
-                  ),
-                  if (unreadCount > 0)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFFAD8B73)),
-            )
-          : RefreshIndicator(
-              onRefresh: refreshData,
-              color: const Color(0xFFAD8B73),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(16, 18, 16, 50),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // GAMIFIED LEVEL HEADER CARD
-                    _buildGamifiedHeader(),
-
-                    const SizedBox(height: 22),
-
-                    // WIDE FULL-WIDTH TAB BAR SELECTOR
-                    Container(
-                      width: double.infinity,
-                      height: 52,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: TabBar(
-                        controller: _tabController,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        labelPadding: EdgeInsets.zero,
-                        indicator: BoxDecoration(
-                          color: const Color(0xFFAD8B73),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFAD8B73).withOpacity(0.3),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.grey.shade700,
-                        tabs: [
-                          Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.menu_book_rounded, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Modul Belajar',
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.emoji_events_rounded, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Lencana',
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Tab(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                Icon(Icons.history_rounded, size: 16),
-                                SizedBox(width: 6),
-                                Text(
-                                  'Riwayat',
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ACTIVE TAB CONTENT (FULL WIDTH & DYNAMIC HEIGHT)
-                    _buildActiveTabView(),
-
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: AppBar(
+            title: Text(
+              localizationService.translate('learning_progress'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
+            backgroundColor: const Color(0xFFAD8B73),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.refresh_rounded),
+                tooltip: localizationService.translate('refresh'),
+                onPressed: () {
+                  setState(() => _isLoading = true);
+                  refreshData();
+                },
+              ),
+              const SizedBox(width: 2),
+              FutureBuilder<int>(
+                future: SettingsService().getStreak(),
+                builder: (context, snapshot) {
+                  final streak = snapshot.data ?? 3;
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: InkWell(
+                        onTap: () => _showStreakDialog(context, streak),
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.local_fire_department_rounded,
+                                color: Colors.orange,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$streak',
+                                style: const TextStyle(
+                                  color: Color(0xFF5C3D2E),
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(width: 4),
+              FutureBuilder<int>(
+                future: NotificationService().getUnreadCount(),
+                builder: (context, snapshot) {
+                  final unreadCount = snapshot.data ?? 0;
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificationScreen(),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.notifications_none_rounded),
+                      ),
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Colors.redAccent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(width: 8),
+            ],
+          ),
+          body: _isLoading
+              ? const Center(child: CircularProgressIndicator(color: Color(0xFFAD8B73)))
+              : RefreshIndicator(
+                  color: const Color(0xFFAD8B73),
+                  onRefresh: refreshData,
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeroCard(context),
+                        const SizedBox(height: 20),
+                        _buildStatGrid(context),
+                        const SizedBox(height: 24),
+                        _buildTabBar(context),
+                        const SizedBox(height: 16),
+                        _buildTabContent(context),
+                      ],
+                    ),
+                  ),
+                ),
+        );
+      },
     );
   }
 
-  Widget _buildActiveTabView() {
-    switch (_tabController.index) {
-      case 1:
-        return _buildBadgesTabView();
-      case 2:
-        return _buildActivityHistoryTabView();
-      case 0:
-      default:
-        return _buildModulesTabView();
-    }
-  }
-
-  // ==========================================
-  // GAMIFIED HEADER CARD
-  // ==========================================
-  Widget _buildGamifiedHeader() {
+  Widget _buildHeroCard(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF8D6E63), Color(0xFFAD8B73)],
+          colors: [Color(0xFFAD8B73), Color(0xFFCEAB93)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFAD8B73).withOpacity(0.25),
+            color: const Color(0xFFAD8B73).withOpacity(0.22),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              // LEVEL AVATAR
               Container(
-                width: 62,
-                height: 60,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white70, width: 2),
+                  color: Colors.white.withOpacity(0.20),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: Icon(
-                  _levelIcon,
-                  color: Colors.white,
-                  size: 32,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(_levelIcon, color: Colors.white, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      _userLevel.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 14),
+              const Spacer(),
+              Text(
+                '$_overallProgress%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _userLevel.toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
                     Text(
-                      '$_overallProgress% Selesai',
+                      localizationService.translate('overall_progress'),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      localizationService.isEnglish
+                          ? '$_completedModulesCount of ${_modulesInfo.length} modules completed'
+                          : '$_completedModulesCount dari ${_modulesInfo.length} modul selesai penuh',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -532,260 +450,263 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
           ),
           const SizedBox(height: 16),
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: _overallProgress / 100,
+              value: _overallProgress / 100.0,
+              minHeight: 10,
               backgroundColor: Colors.white24,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              minHeight: 8,
             ),
-          ),
-          const SizedBox(height: 16),
-          // STATS SUMMARY ROW
-          Row(
-            children: [
-              Expanded(
-                child: _buildHeaderStatPill(
-                  icon: Icons.checklist_rounded,
-                  value: '$_completedFeaturesCount / 49',
-                  label: 'Aktivitas',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildHeaderStatPill(
-                  icon: Icons.school_rounded,
-                  value: '$_completedModulesCount / 7',
-                  label: 'Modul Tuntas',
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _buildHeaderStatPill(
-                  icon: Icons.history_rounded,
-                  value: '${_activities.length}',
-                  label: 'Riwayat',
-                ),
-              ),
-            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildHeaderStatPill({
-    required IconData icon,
+  Widget _buildStatGrid(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            context,
+            title: localizationService.isEnglish ? 'Feature Progress' : 'Aktivitas Selesai',
+            value: '$_completedFeaturesCount',
+            subtitle: localizationService.isEnglish ? 'Out of 42 tasks' : 'dari total 42 fitur',
+            icon: Icons.task_alt_rounded,
+            color: const Color(0xFF2E7D32),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            title: localizationService.isEnglish ? 'Finished Modules' : 'Modul Tuntas',
+            value: '$_completedModulesCount',
+            subtitle: localizationService.isEnglish ? 'Out of 6 modules' : 'dari total 6 modul',
+            icon: Icons.check_circle_rounded,
+            color: const Color(0xFF00838F),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required String title,
     required String value,
-    required String label,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Colors.white, size: 14),
-              const SizedBox(width: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
           const SizedBox(height: 2),
           Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 10,
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
         ],
       ),
     );
   }
 
-  // ==========================================
-  // TAB 1: MODUL BELAJAR VIEW
-  // ==========================================
-  Widget _buildModulesTabView() {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: _modulesInfo.length,
-      itemBuilder: (context, index) {
-        final mod = _modulesInfo[index];
-        final modId = mod['id'] as String;
-        final modTitle = mod['title'] as String;
-        final modSubtitle = mod['subtitle'] as String;
-        final modIcon = mod['icon'] as IconData;
-        final modColor = mod['color'] as Color;
-        final modScreen = mod['screen'] as Widget;
+  Widget _buildTabBar(BuildContext context) {
+    return Container(
+      height: 46,
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          color: const Color(0xFFAD8B73),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.grey,
+        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        tabs: [
+          Tab(text: localizationService.isEnglish ? 'By Module' : 'Per Modul'),
+          Tab(text: localizationService.isEnglish ? 'Activities' : 'Aktivitas'),
+          Tab(text: localizationService.translate('badges_prestasi')),
+        ],
+      ),
+    );
+  }
 
-        final progress = _moduleProgressMap[modId] ?? 0;
-        final featureStatus = _moduleDetailsMap[modId] ?? {};
+  Widget _buildTabContent(BuildContext context) {
+    switch (_tabController.index) {
+      case 0:
+        return _buildModuleProgressList(context);
+      case 1:
+        return _buildActivityHistoryList(context);
+      case 2:
+        return _buildBadgesList(context);
+      default:
+        return _buildModuleProgressList(context);
+    }
+  }
+
+  Widget _buildModuleProgressList(BuildContext context) {
+    return Column(
+      children: _modulesInfo.map((mod) {
+        final modId = mod['id'] as String;
+        final p = _moduleProgressMap[modId] ?? 0;
+        final details = _moduleDetailsMap[modId] ?? {};
         final isExpanded = _expandedModuleId == modId;
 
-        return Card(
+        return Container(
           margin: const EdgeInsets.only(bottom: 12),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
-            side: BorderSide(
-              color: isExpanded ? modColor : Colors.grey.shade200,
-              width: isExpanded ? 2 : 1,
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(18),
-                onTap: () {
-                  setState(() {
-                    _expandedModuleId = isExpanded ? null : modId;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: modColor.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Icon(modIcon, color: modColor, size: 26),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  modTitle,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                                  decoration: BoxDecoration(
-                                    color: modColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text(
-                                    '$progress%',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: modColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              modSubtitle,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(6),
-                              child: LinearProgressIndicator(
-                                value: progress / 100,
-                                backgroundColor: modColor.withOpacity(0.12),
-                                valueColor: AlwaysStoppedAnimation<Color>(modColor),
-                                minHeight: 7,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up_rounded
-                            : Icons.keyboard_arrow_down_rounded,
-                        color: Colors.grey.shade600,
-                        size: 26,
-                      ),
-                    ],
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                leading: Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: (mod['color'] as Color).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(mod['icon'] as IconData, color: mod['color'] as Color, size: 24),
+                ),
+                title: Text(
+                  mod['title'] as String,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
-              ),
-
-              // EXPANDED CHECKLIST SECTION
-              if (isExpanded) ...[
-                const Divider(height: 1),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  color: modColor.withOpacity(0.04),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Rincian Aktivitas Modul:',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: LinearProgressIndicator(
+                        value: p / 100.0,
+                        minHeight: 6,
+                        backgroundColor: Colors.grey.withOpacity(0.15),
+                        valueColor: AlwaysStoppedAnimation<Color>(mod['color'] as Color),
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$p% selesai',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                trailing: IconButton(
+                  icon: Icon(
+                    isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _expandedModuleId = isExpanded ? null : modId;
+                    });
+                  },
+                ),
+              ),
+              if (isExpanded)
+                Container(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Column(
+                    children: [
+                      const Divider(height: 1),
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: _featureTypes.map((feat) {
                           final featKey = feat['key'] as String;
-                          final featLabel = feat['label'] as String;
-                          final featIcon = feat['icon'] as IconData;
-                          final isDone = featureStatus[featKey] ?? false;
+                          final isDone = details[featKey] ?? false;
 
                           return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
-                              color: isDone ? Colors.green.withOpacity(0.12) : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
+                              color: isDone
+                                  ? (mod['color'] as Color).withOpacity(0.12)
+                                  : Theme.of(context).scaffoldBackgroundColor,
+                              borderRadius: BorderRadius.circular(10),
                               border: Border.all(
-                                color: isDone ? Colors.green : Colors.grey.shade300,
+                                color: isDone
+                                    ? (mod['color'] as Color).withOpacity(0.3)
+                                    : Colors.grey.withOpacity(0.2),
                               ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  isDone ? Icons.check_circle_rounded : featIcon,
-                                  size: 16,
-                                  color: isDone ? Colors.green : Colors.grey,
+                                  isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                  size: 14,
+                                  color: isDone ? mod['color'] as Color : Colors.grey,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  featLabel,
+                                  feat['label'] as String,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 11,
                                     fontWeight: isDone ? FontWeight.bold : FontWeight.normal,
-                                    color: isDone ? Colors.green.shade800 : Colors.grey.shade800,
+                                    color: isDone
+                                        ? (mod['color'] as Color)
+                                        : Theme.of(context).textTheme.bodySmall?.color,
                                   ),
                                 ),
                               ],
@@ -793,341 +714,141 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                           );
                         }).toList(),
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => modScreen),
-                            ).then((_) => refreshData());
-                          },
-                          icon: Icon(
-                            progress == 100
-                                ? Icons.replay_rounded
-                                : (progress > 0
-                                    ? Icons.play_circle_fill_rounded
-                                    : Icons.arrow_forward_rounded),
-                            size: 20,
-                          ),
-                          label: Text(
-                            progress == 100
-                                ? 'Pelajari Ulang Modul $modTitle'
-                                : (progress > 0
-                                    ? 'Lanjutkan Pembelajaran Modul $modTitle'
-                                    : 'Mulai Belajar Modul $modTitle'),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: modColor,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
-              ],
             ],
           ),
         );
-      },
+      }).toList(),
     );
   }
 
-  // ==========================================
-  // TAB 2: LENCANA & PENCAPAIAN TAB
-  // ==========================================
-  Widget _buildBadgesTabView() {
-    final List<Map<String, dynamic>> badges = [
-      {
-        'title': 'Langkah Perdana',
-        'desc': 'Selesaikan minimal 1 aktivitas pembelajaran',
-        'icon': Icons.flag_rounded,
-        'unlocked': _completedFeaturesCount >= 1,
-        'progress': _completedFeaturesCount >= 1 ? 1.0 : 0.0,
-      },
-      {
-        'title': 'Peneliti K3',
-        'desc': 'Selesaikan modul Keselamatan Kerja (K3LH)',
-        'icon': Icons.health_and_safety_rounded,
-        'unlocked': (_moduleProgressMap['k3'] ?? 0) == 100,
-        'progress': (_moduleProgressMap['k3'] ?? 0) / 100.0,
-      },
-      {
-        'title': 'Pakar Perangkat',
-        'desc': 'Selesaikan modul Perangkat Jaringan',
-        'icon': Icons.router_rounded,
-        'unlocked': (_moduleProgressMap['perangkat_jaringan'] ?? 0) == 100,
-        'progress': (_moduleProgressMap['perangkat_jaringan'] ?? 0) / 100.0,
-      },
-      {
-        'title': 'Ahli IP Address',
-        'desc': 'Selesaikan modul IP Address & Subnetting',
-        'icon': Icons.language_rounded,
-        'unlocked': (_moduleProgressMap['ip_address'] ?? 0) == 100,
-        'progress': (_moduleProgressMap['ip_address'] ?? 0) / 100.0,
-      },
-      {
-        'title': 'Teknisi Pengkabelan',
-        'desc': 'Selesaikan modul Kabel Jaringan',
-        'icon': Icons.cable_rounded,
-        'unlocked': (_moduleProgressMap['kabel_jaringan'] ?? 0) == 100,
-        'progress': (_moduleProgressMap['kabel_jaringan'] ?? 0) / 100.0,
-      },
-      {
-        'title': 'Pencapai 50%',
-        'desc': 'Selesaikan 50% dari seluruh modul Netropia',
-        'icon': Icons.bolt_rounded,
-        'unlocked': _overallProgress >= 50,
-        'progress': _overallProgress / 50.0 > 1.0 ? 1.0 : _overallProgress / 50.0,
-      },
-      {
-        'title': 'Bintang Netropia',
-        'desc': 'Selesaikan 100% seluruh modul pembelajaran',
-        'icon': Icons.emoji_events_rounded,
-        'unlocked': _overallProgress == 100,
-        'progress': _overallProgress / 100.0,
-      },
-    ];
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: badges.length,
-      itemBuilder: (context, index) {
-        final b = badges[index];
-        final title = b['title'] as String;
-        final desc = b['desc'] as String;
-        final icon = b['icon'] as IconData;
-        final unlocked = b['unlocked'] as bool;
-        final progressVal = (b['progress'] as double).clamp(0.0, 1.0);
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: BorderSide(
-              color: unlocked ? Colors.amber.shade600 : Colors.grey.shade200,
-              width: unlocked ? 1.5 : 1,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: unlocked ? Colors.amber.shade100 : Colors.grey.shade200,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    color: unlocked ? Colors.amber.shade800 : Colors.grey,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 14.5,
-                              fontWeight: FontWeight.bold,
-                              color: unlocked ? Colors.amber.shade900 : Colors.grey.shade800,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: unlocked ? Colors.green.shade100 : Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Text(
-                              unlocked ? 'TERBUKA' : 'TERKUNCI',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.bold,
-                                color: unlocked ? Colors.green.shade800 : Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        desc,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: progressVal,
-                          backgroundColor: Colors.grey.shade200,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            unlocked ? Colors.amber.shade600 : Colors.grey,
-                          ),
-                          minHeight: 5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ==========================================
-  // TAB 3: RIWAYAT AKTIVITAS TAB
-  // ==========================================
-  Widget _buildActivityHistoryTabView() {
+  Widget _buildActivityHistoryList(BuildContext context) {
     if (_activities.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.assignment_turned_in_outlined,
-              size: 52,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 14),
-            Text(
-              'Belum Ada Riwayat Aktivitas',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.grey,
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: Column(
+            children: [
+              Icon(Icons.history_rounded, size: 50, color: Colors.grey.shade400),
+              const SizedBox(height: 12),
+              Text(
+                localizationService.isEnglish ? 'No activity history yet' : 'Belum ada riwayat aktivitas',
+                style: const TextStyle(color: Colors.grey),
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Kerjakan Pre-Test, Post-Test, atau Tugas di modul untuk mencatat riwayat belajarmu di sini.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: Colors.grey, height: 1.4),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
 
     return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '${_activities.length} Aktivitas Terekam',
-              style: const TextStyle(
-                fontSize: 13.5,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey,
+      children: _activities.map((act) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFAD8B73).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.check_circle_rounded, color: Color(0xFFAD8B73), size: 22),
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      act['title'] ?? 'Aktivitas Belajar',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      act['time'] ?? 'Baru saja',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildBadgesList(BuildContext context) {
+    final badges = [
+      {'title': 'Network Beginner', 'desc': 'Selesaikan modul K3LH', 'unlocked': _overallProgress >= 15, 'icon': Icons.lan_rounded, 'color': const Color(0xFFAD8B73)},
+      {'title': 'First Lesson', 'desc': 'Selesaikan Pre Test pertama', 'unlocked': _completedFeaturesCount >= 1, 'icon': Icons.school_rounded, 'color': Colors.green},
+      {'title': 'Subnet Master', 'desc': 'Selesaikan modul IP Address', 'unlocked': (_moduleProgressMap['ip_address'] ?? 0) == 100, 'icon': Icons.calculate_rounded, 'color': Colors.orange},
+      {'title': 'Lab Explorer', 'desc': 'Gunakan 3D Simulator', 'unlocked': true, 'icon': Icons.science_rounded, 'color': Colors.purple},
+      {'title': '7 Day Streak', 'desc': 'Belajar 7 hari berturut-turut', 'unlocked': false, 'icon': Icons.local_fire_department_rounded, 'color': Colors.red},
+      {'title': 'Master Netropia', 'desc': 'Capai 90% total progres', 'unlocked': _overallProgress >= 90, 'icon': Icons.military_tech_rounded, 'color': Colors.amber},
+    ];
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.1,
+      children: badges.map((badge) {
+        final unlocked = badge['unlocked'] as bool;
+        final color = badge['color'] as Color;
+
+        return Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: unlocked ? color.withOpacity(0.3) : Colors.grey.withOpacity(0.2),
             ),
-            TextButton(
-              onPressed: () async {
-                await _progressService.clearActivities();
-                refreshData();
-              },
-              child: const Text('Hapus Semua', style: TextStyle(fontSize: 12.5, color: Colors.red)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _activities.length,
-          itemBuilder: (context, index) {
-            final activity = _activities[index];
-            final title = activity['title'] ?? '';
-            final type = activity['type'] ?? '';
-
-            IconData iconData = Icons.school_rounded;
-            Color iconColor = const Color(0xFFAD8B73);
-
-            if (type.contains('pre_test')) {
-              iconData = Icons.assignment_rounded;
-              iconColor = Colors.orange;
-            } else if (type.contains('post_test')) {
-              iconData = Icons.assignment_turned_in_rounded;
-              iconColor = Colors.green;
-            } else if (type.contains('penugasan')) {
-              iconData = Icons.task_rounded;
-              iconColor = Colors.deepOrange;
-            }
-
-            return Card(
-              margin: const EdgeInsets.only(bottom: 10),
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                unlocked ? (badge['icon'] as IconData) : Icons.lock_outline_rounded,
+                color: unlocked ? color : Colors.grey,
+                size: 36,
               ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(iconData, color: iconColor, size: 22),
-                ),
-                title: Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    activity['subtitle'] ?? '',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                ),
-                trailing: Text(
-                  activity['time'] ?? '',
-                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+              const SizedBox(height: 10),
+              Text(
+                badge['title'] as String,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: unlocked ? Theme.of(context).textTheme.bodyLarge?.color : Colors.grey,
                 ),
               ),
-            );
-          },
-        ),
-      ],
+              const SizedBox(height: 4),
+              Text(
+                badge['desc'] as String,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 }

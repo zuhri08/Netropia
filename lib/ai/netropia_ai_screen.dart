@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../services/ai_service.dart';
+import '../services/localization_service.dart';
 
 class NetropiaAiScreen extends StatefulWidget {
   final String? initialMessage;
@@ -17,10 +18,6 @@ class NetropiaAiScreen extends StatefulWidget {
 }
 
 class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
-  // ============================================================
-  // CONTROLLERS & SERVICES
-  // ============================================================
-
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -29,29 +26,30 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   bool _isLoading = false;
 
-  // ============================================================
-  // THEME
-  // ============================================================
-
   static const Color _primaryColor = Color(0xFFAD8B73);
 
-  // ============================================================
-  // QUICK PROMPTS
-  // ============================================================
-
-  final List<String> _quickPrompts = [
-    'Jelaskan Subnetting /24',
-    'Urutan warna kabel UTP T568B',
-    'Troubleshooting RTO Internet',
-    'Perbedaan TCP dan UDP',
-    'Fungsi Router dan Switch',
-    '7 Lapisan OSI Layer',
-    'Beri saya kuis TKJ',
-  ];
-
-  // ============================================================
-  // LIFECYCLE
-  // ============================================================
+  List<String> get _quickPrompts {
+    if (localizationService.isEnglish) {
+      return [
+        'Explain Subnetting /24',
+        'UTP T568B color order',
+        'Troubleshooting Internet RTO',
+        'Difference between TCP and UDP',
+        'Functions of Router and Switch',
+        '7 OSI Layers',
+        'Give me a TKJ quiz',
+      ];
+    }
+    return [
+      'Jelaskan Subnetting /24',
+      'Urutan warna kabel UTP T568B',
+      'Troubleshooting RTO Internet',
+      'Perbedaan TCP dan UDP',
+      'Fungsi Router dan Switch',
+      '7 Lapisan OSI Layer',
+      'Beri saya kuis TKJ',
+    ];
+  }
 
   @override
   void initState() {
@@ -79,18 +77,15 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     super.dispose();
   }
 
-  // ============================================================
-  // CHAT MANAGEMENT
-  // ============================================================
-
   void _addWelcomeMessage() {
+    final msg = localizationService.isEnglish
+        ? 'Hello! I am Netropia AI. Your smart learning assistant for computer networking, hardware, and TKJ. What would you like to discuss today?'
+        : 'Halo! Saya Netropia AI. Asisten pintar belajarmu untuk materi jaringan komputer, hardware, dan TKJ. Apa yang ingin kamu diskusikan hari ini?';
+
     _messages.add(
       ChatMessage(
         id: DateTime.now().toString(),
-        message:
-        'Halo! Saya Netropia AI. Asisten pintar belajarmu untuk materi '
-            'jaringan komputer, hardware, dan TKJ. Apa yang ingin kamu '
-            'diskusikan hari ini?',
+        message: msg,
         isUser: false,
         timestamp: DateTime.now(),
       ),
@@ -146,9 +141,11 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Maaf, terjadi kesalahan saat menghubungi AI.',
+            localizationService.isEnglish
+                ? 'Sorry, an error occurred while connecting to AI.'
+                : 'Maaf, terjadi kesalahan saat menghubungi AI.',
           ),
         ),
       );
@@ -164,9 +161,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       _messages.add(
         ChatMessage(
           id: DateTime.now().toString(),
-          message:
-          'Percakapan dibersihkan. Ada lagi materi TKJ atau '
-              'troubleshooting jaringan yang ingin kamu tanyakan?',
+          message: localizationService.isEnglish
+              ? 'Conversation cleared. Any other TKJ or networking topics you want to ask?'
+              : 'Percakapan dibersihkan. Ada lagi materi TKJ atau troubleshooting jaringan yang ingin kamu tanyakan?',
           isUser: false,
           timestamp: DateTime.now(),
         ),
@@ -175,10 +172,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
     _scrollToBottom();
   }
-
-  // ============================================================
-  // CHAT UTILITIES
-  // ============================================================
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -198,9 +191,13 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Teks jawaban AI berhasil disalin!'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(
+          localizationService.isEnglish
+              ? 'AI response copied to clipboard!'
+              : 'Teks jawaban AI berhasil disalin!',
+        ),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -212,51 +209,48 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     _handleSend();
   }
 
-  // ============================================================
-  // MAIN BUILD
-  // ============================================================
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: _messages.isEmpty
-                ? _buildEmptyState()
-                : ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: _messages.length + (_isLoading ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == _messages.length) {
-                  return _buildLoadingBubble();
-                }
+    return ListenableBuilder(
+      listenable: localizationService,
+      builder: (context, child) {
+        return Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          appBar: _buildAppBar(),
+          body: Column(
+            children: [
+              Expanded(
+                child: _messages.isEmpty
+                    ? _buildEmptyState()
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: _messages.length + (_isLoading ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == _messages.length) {
+                            return _buildLoadingBubble();
+                          }
 
-                return _buildChatBubble(
-                  _messages[index],
-                  isDark,
-                );
-              },
-            ),
+                          return _buildChatBubble(
+                            _messages[index],
+                            isDark,
+                          );
+                        },
+                      ),
+              ),
+
+              if (_messages.length <= 2 && !_isLoading)
+                _buildQuickPrompts(),
+
+              _buildInputArea(isDark),
+            ],
           ),
-
-          if (_messages.length <= 2 && !_isLoading)
-            _buildQuickPrompts(),
-
-          _buildInputArea(isDark),
-        ],
-      ),
+        );
+      },
     );
   }
-
-  // ============================================================
-  // APP BAR
-  // ============================================================
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
@@ -281,9 +275,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Netropia AI',
-                style: TextStyle(
+              Text(
+                localizationService.translate('ai_assistant'),
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -316,15 +310,11 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         IconButton(
           icon: const Icon(Icons.delete_sweep_rounded),
           onPressed: _isLoading ? null : _clearChat,
-          tooltip: 'Hapus Chat',
+          tooltip: localizationService.isEnglish ? 'Clear Chat' : 'Hapus Chat',
         ),
       ],
     );
   }
-
-  // ============================================================
-  // EMPTY STATE
-  // ============================================================
 
   Widget _buildEmptyState() {
     return Center(
@@ -337,9 +327,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
             color: Colors.grey.shade300,
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Belum ada percakapan',
-            style: TextStyle(
+          Text(
+            localizationService.isEnglish ? 'No conversation yet' : 'Belum ada percakapan',
+            style: const TextStyle(
               color: Colors.grey,
             ),
           ),
@@ -347,10 +337,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       ),
     );
   }
-
-  // ============================================================
-  // CHAT BUBBLE
-  // ============================================================
 
   Widget _buildChatBubble(ChatMessage message, bool isDark) {
     final isUser = message.isUser;
@@ -361,7 +347,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
     final bubbleColor = isUser
         ? _primaryColor
-        : (isDark ? const Color(0xFF2C2C2C) : Colors.white);
+        : (isDark ? Theme.of(context).cardColor : Colors.white);
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -390,8 +376,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Pesan siswa menggunakan teks biasa.
-            // Pesan AI menggunakan Markdown.
             if (isUser)
               Text(
                 message.message,
@@ -415,23 +399,23 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                 child: InkWell(
                   onTap: () => _copyToClipboard(message.message),
                   borderRadius: BorderRadius.circular(8),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 6,
                       vertical: 4,
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.copy_rounded,
                           size: 14,
                           color: Colors.grey,
                         ),
-                        SizedBox(width: 4),
+                        const SizedBox(width: 4),
                         Text(
-                          'Salin',
-                          style: TextStyle(
+                          localizationService.isEnglish ? 'Copy' : 'Salin',
+                          style: const TextStyle(
                             fontSize: 11,
                             color: Colors.grey,
                           ),
@@ -448,16 +432,12 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     );
   }
 
-  // ============================================================
-  // MARKDOWN STYLE
-  // ============================================================
-
   MarkdownStyleSheet _buildMarkdownStyle(
       Color textColor,
       bool isDark,
       ) {
     final codeBackground = isDark
-        ? const Color(0xFF424242)
+        ? const Color(0xFF2C2C2C)
         : const Color(0xFFF0EDE9);
 
     return MarkdownStyleSheet(
@@ -511,7 +491,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         fontSize: 13.5,
         height: 1.5,
       ),
-      blockquoteDecoration: BoxDecoration(
+      blockquoteDecoration: const BoxDecoration(
         border: Border(
           left: BorderSide(
             color: _primaryColor,
@@ -533,10 +513,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     );
   }
 
-  // ============================================================
-  // LOADING BUBBLE
-  // ============================================================
-
   Widget _buildLoadingBubble() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -549,7 +525,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           vertical: 12,
         ),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
+          color: isDark ? Theme.of(context).cardColor : Colors.white,
           borderRadius: BorderRadius.circular(18),
         ),
         child: Row(
@@ -565,7 +541,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
             ),
             const SizedBox(width: 12),
             Text(
-              'Netropia AI sedang memproses jawaban...',
+              localizationService.isEnglish
+                  ? 'Netropia AI is processing response...'
+                  : 'Netropia AI sedang memproses jawaban...',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey.shade600,
@@ -576,10 +554,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       ),
     );
   }
-
-  // ============================================================
-  // QUICK PROMPTS
-  // ============================================================
 
   Widget _buildQuickPrompts() {
     return Container(
@@ -621,10 +595,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     );
   }
 
-  // ============================================================
-  // INPUT AREA
-  // ============================================================
-
   Widget _buildInputArea(bool isDark) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 82),
@@ -648,7 +618,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
               minLines: 1,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'Tanyakan seputar TKJ & Jaringan...',
+                hintText: localizationService.translate('ask_ai_placeholder'),
                 hintStyle: const TextStyle(fontSize: 13.5),
                 filled: true,
                 fillColor: isDark
@@ -679,7 +649,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                 size: 20,
               ),
               onPressed: _isLoading ? null : _handleSend,
-              tooltip: 'Kirim pesan',
+              tooltip: localizationService.isEnglish ? 'Send message' : 'Kirim pesan',
             ),
           ),
         ],

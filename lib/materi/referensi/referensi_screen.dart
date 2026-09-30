@@ -97,13 +97,13 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF173B72),
+        backgroundColor: const Color(0xFFAD8B73),
+        foregroundColor: Colors.white,
         elevation: 0,
         titleSpacing: 20,
-        title: Text(
+        title: const Text(
           'Referensi',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w700,
           ),
@@ -137,14 +137,14 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF123B72),
-            Color(0xFF1E65B8),
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF123B72).withOpacity(0.14),
+            color: const Color(0xFFAD8B73).withOpacity(0.18),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),

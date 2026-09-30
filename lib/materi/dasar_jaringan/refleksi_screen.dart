@@ -1,8 +1,14 @@
-
 import 'package:flutter/material.dart';
 
 class RefleksiScreen extends StatefulWidget {
-  const RefleksiScreen({super.key});
+  final String materiId;
+  final String materiTitle;
+
+  const RefleksiScreen({
+    super.key,
+    this.materiId = 'dasar_jaringan',
+    this.materiTitle = 'Dasar Jaringan',
+  });
 
   @override
   State<RefleksiScreen> createState() => _RefleksiScreenState();
@@ -20,12 +26,14 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
   final Set<String> _understoodTopics = {};
   final Set<String> _difficultTopics = {};
 
-  final TextEditingController _newThingController =
-  TextEditingController();
-  final TextEditingController _challengeController =
-  TextEditingController();
-  final TextEditingController _planController =
-  TextEditingController();
+  final TextEditingController _newThingController = TextEditingController();
+  final TextEditingController _challengeController = TextEditingController();
+  final TextEditingController _planController = TextEditingController();
+
+  static const Color primary = Color(0xFFAD8B73);
+  static const Color dark = Color(0xFF172B4D);
+  static const Color muted = Color(0xFF718096);
+  static const Color background = Color(0xFFF4F7FB);
 
   final List<Map<String, dynamic>> _moods = [
     {
@@ -54,13 +62,13 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
     },
   ];
 
-  final List<String> _topics = [
-    'Pengertian jaringan',
-    'Jenis jaringan komputer',
-    'Topologi jaringan',
-    'Perangkat jaringan',
-    'IP Address',
-    'Kabel jaringan',
+  late final List<String> _topics = [
+    'Konsep dasar ${widget.materiTitle}',
+    'Fungsi dan penerapan ${widget.materiTitle}',
+    'Langkah-langkah praktik',
+    'Troubleshooting dan penanganan masalah',
+    'Penggunaan perangkat & tools',
+    'Istilah penting dalam ${widget.materiTitle}',
   ];
 
   final List<Map<String, dynamic>> _steps = [
@@ -124,57 +132,43 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
       case 1:
         return true;
       case 2:
-        return _understoodTopics.isNotEmpty ||
-            _difficultTopics.isNotEmpty;
+        return _understoodTopics.isNotEmpty || _difficultTopics.isNotEmpty;
       case 3:
-        return _newThingController.text.trim().isNotEmpty &&
-            _challengeController.text.trim().isNotEmpty;
+        return _newThingController.text.trim().isNotEmpty;
       case 4:
-        return _selectedNextAction != null ||
-            _planController.text.trim().isNotEmpty;
+        return _selectedNextAction != null;
+      case 5:
+        return true;
       default:
         return true;
     }
   }
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _newThingController.dispose();
+    _challengeController.dispose();
+    _planController.dispose();
+    super.dispose();
+  }
+
   void _nextStep() {
-    if (!_canContinue()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lengkapi bagian ini terlebih dahulu.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
     if (_currentStep < _totalSteps - 1) {
-      setState(() {
-        _currentStep++;
-      });
-
-      _pageController.animateToPage(
-        _currentStep,
-        duration: const Duration(milliseconds: 350),
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
       );
-    } else {
-      _saveReflection();
     }
   }
 
   void _previousStep() {
-    if (_currentStep == 0) return;
-
-    setState(() {
-      _currentStep--;
-    });
-
-    _pageController.animateToPage(
-      _currentStep,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOut,
-    );
+    if (_currentStep > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _saveReflection() {
@@ -182,107 +176,79 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
       _isSaved = true;
     });
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(18),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE7F7EC),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.check_rounded,
-                  color: Color(0xFF269653),
-                  size: 42,
-                ),
-              ),
-              const SizedBox(height: 18),
-              const Text(
-                'Refleksi Selesai!',
-                style: TextStyle(
-                  fontSize: 21,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF202A44),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Kamu sudah meluangkan waktu untuk mengenali proses belajarmu. Terus berkembang dan jangan takut mencoba!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.black54,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4169E1),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text('Selesai'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Refleksi belajarmu berhasil disimpan!'),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
-  Widget _buildHeader() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: background,
+      appBar: AppBar(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Refleksi Diri - ${widget.materiTitle}',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeaderProgress(),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentStep = index;
+                  });
+                },
+                children: [
+                  _buildMoodStep(),
+                  _buildUnderstandingStep(),
+                  _buildTopicsStep(),
+                  _buildReflectionTextStep(),
+                  _buildPlanStep(),
+                  _buildSummaryStep(),
+                ],
+              ),
+            ),
+            _buildBottomBar(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderProgress() {
     final step = _steps[_currentStep];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color(0xFF3159C9),
-            Color(0xFF6387F0),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(26),
-          bottomRight: Radius.circular(26),
-        ),
-      ),
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.16),
-                  borderRadius: BorderRadius.circular(13),
+                  color: primary.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   step['icon'] as IconData,
-                  color: Colors.white,
-                  size: 23,
+                  color: primary,
+                  size: 22,
                 ),
               ),
               const SizedBox(width: 12),
@@ -291,55 +257,39 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'LANGKAH ${_currentStep + 1} DARI $_totalSteps',
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
                       step['title'] as String,
                       style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
+                        color: dark,
                       ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      step['subtitle'] as String,
+                      style: const TextStyle(fontSize: 12, color: muted),
                     ),
                   ],
                 ),
               ),
               Text(
-                '${(_progress * 100).round()}%',
+                '${_currentStep + 1}/$_totalSteps',
                 style: const TextStyle(
-                  color: Colors.white,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  color: primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: _progress,
-              minHeight: 7,
-              backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            step['subtitle'] as String,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              height: 1.4,
+              minHeight: 6,
+              backgroundColor: const Color(0xFFE8EDF5),
+              valueColor: const AlwaysStoppedAnimation<Color>(primary),
             ),
           ),
         ],
@@ -348,51 +298,40 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
   }
 
   Widget _buildMoodStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Bagaimana perasaanmu hari ini?',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Bagaimana perasaanmu setelah mempelajari ${widget.materiTitle}?',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Tidak ada jawaban benar atau salah. Pilih yang paling sesuai dengan dirimu.',
-          style: TextStyle(
-            color: Colors.black54,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 24),
-        ..._moods.map((mood) {
-          final selected = _selectedMood == mood['label'];
+          const SizedBox(height: 16),
+          ..._moods.map((mood) {
+            final label = mood['label'] as String;
+            final isSelected = _selectedMood == label;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(18),
+            return GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedMood = mood['label'] as String;
+                  _selectedMood = label;
                 });
               },
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
+                duration: const Duration(milliseconds: 180),
+                margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: selected
-                      ? mood['color'] as Color
-                      : Colors.white,
+                  color: isSelected ? primary.withOpacity(0.12) : Colors.white,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: selected
-                        ? const Color(0xFF4169E1)
-                        : const Color(0xFFE8ECF4),
-                    width: selected ? 1.8 : 1,
+                    color: isSelected ? primary : const Color(0xFFE8EDF5),
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Row(
@@ -407,290 +346,194 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            mood['label'] as String,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                            label,
+                            style: TextStyle(
                               fontSize: 15,
-                              color: Color(0xFF202A44),
+                              fontWeight: FontWeight.bold,
+                              color: isSelected ? primary : dark,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(
                             mood['description'] as String,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
-                            ),
+                            style: const TextStyle(fontSize: 12, color: muted),
                           ),
                         ],
                       ),
                     ),
-                    Icon(
-                      selected
-                          ? Icons.check_circle_rounded
-                          : Icons.circle_outlined,
-                      color: selected
-                          ? const Color(0xFF4169E1)
-                          : Colors.black26,
-                    ),
+                    if (isSelected)
+                      const Icon(Icons.check_circle_rounded, color: primary),
                   ],
                 ),
               ),
-            ),
-          );
-        }),
-        if (_selectedMood != null)
-          _buildFeedback(
-            'Terima kasih sudah jujur dengan perasaanmu. '
-                'Mengenali perasaan adalah langkah awal untuk belajar lebih baik.',
-          ),
-      ],
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildUnderstandingStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Seberapa paham kamu dengan materi Dasar Jaringan?',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        const SizedBox(height: 10),
-        const Text(
-          'Geser indikator untuk menunjukkan tingkat pemahamanmu.',
-          style: TextStyle(
-            color: Colors.black54,
-            height: 1.5,
-          ),
-        ),
-        const SizedBox(height: 35),
-        Center(
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: 130,
-            height: 130,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF0FF),
-              borderRadius: BorderRadius.circular(35),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: const Color(0xFFE8EDF5)),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '$_understanding',
+                  'Tingkat pemahaman materi ${widget.materiTitle}',
                   style: const TextStyle(
-                    color: Color(0xFF4169E1),
-                    fontSize: 48,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
+                    color: dark,
                   ),
                 ),
-                const Text(
-                  'dari 5',
-                  style: TextStyle(color: Colors.black54),
+                const SizedBox(height: 16),
+                Text(
+                  '$_understanding/5',
+                  style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    color: primary,
+                  ),
+                ),
+                Text(
+                  _understandingLabel,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: dark,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: primary,
+                    inactiveTrackColor: const Color(0xFFE8EDF5),
+                    thumbColor: primary,
+                    overlayColor: primary.withOpacity(0.18),
+                  ),
+                  child: Slider(
+                    value: _understanding.toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    onChanged: (val) {
+                      setState(() {
+                        _understanding = val.round();
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 24),
-        Slider(
-          value: _understanding.toDouble(),
-          min: 1,
-          max: 5,
-          divisions: 4,
-          activeColor: const Color(0xFF4169E1),
-          inactiveColor: const Color(0xFFDDE4F5),
-          label: _understanding.toString(),
-          onChanged: (value) {
-            setState(() {
-              _understanding = value.round();
-            });
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
-              'Belum paham',
-              style: TextStyle(fontSize: 11, color: Colors.black54),
-            ),
-            Text(
-              'Sangat paham',
-              style: TextStyle(fontSize: 11, color: Colors.black54),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEAF0FF),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Gambaran pemahamanmu',
-                style: TextStyle(
-                  color: Color(0xFF4169E1),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _understandingLabel,
-                style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF202A44),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                _understanding <= 2
-                    ? 'Tidak apa-apa. Kamu bisa mengulang materi dan mencoba latihan kembali.'
-                    : _understanding == 3
-                    ? 'Kamu sudah memiliki pemahaman awal. Terus berlatih agar semakin yakin.'
-                    : 'Bagus! Pertahankan pemahamanmu dengan mencoba menerapkan materi.',
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.black54,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildTopicsStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Kenali bagian yang kamu kuasai',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Pilih topik yang sudah kamu pahami. Kamu boleh memilih lebih dari satu.',
-          style: TextStyle(color: Colors.black54, height: 1.5),
-        ),
-        const SizedBox(height: 18),
-        _buildTopicGroup(
-          title: 'Sudah saya pahami',
-          subtitle: 'Topik yang terasa lebih mudah bagimu.',
-          selectedTopics: _understoodTopics,
-          color: const Color(0xFF269653),
-          background: const Color(0xFFE8F7EE),
-        ),
-        const SizedBox(height: 22),
-        const Text(
-          'Bagian yang masih menantang',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Pilih topik yang ingin kamu pelajari lagi.',
-          style: TextStyle(color: Colors.black54, fontSize: 12),
-        ),
-        const SizedBox(height: 12),
-        _buildTopicGroup(
-          title: 'Perlu saya pelajari lagi',
-          subtitle: 'Tidak masalah jika masih ada yang sulit.',
-          selectedTopics: _difficultTopics,
-          color: const Color(0xFFD97706),
-          background: const Color(0xFFFFF3DF),
-        ),
-        const SizedBox(height: 16),
-        _buildFeedback(
-          'Setiap orang memiliki bagian yang mudah dan sulit. '
-              'Mengetahuinya akan membantumu menentukan langkah berikutnya.',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTopicGroup({
-    required String title,
-    required String subtitle,
-    required Set<String> selectedTopics,
-    required Color color,
-    required Color background,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE8ECF4)),
-      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
+          const Text(
+            'Bagian yang sudah kamu pahami',
             style: TextStyle(
+              fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: color,
+              color: dark,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 13),
+          const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: _topics.map((topic) {
-              final selected = selectedTopics.contains(topic);
+              final isSelected = _understoodTopics.contains(topic);
 
               return FilterChip(
                 label: Text(topic),
-                selected: selected,
-                showCheckmark: true,
-                selectedColor: background,
-                checkmarkColor: color,
-                labelStyle: TextStyle(
-                  fontSize: 12,
-                  color: selected ? color : const Color(0xFF414B61),
-                  fontWeight:
-                  selected ? FontWeight.bold : FontWeight.normal,
-                ),
-                side: BorderSide(
-                  color: selected ? color : const Color(0xFFE1E5ED),
-                ),
-                onSelected: (value) {
+                selected: isSelected,
+                onSelected: (selected) {
                   setState(() {
-                    if (value) {
-                      selectedTopics.add(topic);
+                    if (selected) {
+                      _understoodTopics.add(topic);
+                      _difficultTopics.remove(topic);
                     } else {
-                      selectedTopics.remove(topic);
+                      _understoodTopics.remove(topic);
                     }
                   });
                 },
+                selectedColor: primary.withOpacity(0.15),
+                checkmarkColor: primary,
+                labelStyle: TextStyle(
+                  color: isSelected ? primary : dark,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 12,
+                ),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? primary : const Color(0xFFE8EDF5),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Bagian yang masih membuatmu bingung/kesulitan',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: _topics.map((topic) {
+              final isSelected = _difficultTopics.contains(topic);
+
+              return FilterChip(
+                label: Text(topic),
+                selected: isSelected,
+                onSelected: (selected) {
+                  setState(() {
+                    if (selected) {
+                      _difficultTopics.add(topic);
+                      _understoodTopics.remove(topic);
+                    } else {
+                      _difficultTopics.remove(topic);
+                    }
+                  });
+                },
+                selectedColor: const Color(0xFFFFE9E7),
+                checkmarkColor: Colors.red,
+                labelStyle: TextStyle(
+                  color: isSelected ? Colors.red : dark,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontSize: 12,
+                ),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: isSelected ? Colors.red : const Color(0xFFE8EDF5),
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -699,100 +542,72 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
     );
   }
 
-  Widget _buildWritingStep() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Mari lihat kembali pengalamanmu',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Tidak perlu jawaban panjang. Tuliskan dengan bahasamu sendiri.',
-          style: TextStyle(color: Colors.black54, height: 1.5),
-        ),
-        const SizedBox(height: 22),
-        _buildTextQuestion(
-          number: '01',
-          title: 'Apa hal baru yang kamu pelajari?',
-          hint: 'Contoh: Saya memahami fungsi perangkat jaringan...',
-          controller: _newThingController,
-          icon: Icons.lightbulb_outline_rounded,
-        ),
-        const SizedBox(height: 16),
-        _buildTextQuestion(
-          number: '02',
-          title: 'Apa tantangan yang kamu temui?',
-          hint: 'Contoh: Saya masih kesulitan membedakan...',
-          controller: _challengeController,
-          icon: Icons.psychology_alt_rounded,
-        ),
-        const SizedBox(height: 18),
-        _buildFeedback(
-          'Cobalah mengingat kegiatan belajar yang baru saja kamu lakukan. '
-              'Pengalaman kecil pun layak untuk direfleksikan.',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextQuestion({
-    required String number,
-    required String title,
-    required String hint,
-    required TextEditingController controller,
-    required IconData icon,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE8ECF4)),
-      ),
+  Widget _buildReflectionTextStep() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: const Color(0xFF4169E1)),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Text(
-                  '$number  $title',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF202A44),
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            'Hal baru apa yang kamu pelajari dari ${widget.materiTitle}?',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: 8),
           TextField(
-            controller: controller,
-            minLines: 3,
-            maxLines: 5,
-            maxLength: 300,
+            controller: _newThingController,
+            maxLines: 4,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              hintText: hint,
-              hintStyle: const TextStyle(
-                fontSize: 12,
-                color: Colors.black38,
-              ),
+              hintText: 'Tuliskan pemahaman atau hal paling berkesan...',
               filled: true,
-              fillColor: const Color(0xFFF7F8FC),
+              fillColor: Colors.white,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(13),
-                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE8EDF5)),
               ),
-              contentPadding: const EdgeInsets.all(14),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE8EDF5)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: primary, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Tantangan terbesarmu saat belajar?',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            controller: _challengeController,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: 'Tuliskan bagian yang membuatmu tertantang...',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE8EDF5)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE8EDF5)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: primary, width: 2),
+              ),
             ),
           ),
         ],
@@ -801,461 +616,195 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
   }
 
   Widget _buildPlanStep() {
-    final actions = [
-      'Mengulang materi',
-      'Mencoba latihan',
-      'Bertanya kepada guru',
-      'Belajar bersama teman',
-      'Mencoba praktik langsung',
+    final plans = [
+      'Membaca kembali materi ${widget.materiTitle}',
+      'Mencoba latihan atau simulasi kembali',
+      'Bertanya kepada guru/teman',
+      'Mencari referensi tambahan',
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Apa langkahmu selanjutnya?',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Langkahmu selanjutnya:',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Pilih satu tindakan yang ingin kamu lakukan untuk meningkatkan pemahaman.',
-          style: TextStyle(color: Colors.black54, height: 1.5),
-        ),
-        const SizedBox(height: 20),
-        ...actions.map((action) {
-          final selected = _selectedNextAction == action;
+          const SizedBox(height: 12),
+          ...plans.map((plan) {
+            final isSelected = _selectedNextAction == plan;
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(15),
+            return GestureDetector(
               onTap: () {
                 setState(() {
-                  _selectedNextAction = action;
+                  _selectedNextAction = plan;
                 });
               },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.all(15),
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: selected
-                      ? const Color(0xFFEAF0FF)
-                      : Colors.white,
-                  borderRadius: BorderRadius.circular(15),
+                  color: isSelected ? primary.withOpacity(0.12) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: selected
-                        ? const Color(0xFF4169E1)
-                        : const Color(0xFFE8ECF4),
-                    width: selected ? 1.6 : 1,
+                    color: isSelected ? primary : const Color(0xFFE8EDF5),
+                    width: isSelected ? 2 : 1,
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      selected
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
-                      color: selected
-                          ? const Color(0xFF4169E1)
-                          : Colors.black38,
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        action,
+                        plan,
                         style: TextStyle(
-                          fontWeight: selected
-                              ? FontWeight.bold
-                              : FontWeight.w500,
-                          color: const Color(0xFF202A44),
+                          fontSize: 13,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                          color: isSelected ? primary : dark,
                         ),
                       ),
                     ),
+                    if (isSelected)
+                      const Icon(Icons.check_circle_rounded, color: primary),
                   ],
                 ),
               ),
-            ),
-          );
-        }),
-        const SizedBox(height: 10),
-        const Text(
-          'Atau tuliskan rencanamu sendiri',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        const SizedBox(height: 10),
-        TextField(
-          controller: _planController,
-          minLines: 3,
-          maxLines: 4,
-          maxLength: 200,
-          onChanged: (_) => setState(() {}),
-          decoration: InputDecoration(
-            hintText: 'Saya akan mencoba untuk...',
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Color(0xFFE8ECF4)),
-            ),
-          ),
-        ),
-        _buildFeedback(
-          'Rencana kecil yang dilakukan secara konsisten dapat membantumu berkembang.',
-        ),
-      ],
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildSummaryStep() {
-    final mood = _moods.firstWhere(
-          (item) => item['label'] == _selectedMood,
-      orElse: () => _moods[0],
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Rangkuman Refleksi Belajar',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: dark,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFE8EDF5)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _summaryItem('Modul Materi', widget.materiTitle),
+                const Divider(height: 20),
+                _summaryItem('Perasaan', _selectedMood ?? '-'),
+                const Divider(height: 20),
+                _summaryItem('Pemahaman', '$_understanding/5 ($_understandingLabel)'),
+                if (_understoodTopics.isNotEmpty) ...[
+                  const Divider(height: 20),
+                  _summaryItem('Paham', _understoodTopics.join(', ')),
+                ],
+                if (_difficultTopics.isNotEmpty) ...[
+                  const Divider(height: 20),
+                  _summaryItem('Sulit', _difficultTopics.join(', ')),
+                ],
+                if (_newThingController.text.isNotEmpty) ...[
+                  const Divider(height: 20),
+                  _summaryItem('Hal Baru', '"${_newThingController.text}"'),
+                ],
+                if (_selectedNextAction != null) ...[
+                  const Divider(height: 20),
+                  _summaryItem('Rencana', _selectedNextAction!),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
     );
+  }
 
+  Widget _summaryItem(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Perjalanan belajarmu hari ini',
-          style: TextStyle(
-            fontSize: 22,
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
+            color: muted,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'Berikut rangkuman refleksi yang sudah kamu isi.',
-          style: TextStyle(color: Colors.black54),
-        ),
-        const SizedBox(height: 20),
-        _buildSummaryCard(
-          icon: Icons.mood_rounded,
-          title: 'Perasaan',
-          child: Row(
-            children: [
-              Text(
-                mood['emoji'] as String,
-                style: const TextStyle(fontSize: 27),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                _selectedMood ?? '-',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: dark,
           ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.lightbulb_rounded,
-          title: 'Tingkat pemahaman',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$_understanding dari 5 — $_understandingLabel',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 9),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: LinearProgressIndicator(
-                  value: _understanding / 5,
-                  minHeight: 7,
-                  backgroundColor: const Color(0xFFE9EDF5),
-                  valueColor: const AlwaysStoppedAnimation(
-                    Color(0xFF4169E1),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.check_circle_outline_rounded,
-          title: 'Topik yang dipahami',
-          child: Text(
-            _understoodTopics.isEmpty
-                ? 'Belum memilih topik.'
-                : _understoodTopics.join(', '),
-            style: const TextStyle(height: 1.5),
-          ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.flag_outlined,
-          title: 'Topik yang perlu dipelajari lagi',
-          child: Text(
-            _difficultTopics.isEmpty
-                ? 'Belum memilih topik.'
-                : _difficultTopics.join(', '),
-            style: const TextStyle(height: 1.5),
-          ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.edit_note_rounded,
-          title: 'Hal baru yang dipelajari',
-          child: Text(
-            _newThingController.text.trim().isEmpty
-                ? '-'
-                : _newThingController.text.trim(),
-            style: const TextStyle(height: 1.5),
-          ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.psychology_alt_rounded,
-          title: 'Tantangan',
-          child: Text(
-            _challengeController.text.trim().isEmpty
-                ? '-'
-                : _challengeController.text.trim(),
-            style: const TextStyle(height: 1.5),
-          ),
-        ),
-        _buildSummaryCard(
-          icon: Icons.flag_rounded,
-          title: 'Rencana berikutnya',
-          child: Text(
-            [
-              if (_selectedNextAction != null) _selectedNextAction!,
-              if (_planController.text.trim().isNotEmpty)
-                _planController.text.trim(),
-            ].join('\n\n').isEmpty
-                ? '-'
-                : [
-              if (_selectedNextAction != null)
-                _selectedNextAction!,
-              if (_planController.text.trim().isNotEmpty)
-                _planController.text.trim(),
-            ].join('\n\n'),
-            style: const TextStyle(height: 1.5),
-          ),
-        ),
-        const SizedBox(height: 12),
-        _buildFeedback(
-          'Periksa kembali jawabanmu. Jika sudah sesuai, tekan tombol Selesaikan Refleksi.',
         ),
       ],
     );
   }
 
-  Widget _buildSummaryCard({
-    required IconData icon,
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: const Color(0xFFE8ECF4)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 19, color: const Color(0xFF4169E1)),
-              const SizedBox(width: 9),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF202A44),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 11),
-          child,
-        ],
-      ),
-    );
-  }
+  Widget _buildBottomBar() {
+    final isLastStep = _currentStep == _totalSteps - 1;
 
-  Widget _buildFeedback(String message) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEAF0FF),
-        borderRadius: BorderRadius.circular(15),
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFE8EDF5))),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.auto_awesome_rounded,
-            color: Color(0xFF4169E1),
-            size: 20,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Color(0xFF3455A4),
-                fontSize: 12,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCurrentPage() {
-    switch (_currentStep) {
-      case 0:
-        return _buildMoodStep();
-      case 1:
-        return _buildUnderstandingStep();
-      case 2:
-        return _buildTopicsStep();
-      case 3:
-        return _buildWritingStep();
-      case 4:
-        return _buildPlanStep();
-      default:
-        return _buildSummaryStep();
-    }
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _newThingController.dispose();
-    _challengeController.dispose();
-    _planController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
-      appBar: AppBar(
-        title: const Text(
-          'Refleksi Belajar',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF202A44),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF202A44),
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              physics: const NeverScrollableScrollPhysics(),
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildMoodStep(),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildUnderstandingStep(),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildTopicsStep(),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildWritingStep(),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildPlanStep(),
-                ),
-                SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildSummaryStep(),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                top: BorderSide(color: Color(0xFFE8ECF4)),
-              ),
-            ),
-            child: Row(
-              children: [
-                if (_currentStep > 0)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: _previousStep,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF4169E1),
-                        side: const BorderSide(
-                          color: Color(0xFF4169E1),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: const Text('Kembali'),
-                    ),
-                  ),
-                if (_currentStep > 0) const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _nextStep,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4169E1),
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _currentStep == _totalSteps - 1
-                              ? 'Selesaikan Refleksi'
-                              : 'Lanjut',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          _currentStep == _totalSteps - 1
-                              ? Icons.check_rounded
-                              : Icons.arrow_forward_rounded,
-                          size: 18,
-                        ),
-                      ],
-                    ),
+          if (_currentStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _previousStep,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: dark,
+                  side: const BorderSide(color: Color(0xFFE8EDF5)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ],
+                child: const Text('Sebelumnya'),
+              ),
+            ),
+          if (_currentStep > 0) const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _canContinue()
+                  ? (isLastStep ? _saveReflection : _nextStep)
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(_isSaved
+                  ? 'Tersimpan'
+                  : (isLastStep ? 'Simpan Refleksi' : 'Lanjut')),
             ),
           ),
         ],
