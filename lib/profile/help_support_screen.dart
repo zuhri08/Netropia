@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/localization_service.dart';
 
 class HelpSupportScreen extends StatefulWidget {
@@ -47,31 +49,31 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       {
         'question': 'Bagaimana cara mengakses Materi Pembelajaran?',
         'answer':
-            'Kamu dapat mengakses materi dari menu "Materi TKJ" di Dashboard. Pilih bab atau modul yang ingin dipelajari, seperti Dasar Jaringan, K3LH, IP Address, atau Kabel Jaringan.',
+        'Kamu dapat mengakses materi dari menu "Materi TKJ" di Dashboard. Pilih bab atau modul yang ingin dipelajari, seperti Dasar Jaringan, K3LH, IP Address, atau Kabel Jaringan.',
         'category': 'Materi',
       },
       {
         'question': 'Bagaimana cara menggunakan Kalkulator Subnetting?',
         'answer':
-            'Buka menu "Kalkulator Subnet" di Dashboard, masukkan IP Address dan Subnet Mask (CIDR), lalu tekan tombol "Hitung" untuk melihat detail Subnet, Broadcast, Range IP, dan jumlah Host.',
+        'Buka menu "Kalkulator Subnet" di Dashboard, masukkan IP Address dan Subnet Mask (CIDR), lalu tekan tombol "Hitung" untuk melihat detail Subnet, Broadcast, Range IP, dan jumlah Host.',
         'category': 'Fitur',
       },
       {
         'question': 'Bagaimana proses Peminjaman Perangkat TKJ?',
         'answer':
-            'Pilih menu "Peminjaman" di Dashboard, cari alat yang kamu butuhkan (seperti Tang Crimping, Switch, atau Router), lalu isi formulir jumlah dan tanggal pengembalian. Pengajuan akan ditinjau oleh guru.',
+        'Pilih menu "Peminjaman" di Dashboard, cari alat yang kamu butuhkan (seperti Tang Crimping, Switch, atau Router), lalu isi formulir jumlah dan tanggal pengembalian. Pengajuan akan ditinjau oleh guru.',
         'category': 'Peminjaman',
       },
       {
         'question': 'Bagaimana cara melakukan Absensi Harian?',
         'answer':
-            'Buka menu "Absen" di Dashboard saat sesi absensi dibuka oleh guru, pilih status kehadiran kamu (Hadir/Izin/Sakit), dan tekan konfirmasi.',
+        'Buka menu "Absen" di Dashboard saat sesi absensi dibuka oleh guru, pilih status kehadiran kamu (Hadir/Izin/Sakit), dan tekan konfirmasi.',
         'category': 'Absensi',
       },
       {
         'question': 'Bagaimana cara menjaga Streak Belajar tetap aktif?',
         'answer':
-            'Streak belajar akan bertambah setiap hari ketika kamu membaca materi, melakukan kuis, atau membuka fitur pembelajaran di Netropia minimal satu kali sehari.',
+        'Streak belajar akan bertambah setiap hari ketika kamu membaca materi, melakukan kuis, atau membuka fitur pembelajaran di Netropia minimal satu kali sehari.',
         'category': 'Akun',
       },
     ];
@@ -90,65 +92,180 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   void _showFeedbackDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.feedback_rounded, color: Color(0xFFAD8B73)),
-            const SizedBox(width: 8),
-            Text(localizationService.isEnglish ? 'Send Feedback' : 'Kirim Masukan'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              localizationService.isEnglish
-                  ? 'Have an issue or suggestion? Write your message below.'
-                  : 'Punya kendala, saran, atau pertanyaan lain? Tuliskan pesanmu di bawah ini.',
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
+      builder: (dialogContext) {
+        bool isSending = false;
+
+        return StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _feedbackController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: localizationService.isEnglish ? 'Write your message here...' : 'Tuliskan pesan kamu di sini...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            title: Row(
+              children: [
+                const Icon(
+                  Icons.feedback_rounded,
+                  color: Color(0xFFAD8B73),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  localizationService.isEnglish
+                      ? 'Send Feedback'
+                      : 'Kirim Masukan',
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizationService.isEnglish
+                      ? 'Have an issue or suggestion? Write your message below.'
+                      : 'Punya kendala, saran, atau pertanyaan lain? Tuliskan pesanmu di bawah ini.',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _feedbackController,
+                  maxLines: 4,
+                  maxLength: 500,
+                  decoration: InputDecoration(
+                    hintText: localizationService.isEnglish
+                        ? 'Write your message here...'
+                        : 'Tuliskan pesan kamu di sini...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSending
+                    ? null
+                    : () => Navigator.pop(dialogContext),
+                child: Text(localizationService.translate('cancel')),
+              ),
+              ElevatedButton(
+                onPressed: isSending
+                    ? null
+                    : () async {
+                  final message = _feedbackController.text.trim();
+
+                  if (message.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          localizationService.isEnglish
+                              ? 'Please write your feedback first.'
+                              : 'Silakan tuliskan masukan terlebih dahulu.',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  final user = FirebaseAuth.instance.currentUser;
+
+                  if (user == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          localizationService.isEnglish
+                              ? 'Please log in before sending feedback.'
+                              : 'Silakan login terlebih dahulu untuk mengirim masukan.',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                    return;
+                  }
+
+                  setDialogState(() {
+                    isSending = true;
+                  });
+
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('masukan')
+                        .add({
+                      'isi': message,
+                      'uid': user.uid,
+                      'email': user.email,
+                      'createdAt': FieldValue.serverTimestamp(),
+                      'status': 'baru',
+                    });
+
+                    if (!mounted || !dialogContext.mounted) return;
+
+                    _feedbackController.clear();
+                    Navigator.pop(dialogContext);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          localizationService.isEnglish
+                              ? 'Feedback sent successfully. Thank you!'
+                              : 'Masukan berhasil dikirim. Terima kasih!',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          localizationService.isEnglish
+                              ? 'Failed to send feedback. Please try again.'
+                              : 'Masukan gagal dikirim. Silakan coba lagi.',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } finally {
+                    if (dialogContext.mounted) {
+                      setDialogState(() {
+                        isSending = false;
+                      });
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFAD8B73),
+                  foregroundColor: Colors.white,
+                ),
+                child: isSending
+                    ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+                    : Text(
+                  localizationService.isEnglish ? 'Send' : 'Kirim',
                 ),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(localizationService.translate('cancel')),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (_feedbackController.text.trim().isNotEmpty) {
-                _feedbackController.clear();
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(localizationService.isEnglish ? 'Feedback sent! Thank you.' : 'Masukan kamu telah terkirim! Terima kasih.'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFAD8B73),
-              foregroundColor: Colors.white,
-            ),
-            child: Text(localizationService.isEnglish ? 'Send' : 'Kirim'),
-          ),
-        ],
-      ),
+        );
+      },
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _feedbackController.dispose();
+    super.dispose();
   }
 
   @override
@@ -187,16 +304,31 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.help_center_rounded, color: Colors.white, size: 40),
+                      const Icon(
+                        Icons.help_center_rounded,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                       const SizedBox(height: 12),
                       Text(
-                        localizationService.isEnglish ? 'How can we help you?' : 'Ada yang bisa kami bantu?',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                        localizationService.isEnglish
+                            ? 'How can we help you?'
+                            : 'Ada yang bisa kami bantu?',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        localizationService.isEnglish ? 'Find answers to your questions below.' : 'Temukan jawaban untuk pertanyaan umum seputar Netropia di bawah ini.',
-                        style: const TextStyle(fontSize: 13, color: Colors.white70),
+                        localizationService.isEnglish
+                            ? 'Find answers to your questions below.'
+                            : 'Temukan jawaban untuk pertanyaan umum seputar Netropia di bawah ini.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                        ),
                       ),
                     ],
                   ),
@@ -208,10 +340,17 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 TextField(
                   controller: _searchController,
                   onChanged: (val) => setState(() => _searchQuery = val),
-                  style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                  style: TextStyle(
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
                   decoration: InputDecoration(
-                    hintText: localizationService.isEnglish ? 'Search questions...' : 'Cari pertanyaan...',
-                    prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFFAD8B73)),
+                    hintText: localizationService.isEnglish
+                        ? 'Search questions...'
+                        : 'Cari pertanyaan...',
+                    prefixIcon: const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFFAD8B73),
+                    ),
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(
@@ -224,7 +363,9 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                 const SizedBox(height: 25),
 
                 Text(
-                  localizationService.isEnglish ? 'Frequently Asked Questions (FAQ)' : 'Pertanyaan Sering Diajukan (FAQ)',
+                  localizationService.isEnglish
+                      ? 'Frequently Asked Questions (FAQ)'
+                      : 'Pertanyaan Sering Diajukan (FAQ)',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -247,10 +388,16 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   ),
                   child: Column(
                     children: [
-                      const Icon(Icons.support_agent_rounded, size: 40, color: Color(0xFFAD8B73)),
+                      const Icon(
+                        Icons.support_agent_rounded,
+                        size: 40,
+                        color: Color(0xFFAD8B73),
+                      ),
                       const SizedBox(height: 10),
                       Text(
-                        localizationService.isEnglish ? 'Still need help?' : 'Masih butuh bantuan?',
+                        localizationService.isEnglish
+                            ? 'Still need help?'
+                            : 'Masih butuh bantuan?',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -259,9 +406,14 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        localizationService.isEnglish ? 'Send your questions or feedback to our team.' : 'Kirimkan pertanyaan atau masukan kamu langsung kepada tim pengembang.',
+                        localizationService.isEnglish
+                            ? 'Send your questions or feedback to our team.'
+                            : 'Kirimkan pertanyaan atau masukan kamu langsung kepada tim pengembang.',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
@@ -270,11 +422,17 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         child: ElevatedButton.icon(
                           onPressed: _showFeedbackDialog,
                           icon: const Icon(Icons.send_rounded, size: 18),
-                          label: Text(localizationService.isEnglish ? 'Send Feedback' : 'Kirim Masukan'),
+                          label: Text(
+                            localizationService.isEnglish
+                                ? 'Send Feedback'
+                                : 'Kirim Masukan',
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFAD8B73),
                             foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
@@ -312,7 +470,11 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             faq['answer']!,
             style: TextStyle(
               fontSize: 13,
-              color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.8),
+              color: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.color
+                  ?.withOpacity(0.8),
               height: 1.5,
             ),
           ),

@@ -23,7 +23,7 @@ class PetaKonsepKomputerScreen extends StatelessWidget {
                 maxScale: 4,
                 child: Center(
                   child: Image.asset(
-                    'assets/images/peta_konsep_komponen_komputer.png',
+                    'assets/images/peta_konsep_komponen_komputer.jpg',
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
                       return const Padding(

@@ -19,7 +19,12 @@ import 'k3/k3_materi_screen.dart';
 import 'kabel_jaringan/pengertian_kabel_screen.dart';
 import 'komponen_komputer/komponen_komputer_materi_screen.dart';
 import 'perangkat_jaringan/perangkat_jaringan_materi_screen.dart';
-
+import 'dasar_jaringan/peta_konsep_screen.dart';
+import 'k3/peta_konsep_k3_screen.dart';
+import 'komponen_komputer/peta_konsep_komputer_screen.dart';
+import 'kabel_jaringan/peta_konsep_kabel_jaringan.dart';
+import 'ip_address/peta_konsep_ip_address_screen.dart';
+import 'perangkat_jaringan/peta_konsep_perangkat_jaringan_screen.dart';
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
@@ -278,8 +283,33 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     }
 
     final materiId = _getMateriId();
-
     switch (name) {
+      case 'Peta Konsep':
+        if (materiId == 'k3') {
+          _navigateTo(const PetaKonsepK3Screen());
+        } else if (materiId == 'dasar_jaringan') {
+          _navigateTo(const PetaKonsepScreen());
+        } else if (materiId == 'komponen_komputer') {
+          _navigateTo(const PetaKonsepKomputerScreen());
+        } else if (materiId == 'ip_address') {
+          _navigateTo(const PetaKonsepIpAddressScreen());
+        }
+         else if (materiId == 'kabel_jaringan') {
+          _navigateTo(const PetaKonsepKabelJaringanScreen());
+        } else if (materiId == 'perangkat_jaringan') {
+          _navigateTo(const PetaKonsepPerangkatJaringanScreen());
+        } else {
+          _navigateTo(
+            LearningFeatureScreen(
+              materiId: materiId,
+              materiTitle: widget.title,
+              feature: name,
+              themeColor: widget.themeColor,
+            ),
+          );
+        }
+        break;
+
       case 'Video':
         _navigateTo(const VideoScreen());
         break;
