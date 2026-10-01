@@ -125,21 +125,21 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   // ============================================================
 
   Widget _buildGrid() {
-    final menuItems = [
+    final baseMenuItems = [
       {
         'name': 'Materi',
         'icon': Icons.menu_book_rounded,
-        'color': const Color(0xFFAD8B73),
+        'color': widget.themeColor,
       },
       {
         'name': 'Video',
         'icon': Icons.play_circle_fill_rounded,
-        'color': Colors.red,
+        'color': const Color(0xFFE53935),
       },
       {
         'name': 'Peta Konsep',
         'icon': Icons.account_tree_rounded,
-        'color': Colors.teal,
+        'color': const Color(0xFF00897B),
       },
       {
         'name': 'Referensi',
@@ -149,44 +149,56 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
       {
         'name': 'Pre Test',
         'icon': Icons.assignment_rounded,
-        'color': Colors.orange,
+        'color': const Color(0xFFFF9800),
       },
       {
         'name': 'Post Test',
         'icon': Icons.assignment_turned_in_rounded,
-        'color': Colors.green,
+        'color': const Color(0xFF43A047),
       },
       {
         'name': 'Penugasan',
         'icon': Icons.task_rounded,
-        'color': Colors.deepOrange,
+        'color': const Color(0xFFE65100),
       },
       {
         'name': 'Portofolio',
         'icon': Icons.folder_shared_rounded,
-        'color': Colors.purple,
+        'color': const Color(0xFF8E24AA),
       },
       {
         'name': 'Forum Diskusi',
         'icon': Icons.forum_rounded,
-        'color': Colors.lightBlue,
+        'color': const Color(0xFF1E88E5),
       },
       {
         'name': 'Refleksi',
         'icon': Icons.psychology_rounded,
-        'color': Colors.pink,
+        'color': const Color(0xFFD81B60),
       },
       {
         'name': 'Evaluasi',
         'icon': Icons.assessment_rounded,
-        'color': Colors.cyan,
+        'color': const Color(0xFF00ACC1),
       },
       {
         'name': 'Feedback',
         'icon': Icons.feedback_rounded,
-        'color': Colors.deepPurple,
+        'color': const Color(0xFF5E35B1),
       },
     ];
+
+    final menuItems = baseMenuItems.map((item) {
+      final baseColor = item['color'] as Color;
+      final harmonizedColor = baseColor == widget.themeColor
+          ? widget.themeColor
+          : Color.lerp(baseColor, widget.themeColor, 0.55)!;
+      return {
+        'name': item['name'],
+        'icon': item['icon'],
+        'color': harmonizedColor,
+      };
+    }).toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {

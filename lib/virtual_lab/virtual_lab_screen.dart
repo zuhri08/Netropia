@@ -50,10 +50,10 @@ class VirtualLabScreen extends StatelessWidget {
               const SizedBox(height: 25),
               _buildMenuCard(
                 context,
-                title: localizationService.isEnglish ? 'Network Simulation (Cisco)' : 'Simulasi Jaringan (Cisco)',
+                title: localizationService.isEnglish ? 'Network Simulation' : 'Simulasi Jaringan',
                 subtitle: localizationService.isEnglish
-                    ? 'Build topology and configure Cisco devices.'
-                    : 'Bangun topologi dan konfigurasi perangkat Cisco.',
+                    ? 'Build topology and configure network devices.'
+                    : 'Bangun topologi dan konfigurasi perangkat jaringan.',
                 icon: Icons.hub_rounded,
                 color: const Color(0xFFAD8B73),
                 onTap: () {
