@@ -22,6 +22,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   final ScrollController _scrollController = ScrollController();
 
   final List<ChatMessage> _messages = [];
+  final List<ChatSessionItem> _sessions = [];
+  String? _activeSessionId;
+
   final AiService _aiService = AiService();
 
   bool _isLoading = false;
@@ -55,7 +58,24 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   void initState() {
     super.initState();
 
-    _addWelcomeMessage();
+    _loadHistoryOrWelcome();
+  }
+
+  Future<void> _loadHistoryOrWelcome() async {
+    final loadedSessions = await _aiService.loadAllSessions();
+    if (!mounted) return;
+
+    if (loadedSessions.isNotEmpty) {
+      setState(() {
+        _sessions.clear();
+        _sessions.addAll(loadedSessions);
+        _activeSessionId = _sessions.first.id;
+        _messages.clear();
+        _messages.addAll(_sessions.first.messages);
+      });
+    } else {
+      _startNewChat(savePrevious: false);
+    }
 
     final initialMessage = widget.initialMessage?.trim();
 
@@ -77,19 +97,114 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     super.dispose();
   }
 
-  void _addWelcomeMessage() {
+  ChatMessage _createWelcomeMessage() {
     final msg = localizationService.isEnglish
         ? 'Hello! I am Netropia AI. Your smart learning assistant for computer networking, hardware, and TKJ. What would you like to discuss today?'
         : 'Halo! Saya Netropia AI. Asisten pintar belajarmu untuk materi jaringan komputer, hardware, dan TKJ. Apa yang ingin kamu diskusikan hari ini?';
 
-    _messages.add(
-      ChatMessage(
-        id: DateTime.now().toString(),
-        message: msg,
-        isUser: false,
-        timestamp: DateTime.now(),
-      ),
+    return ChatMessage(
+      id: DateTime.now().toString(),
+      message: msg,
+      isUser: false,
+      timestamp: DateTime.now(),
     );
+  }
+
+  void _startNewChat({bool savePrevious = true}) {
+    if (_isLoading) return;
+
+    if (savePrevious && _messages.isNotEmpty) {
+      _saveCurrentSession();
+    }
+
+    _aiService.resetChat();
+
+    final newId = DateTime.now().millisecondsSinceEpoch.toString();
+    final welcomeMsg = _createWelcomeMessage();
+
+    final newSession = ChatSessionItem(
+      id: newId,
+      title: localizationService.isEnglish ? 'New Conversation' : 'Percakapan Baru',
+      createdAt: DateTime.now(),
+      messages: [welcomeMsg],
+    );
+
+    setState(() {
+      _activeSessionId = newId;
+      _messages.clear();
+      _messages.add(welcomeMsg);
+      _sessions.insert(0, newSession);
+    });
+
+    _aiService.saveAllSessions(_sessions);
+    _scrollToBottom();
+  }
+
+  void _saveCurrentSession() {
+    if (_activeSessionId == null) return;
+    final index = _sessions.indexWhere((s) => s.id == _activeSessionId);
+
+    String title = localizationService.isEnglish ? 'New Conversation' : 'Percakapan Baru';
+    final userMsg = _messages.firstWhere(
+      (m) => m.isUser,
+      orElse: () => ChatMessage(id: '', message: '', isUser: false, timestamp: DateTime.now()),
+    );
+    if (userMsg.message.isNotEmpty) {
+      title = userMsg.message.length > 28
+          ? '${userMsg.message.substring(0, 28)}...'
+          : userMsg.message;
+    }
+
+    final updatedSession = ChatSessionItem(
+      id: _activeSessionId!,
+      title: title,
+      createdAt: index >= 0 ? _sessions[index].createdAt : DateTime.now(),
+      messages: List.from(_messages),
+    );
+
+    if (index >= 0) {
+      _sessions[index] = updatedSession;
+    } else {
+      _sessions.insert(0, updatedSession);
+    }
+
+    _aiService.saveAllSessions(_sessions);
+  }
+
+  void _selectSession(ChatSessionItem session) {
+    if (_activeSessionId == session.id) {
+      Navigator.of(context).pop();
+      return;
+    }
+
+    _saveCurrentSession();
+    _aiService.resetChat();
+
+    setState(() {
+      _activeSessionId = session.id;
+      _messages.clear();
+      _messages.addAll(session.messages);
+    });
+
+    Navigator.of(context).pop();
+    _scrollToBottom();
+  }
+
+  void _deleteSession(String sessionId) {
+    setState(() {
+      _sessions.removeWhere((s) => s.id == sessionId);
+      if (_activeSessionId == sessionId) {
+        if (_sessions.isNotEmpty) {
+          _activeSessionId = _sessions.first.id;
+          _messages.clear();
+          _messages.addAll(_sessions.first.messages);
+        } else {
+          _startNewChat(savePrevious: false);
+        }
+      }
+    });
+
+    _aiService.saveAllSessions(_sessions);
   }
 
   Future<void> _handleSend() async {
@@ -112,6 +227,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       _isLoading = true;
     });
 
+    _saveCurrentSession();
     _scrollToBottom();
 
     try {
@@ -132,6 +248,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         _isLoading = false;
       });
 
+      _saveCurrentSession();
       _scrollToBottom();
     } catch (error) {
       if (!mounted) return;
@@ -155,22 +272,11 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   void _clearChat() {
     _aiService.resetChat();
 
-    setState(() {
-      _messages.clear();
-
-      _messages.add(
-        ChatMessage(
-          id: DateTime.now().toString(),
-          message: localizationService.isEnglish
-              ? 'Conversation cleared. Any other TKJ or networking topics you want to ask?'
-              : 'Percakapan dibersihkan. Ada lagi materi TKJ atau troubleshooting jaringan yang ingin kamu tanyakan?',
-          isUser: false,
-          timestamp: DateTime.now(),
-        ),
-      );
-    });
-
-    _scrollToBottom();
+    if (_activeSessionId != null) {
+      _deleteSession(_activeSessionId!);
+    } else {
+      _startNewChat(savePrevious: false);
+    }
   }
 
   void _scrollToBottom() {
@@ -219,6 +325,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: _buildAppBar(),
+          endDrawer: _buildHistoryDrawer(isDark),
           body: Column(
             children: [
               Expanded(
@@ -310,9 +417,111 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         IconButton(
           icon: const Icon(Icons.delete_sweep_rounded),
           onPressed: _isLoading ? null : _clearChat,
-          tooltip: localizationService.isEnglish ? 'Clear Chat' : 'Hapus Chat',
+          tooltip: localizationService.isEnglish ? 'Clear Session' : 'Hapus Sesi Ini',
+        ),
+        IconButton(
+          icon: const Icon(Icons.add_rounded),
+          onPressed: _isLoading ? null : () => _startNewChat(savePrevious: true),
+          tooltip: localizationService.isEnglish ? 'New Conversation' : 'Percakapan Baru',
+        ),
+        Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.history_rounded),
+            onPressed: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+            tooltip: localizationService.isEnglish ? 'Chat History' : 'Buka Riwayat',
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHistoryDrawer(bool isDark) {
+    return Drawer(
+      width: MediaQuery.of(context).size.width * 0.78,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      child: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              color: _primaryColor,
+              child: Row(
+                children: [
+                  const Icon(Icons.history_rounded, color: Colors.white),
+                  const SizedBox(width: 10),
+                  Text(
+                    localizationService.isEnglish ? 'Chat History' : 'Riwayat Chat',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.add_rounded, color: Colors.white),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _startNewChat(savePrevious: true);
+                    },
+                    tooltip: localizationService.isEnglish ? 'New Chat' : 'Percakapan Baru',
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: _sessions.isEmpty
+                  ? Center(
+                      child: Text(
+                        localizationService.isEnglish ? 'No chat history' : 'Belum ada riwayat',
+                        style: TextStyle(color: Colors.grey.shade500),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      itemCount: _sessions.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final session = _sessions[index];
+                        final isActive = session.id == _activeSessionId;
+
+                        return ListTile(
+                          selected: isActive,
+                          selectedTileColor: _primaryColor.withAlpha(30),
+                          leading: Icon(
+                            isActive ? Icons.chat_rounded : Icons.chat_bubble_outline_rounded,
+                            color: isActive ? _primaryColor : Colors.grey,
+                            size: 20,
+                          ),
+                          title: Text(
+                            session.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                              fontSize: 13,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${session.createdAt.day}/${session.createdAt.month}/${session.createdAt.year} ${session.createdAt.hour.toString().padLeft(2, '0')}:${session.createdAt.minute.toString().padLeft(2, '0')}',
+                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                            onPressed: () => _deleteSession(session.id),
+                            tooltip: 'Hapus Sesi',
+                          ),
+                          onTap: () => _selectSession(session),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
