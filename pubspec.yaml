@@ -27,6 +27,7 @@ dependencies:
   printing: ^5.15.1
   firebase_ai: ^4.0.0
   flutter_markdown: ^0.7.7+1
+  flutter_local_notifications: ^17.2.1
 
 dev_dependencies:
   flutter_test:

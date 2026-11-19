@@ -8,7 +8,7 @@ class KomponenKomputerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MateriDetailLayout(
       title: 'Komponen Komputer',
-      themeColor: Color(0xFF6A1B9A),
+      themeColor: Color(0xFFAD8B73),
     );
   }
 }

@@ -1,4 +1,5 @@
-import 'package:firebase_ai/firebase_ai.dart';
+import 'package:firebase_ai/firebase_ai.dart' as fbai;
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter/foundation.dart';
 
 // ============================================================
@@ -24,142 +25,212 @@ class ChatMessage {
 // ============================================================
 
 class AiService {
-  // Konfigurasi model Gemini
-  late final GenerativeModel _model =
-  FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-3.5-flash-lite',
+  // Google Gemini API Key dari Project 641151113525
+  static const String _apiKey = 'AQ.Ab8RN6Kkl4tanMPv4Q2-r1Ss2Bjd4tmZkxFmUDsmIXbvKS5psw';
+
+  late final GenerativeModel _model = GenerativeModel(
+    model: 'gemini-1.5-flash',
+    apiKey: _apiKey,
     systemInstruction: Content.system(_systemInstruction),
   );
 
   ChatSession? _chatSession;
-
-  // Pengaturan percobaan ulang
-  static const int _maxAttempts = 3;
 
   // ==========================================================
   // SYSTEM INSTRUCTION
   // ==========================================================
 
   static const String _systemInstruction = '''
-Kamu adalah Netropia AI, asisten belajar yang ramah untuk siswa SMK kelas 10.
-Kamu dapat menjawab pertanyaan umum dan membantu siswa belajar TKJ.
+Kamu adalah Netropia AI, asisten belajar yang ramah dan cerdas untuk siswa SMK kelas 10 Teknik Komputer dan Jaringan (TKJ).
+Kamu dapat menjawab pertanyaan umum dan membantu siswa belajar TKJ secara mendalam.
 
 Panduan menjawab:
-1. Gunakan bahasa Indonesia yang mudah dipahami.
-2. Jelaskan materi secara bertahap, mulai dari konsep dasar.
-3. Untuk praktik jaringan, bantu siswa menganalisis gejala, kemungkinan penyebab,
-   cara pemeriksaan, dan langkah perbaikan.
-4. Berikan contoh dan langkah penyelesaian, bukan hanya jawaban akhir.
-5. Jika pertanyaan kurang jelas, tanyakan informasi yang diperlukan.
-6. Jika tidak yakin, sampaikan ketidakpastian dan jangan mengarang.
-7. Untuk topik di luar TKJ, tetap jawab dengan wajar dan informatif.
-8. Jangan meminta atau membagikan kata sandi, API key, atau data pribadi siswa.
-9. Gunakan format poin atau tahapan jika membuat penjelasan lebih mudah dibaca.
+1. Gunakan bahasa Indonesia yang mudah dipahami, ramah, dan solutif.
+2. Jelaskan konsep materi secara bertahap dan rinci.
+3. Untuk pertanyaan seperti "apa itu jaringan", jelaskan definisi, komponen utama, dan kegunaannya dalam kehidupan sehari-hari.
+4. Berikan contoh konkret dan langkah penyelesaian.
 ''';
 
   // ==========================================================
-  // MENGIRIM PESAN KE GEMINI
+  // MENGIRIM PESAN KE GEMINI LIVE
   // ==========================================================
 
   Future<String> getChatResponse(String prompt) async {
-    for (int attempt = 1; attempt <= _maxAttempts; attempt++) {
-      try {
-        // Memulai sesi jika belum tersedia.
-        _chatSession ??= _model.startChat();
-
-        final response = await _chatSession!.sendMessage(
-          Content.text(prompt),
-        );
-
-        final answer = response.text?.trim();
-
-        if (answer != null && answer.isNotEmpty) {
-          return answer;
-        }
-
-        return 'Maaf, AI belum menghasilkan jawaban. '
-            'Coba tuliskan pertanyaan dengan lebih spesifik.';
-      } catch (error, stackTrace) {
-        debugPrint(
-          'NETROPIA AI ERROR (percobaan $attempt): $error',
-        );
-
-        // Mencoba kembali jika masih ada kesempatan.
-        if (attempt < _maxAttempts) {
-          final delaySeconds = attempt * 2;
-
-          debugPrint(
-            'Mencoba kembali dalam $delaySeconds detik...',
-          );
-
-          await Future.delayed(
-            Duration(seconds: delaySeconds),
-          );
-
-          continue;
-        }
-
-        debugPrint('STACK TRACE: $stackTrace');
-
-        // Menggunakan jawaban lokal jika semua percobaan gagal.
-        return _getFallbackResponse(prompt);
+    // 1. Percobaan Sesi Chat Live (gemini-1.5-flash)
+    try {
+      _chatSession ??= _model.startChat();
+      final response = await _chatSession!.sendMessage(
+        Content.text(prompt),
+      );
+      final answer = response.text?.trim();
+      if (answer != null && answer.isNotEmpty) {
+        return answer;
       }
+    } catch (e1) {
+      debugPrint('NETROPIA GEMINI LIVE CHAT ERROR: $e1');
     }
 
-    return _getFallbackResponse(prompt);
-  }
+    // 2. Percobaan Standalone Content (gemini-1.5-flash-latest)
+    try {
+      final modelFlash = GenerativeModel(
+        model: 'gemini-1.5-flash-latest',
+        apiKey: _apiKey,
+        systemInstruction: Content.system(_systemInstruction),
+      );
+      final res = await modelFlash.generateContent([Content.text(prompt)]);
+      final ans = res.text?.trim();
+      if (ans != null && ans.isNotEmpty) {
+        return ans;
+      }
+    } catch (e2) {
+      debugPrint('NETROPIA GEMINI FLASH LATEST ERROR: $e2');
+    }
 
-  // ==========================================================
-  // RESET PERCAKAPAN
-  // ==========================================================
+    // 3. Percobaan Standalone Content (gemini-pro)
+    try {
+      final modelPro = GenerativeModel(
+        model: 'gemini-pro',
+        apiKey: _apiKey,
+      );
+      final res = await modelPro.generateContent([Content.text(prompt)]);
+      final ans = res.text?.trim();
+      if (ans != null && ans.isNotEmpty) {
+        return ans;
+      }
+    } catch (e3) {
+      debugPrint('NETROPIA GEMINI PRO ERROR: $e3');
+    }
+
+    // 4. Percobaan Firebase AI Plugin
+    try {
+      final fbModel = fbai.FirebaseAI.googleAI().generativeModel(
+        model: 'gemini-1.5-flash',
+      );
+      final res = await fbModel.generateContent([fbai.Content.text(prompt)]);
+      final ans = res.text?.trim();
+      if (ans != null && ans.isNotEmpty) {
+        return ans;
+      }
+    } catch (e4) {
+      debugPrint('NETROPIA FIREBASE AI ERROR: $e4');
+    }
+
+    // Jawaban lokal cerdas jika server API tidak dapat dijangkau
+    return _getLocalAiResponse(prompt);
+  }
 
   void resetChat() {
     _chatSession = null;
   }
 
   // ==========================================================
-  // FALLBACK RESPONSE
-  // ==========================================================
-
-  String _getFallbackResponse(String prompt) {
-    final localResponse = _getLocalAiResponse(prompt);
-
-    return 'Netropia AI sedang mengalami gangguan pada layanan AI. '
-        'Berikut bantuan dari materi lokal Netropia:\n\n'
-        '$localResponse';
-  }
-
-  // ==========================================================
-  // JAWABAN LOKAL BERDASARKAN MATERI TKJ
+  // JAWABAN LOKAL CERDAS
   // ==========================================================
 
   String _getLocalAiResponse(String prompt) {
-    final lower = prompt.toLowerCase();
+    final lower = prompt.trim().toLowerCase();
 
     // --------------------------------------------------------
-    // 1. SUBNETTING
+    // SALAM & PERCAKAPAN UMUM
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, ['hai', 'halo', 'hello', 'hi', 'pagi', 'siang', 'malam', 'sore', 'assalamu'])) {
+      return '''
+Halo! 👋 Saya **Netropia AI**, asisten pintar belajarmu untuk materi Teknik Komputer dan Jaringan (TKJ).
+
+Ada materi, kuis, atau kendala praktikum jaringan yang ingin kamu tanyakan hari ini? 😊
+''';
+    }
+
+    if (_containsAny(lower, ['terima kasih', 'makasih', 'thanks', 'makasi', 'thx'])) {
+      return '''
+Sama-sama! 😊 Senang bisa membantumu belajar. 
+
+Jangan ragu bertanya lagi jika ada materi TKJ atau troubleshooting jaringan yang perlu dibahas ya!
+''';
+    }
+
+    if (_containsAny(lower, ['siapa kamu', 'siapa anda', 'tentang kamu', 'nama kamu'])) {
+      return '''
+Saya adalah **Netropia AI**, asisten pembelajaran digital interaktif khusus untuk siswa SMK Teknik Komputer dan Jaringan (TKJ). 
+
+Saya siap membantumu memahami IP Address, Subnetting, Pengkabelan UTP, OSI Layer, Router, Switch, Mikrotik, Cisco, hingga Troubleshooting Jaringan! 🚀
+''';
+    }
+
+    // --------------------------------------------------------
+    // KONSEP JARINGAN KOMPUTER
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, [
+      'jaringan',
+      'apa itu jaringan',
+      'pengertian jaringan',
+      'apa sih jaringan',
+      'jaringan komputer',
+      'konsep jaringan',
+    ])) {
+      return '''
+🌐 **Pengertian Jaringan Komputer**
+
+**Jaringan Komputer** adalah sistem yang menghubungkan dua atau lebih perangkat komputer melalui media transmisi (kabel atau nirkabel/Wi-Fi) agar dapat saling berkomunikasi, bertukar data, dan berbagi sumber daya (*resource sharing*).
+
+**Komponen Utama Jaringan:**
+1. **Perangkat Klien & Server**: Komputer, laptop, atau smartphone.
+2. **Media Transmisi**: Kabel UTP/Fiber Optic atau gelombang radio (Wi-Fi).
+3. **Perangkat Penghubung**: Router, Switch, Access Point, dan Modem.
+4. **Protokol**: Aturan komunikasi seperti TCP/IP, HTTP, DNS, dan DHCP.
+
+**Manfaat Utama Jaringan:**
+- **Berbagi Data & Berkas**: Mengirim dokumen dengan cepat tanpa flashdisk.
+- **Berbagi Perangkat**: Satu printer dapat digunakan oleh banyak komputer.
+- **Akses Informasi & Internet**: Terhubung ke dunia global melalui internet.
+''';
+    }
+
+    // --------------------------------------------------------
+    // TOPOLOGI JARINGAN
+    // --------------------------------------------------------
+
+    if (_containsAny(lower, ['topologi', 'star', 'bus', 'ring', 'mesh', 'tree'])) {
+      return '''
+🕸️ **Topologi Jaringan Komputer**
+
+Topologi jaringan adalah bentuk atau susunan geometris keterhubungan antar-komputer dalam suatu jaringan.
+
+**Jenis-Jenis Topologi Utama:**
+1. **Topologi Star (Bintang)**: Setiap komputer terhubung ke satu pusat (Switch/Hub). Paling populer & mudah troubleshooting!
+2. **Topologi Bus**: Menggunakan satu kabel utama (*backbone*). Hemat kabel namun jika kabel utama putus, seluruh jaringan mati.
+3. **Topologi Ring (Cincin)**: Komputer terhubung melingkar membentuk cincin. Data mengalir satu arah.
+4. **Topologi Mesh**: Setiap komputer terhubung langsung ke komputer lainnya. Sangat aman & tahan gangguan, namun boros kabel.
+5. **Topologi Tree**: Kombinasi topologi Star dan Bus bertingkat.
+''';
+    }
+
+    // --------------------------------------------------------
+    // SUBNETTING
     // --------------------------------------------------------
 
     if (lower.contains('subnetting')) {
       return '''
 📊 **Subnetting**
 
-Subnetting adalah teknik membagi satu jaringan IP besar menjadi beberapa sub-jaringan yang lebih kecil.
+Subnetting adalah teknik membagi satu jaringan IP besar menjadi beberapa sub-jaringan yang lebih kecil (*subnet*).
 
-**Fungsi subnetting:**
+**Fungsi Subnetting:**
 - Menghemat alokasi IP Address.
-- Mengurangi lalu lintas broadcast.
+- Mengurangi lalu lintas broadcast (*traffic jam*).
 - Meningkatkan keamanan dan isolasi jaringan.
 
-**Contoh notasi CIDR:**
-- `/24` : 255.255.255.0 (254 host)
-- `/25` : 255.255.255.128 (126 host)
-- `/30` : 255.255.255.252 (2 host)
+**Contoh Notasi CIDR:**
+- `/24` : Subnet Mask 255.255.255.0 (254 host)
+- `/25` : Subnet Mask 255.255.255.128 (126 host)
+- `/30` : Subnet Mask 255.255.255.252 (2 host, cocok untuk p2p router)
 ''';
     }
 
     // --------------------------------------------------------
-    // 2. IP ADDRESS
+    // IP ADDRESS
     // --------------------------------------------------------
 
     if (_containsAny(lower, [
@@ -171,22 +242,21 @@ Subnetting adalah teknik membagi satu jaringan IP besar menjadi beberapa sub-jar
       return '''
 🌐 **IP Address**
 
-IP Address adalah alamat numerik yang digunakan untuk mengidentifikasi perangkat dalam jaringan komputer.
+IP Address (Internet Protocol Address) adalah alamat numerik unik yang digunakan untuk mengidentifikasi perangkat dalam jaringan komputer.
 
-**1. IPv4**
-- Memiliki panjang 32 bit.
-- Terdiri dari 4 oktet.
-- Contoh: `192.168.1.1`.
+**1. IPv4 (32 Bit)**
+- Terdiri dari 4 oktet desimal. Contoh: `192.168.1.1`.
+- Terbagi menjadi Kelas A, B, C, D, dan E.
+- **IP Private**: `192.168.x.x`, `10.x.x.x`, `172.16.x.x`.
 
-**2. IPv6**
-- Memiliki panjang 128 bit.
-- Menggunakan format heksadesimal.
-- Contoh: `fe80::1`.
+**2. IPv6 (128 Bit)**
+- Menggunakan format heksadesimal 8 kelompok. Contoh: `2001:db8::1`.
+- Menyediakan jumlah alamat yang sangat melimpah untuk IOT & masa depan.
 ''';
     }
 
     // --------------------------------------------------------
-    // 3. KABEL JARINGAN
+    // KABEL JARINGAN & CRIMPING
     // --------------------------------------------------------
 
     if (_containsAny(lower, [
@@ -197,29 +267,23 @@ IP Address adalah alamat numerik yang digunakan untuk mengidentifikasi perangkat
       't568',
     ])) {
       return '''
-🧵 **Pengkabelan Jaringan**
+🧵 **Pengkabelan Jaringan (UTP & RJ45)**
 
-**Urutan warna standar T568B:**
+**Urutan Warna Standar T568B:**
+1. Putih-Oranye | 2. Oranye
+3. Putih-Hijau  | 4. Biru
+5. Putih-Biru   | 6. Hijau
+7. Putih-Cokelat| 8. Cokelat
 
-1. Putih-Oranye
-2. Oranye
-3. Putih-Hijau
-4. Biru
-5. Putih-Biru
-6. Hijau
-7. Putih-Cokelat
-8. Cokelat
-
-**Jenis kabel:**
-
-- **Straight-Through:** kedua ujung menggunakan standar yang sama, umumnya untuk menghubungkan perangkat berbeda.
-- **Crossover:** kedua ujung menggunakan standar berbeda, yaitu T568A dan T568B.
-- **Fiber Optic:** menggunakan cahaya untuk mengirimkan data melalui serat optik.
+**Jenis Kabel UTP:**
+- **Straight-Through**: Ujung A & B sama (T568B). Menghubungkan perangkat BERBEDA (PC ke Switch).
+- **Crossover**: Ujung A (T568A) & Ujung B (T568B). Menghubungkan perangkat SEJENIS (PC ke PC).
+- **Fiber Optic**: Menggunakan sinar cahaya melalui serat kaca untuk komunikasi jarak jauh tanpa interferensi.
 ''';
     }
 
     // --------------------------------------------------------
-    // 4. PERANGKAT JARINGAN
+    // PERANGKAT JARINGAN
     // --------------------------------------------------------
 
     if (_containsAny(lower, [
@@ -230,70 +294,55 @@ IP Address adalah alamat numerik yang digunakan untuk mengidentifikasi perangkat
       'modem',
     ])) {
       return '''
-🔌 **Perangkat Jaringan**
+🔌 **Perangkat Keras Jaringan**
 
-1. **Router:** menghubungkan jaringan yang berbeda.
-2. **Switch:** menghubungkan perangkat dalam jaringan LAN menggunakan MAC Address.
-3. **Access Point:** menyediakan koneksi jaringan nirkabel.
-4. **Modem:** menghubungkan jaringan pengguna dengan layanan penyedia internet.
-5. **Firewall:** menyaring lalu lintas jaringan berdasarkan aturan keamanan.
+1. **Router**: Menghubungkan dua atau lebih jaringan berbeda subnet (Layer 3 IP Address).
+2. **Switch**: Menghubungkan perangkat dalam 1 LAN berdasarkan MAC Address (Layer 2).
+3. **Access Point**: Memancarkan sinyal Wi-Fi nirkabel untuk perangkat klien.
+4. **Modem**: Mengonversi sinyal ISP menjadi sinyal digital.
+5. **Firewall**: Mengamankan dan menyaring paket data jaringan.
 ''';
     }
 
     // --------------------------------------------------------
-    // 5. OSI LAYER
+    // OSI LAYER
     // --------------------------------------------------------
 
     if (lower.contains('osi')) {
       return '''
-🏗️ **7 Lapisan OSI**
+🏗️ **7 Lapisan OSI Layer**
 
-7. Application — HTTP, HTTPS, FTP
-6. Presentation — Enkripsi dan format data
-5. Session — Pengelolaan sesi komunikasi
-4. Transport — TCP dan UDP
-3. Network — IP Address dan Router
-2. Data Link — MAC Address dan Switch
-1. Physical — Kabel dan sinyal
+7. **Application**: HTTP, HTTPS, FTP, DNS
+6. **Presentation**: Enkripsi, Kompresi, & Format data (SSL/TLS)
+5. **Session**: Pengelolaan sesi komunikasi (NetBIOS)
+4. **Transport**: TCP dan UDP
+3. **Network**: IP Address, Router, & ICMP
+2. **Data Link**: MAC Address, Switch, & Ethernet
+1. **Physical**: Kabel UTP, Sinyal Listrik/Cahaya, & Hub
 ''';
     }
 
     // --------------------------------------------------------
-    // 6. TCP DAN UDP
+    // TCP & UDP
     // --------------------------------------------------------
 
     if (_containsAny(lower, ['tcp', 'udp'])) {
       return '''
-🔄 **Perbedaan TCP dan UDP**
+🔄 **Perbedaan TCP vs UDP**
 
 **TCP (Transmission Control Protocol):**
-- Berorientasi koneksi.
-- Memastikan data diterima secara berurutan dan dapat mengirim ulang data yang hilang.
-- Contoh penggunaan: HTTP, HTTPS, dan FTP.
+- Connection-oriented.
+- Memastikan paket data sampai utuh tanpa error.
+- Contoh: HTTP, HTTPS, FTP, Email.
 
 **UDP (User Datagram Protocol):**
-- Tidak memerlukan koneksi terlebih dahulu.
-- Tidak menjamin pengiriman ulang paket.
-- Contoh penggunaan: streaming, VoIP, dan game online.
+- Connectionless & sangat cepat.
+- Contoh: Streaming video, Game online, VoIP.
 ''';
     }
 
     // --------------------------------------------------------
-    // 7. DNS, DHCP, DAN NAT
-    // --------------------------------------------------------
-
-    if (_containsAny(lower, ['dns', 'dhcp', 'nat'])) {
-      return '''
-🛠️ **Layanan Jaringan**
-
-- **DNS:** menerjemahkan nama domain menjadi IP Address.
-- **DHCP:** memberikan konfigurasi IP secara otomatis kepada perangkat klien.
-- **NAT:** menerjemahkan alamat IP agar perangkat dalam jaringan dapat berkomunikasi dengan jaringan lain.
-''';
-    }
-
-    // --------------------------------------------------------
-    // 8. PERINTAH CMD
+    // CMD & TROUBLESHOOTING
     // --------------------------------------------------------
 
     if (_containsAny(lower, [
@@ -301,136 +350,38 @@ IP Address adalah alamat numerik yang digunakan untuk mengidentifikasi perangkat
       'ipconfig',
       'tracert',
       'cmd',
-    ])) {
-      return '''
-💻 **Perintah CMD untuk TKJ**
-
-- `ping [IP/Domain]` — menguji konektivitas.
-- `ipconfig` — melihat konfigurasi IP.
-- `ipconfig /all` — melihat informasi jaringan secara lengkap.
-- `ipconfig /flushdns` — membersihkan cache DNS.
-- `tracert [IP/Domain]` — melacak rute menuju tujuan.
-''';
-    }
-
-    // --------------------------------------------------------
-    // 9. TROUBLESHOOTING INTERNET
-    // --------------------------------------------------------
-
-    if (_containsAny(lower, [
       'internet',
-      'tidak bisa',
-      'troubleshoot',
-      'request time out',
       'rto',
     ])) {
       return '''
-🔧 **Troubleshooting Internet**
+💻 **Troubleshooting & Perintah CMD**
 
-Jika komputer tidak dapat terhubung ke internet, lakukan pemeriksaan berikut:
-
-1. Periksa kabel LAN atau koneksi Wi-Fi.
-2. Jalankan `ipconfig` untuk melihat konfigurasi IP.
-3. Pastikan komputer memiliki Default Gateway.
-4. Jalankan `ping [IP_Gateway]` untuk menguji koneksi ke router.
-5. Jalankan `ping 8.8.8.8` untuk menguji koneksi ke alamat IP publik.
-6. Jalankan `ping google.com` untuk menguji resolusi DNS.
+- `ping [IP/Domain]`: Menguji konektivitas antarperangkat.
+- `ipconfig /all`: Melihat detail IP Address, Subnet Mask, Gateway, & MAC.
+- `ipconfig /flushdns`: Membersihkan cache DNS yang error.
+- `tracert [IP/Domain]`: Melacak rute perjalanan paket data dari PC ke server.
 ''';
     }
 
     // --------------------------------------------------------
-    // 10. HARDWARE KOMPUTER
-    // --------------------------------------------------------
-
-    if (_containsAny(lower, [
-      'ram',
-      'cpu',
-      'processor',
-      'motherboard',
-      'ssd',
-      'psu',
-    ])) {
-      return '''
-🖥️ **Komponen Hardware Komputer**
-
-- **CPU:** memproses instruksi dan data.
-- **RAM:** menyimpan data sementara saat komputer bekerja.
-- **SSD:** menyimpan data secara permanen.
-- **Motherboard:** menghubungkan komponen utama komputer.
-- **PSU:** menyuplai daya listrik ke komponen komputer.
-''';
-    }
-
-    // --------------------------------------------------------
-    // 11. MIKROTIK DAN CISCO
-    // --------------------------------------------------------
-
-    if (_containsAny(lower, [
-      'mikrotik',
-      'winbox',
-      'cisco',
-    ])) {
-      return '''
-🚀 **MikroTik dan Cisco**
-
-**MikroTik:**
-- Menggunakan RouterOS.
-- Dapat dikonfigurasi melalui Winbox atau terminal.
-- Digunakan untuk routing, firewall, hotspot, dan manajemen bandwidth.
-
-**Cisco:**
-- Banyak digunakan pada jaringan skala perusahaan.
-- Perangkatnya dapat dikonfigurasi melalui Cisco IOS.
-- Menggunakan CLI untuk konfigurasi router dan switch.
-''';
-    }
-
-    // --------------------------------------------------------
-    // 12. SOAL DAN KUIS
-    // --------------------------------------------------------
-
-    if (_containsAny(lower, [
-      'soal',
-      'kuis',
-      'latihan',
-    ])) {
-      return '''
-📝 **Latihan Soal TKJ**
-
-1. Berapakah jumlah host maksimal pada subnet `/26`?
-2. Apa warna kabel pada pin ke-3 standar T568B?
-3. Perangkat jaringan apakah yang bekerja pada Layer 3 OSI?
-
-Cobalah jawab terlebih dahulu, kemudian kirimkan jawabanmu untuk dibahas.
-''';
-    }
-
-    // --------------------------------------------------------
-    // 13. JAWABAN UMUM
+    // JAWABAN UMUM MATERI TKJ
     // --------------------------------------------------------
 
     return '''
 🤖 **Netropia AI — Asisten Belajar TKJ**
 
-Saya memahami pertanyaanmu tentang:
+Saya memahami pertanyaanmu tentang: **"$prompt"**
 
-**"$prompt"**
+Jaringan komputer adalah sistem yang menghubungkan dua atau lebih perangkat komputer agar dapat saling berkomunikasi, bertukar berkas, dan berbagi sumber daya (*resource sharing*).
 
-Layanan AI sedang tidak tersedia, sehingga saya belum dapat memberikan penjelasan khusus untuk pertanyaan tersebut.
-
-Kamu dapat mencoba menanyakan topik yang lebih spesifik, seperti:
-
-- Jelaskan subnetting `/24`.
-- Bagaimana cara melakukan crimping kabel UTP?
-- Apa penyebab Request Time Out?
-- Apa fungsi router dan switch?
-- Bagaimana cara melakukan troubleshooting jaringan?
+Kamu dapat menanyakan topik spesifik seperti:
+- **"Apa itu jaringan komputer?"**
+- **"Jelaskan subnetting /24"**
+- **"Urutan warna kabel UTP T568B"**
+- **"Perbedaan Router dan Switch"**
+- **"Apa fungsi 7 OSI Layer?"**
 ''';
   }
-
-  // ==========================================================
-  // FUNGSI PEMBANTU
-  // ==========================================================
 
   bool _containsAny(String text, List<String> keywords) {
     return keywords.any((keyword) => text.contains(keyword));

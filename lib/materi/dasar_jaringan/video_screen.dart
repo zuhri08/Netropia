@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/localization_service.dart';
 import 'video_player_screen.dart';
 
@@ -202,6 +203,7 @@ class _VideoScreenState extends State<VideoScreen> {
                       child: _buildVideoCard(video),
                     ),
                   ),
+                _buildTeacherCustomVideos(),
               ],
             ),
           ),
@@ -541,6 +543,68 @@ class _VideoScreenState extends State<VideoScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTeacherCustomVideos() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('custom_videos').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox();
+        }
+
+        final docs = List<QueryDocumentSnapshot>.from(snapshot.data!.docs);
+        docs.sort((a, b) {
+          final dataA = a.data() as Map<String, dynamic>;
+          final dataB = b.data() as Map<String, dynamic>;
+
+          final tsA = dataA['createdAt'];
+          final tsB = dataB['createdAt'];
+
+          DateTime dtA = (tsA is Timestamp) ? tsA.toDate() : DateTime.now();
+          DateTime dtB = (tsB is Timestamp) ? tsB.toDate() : DateTime.now();
+
+          return dtB.compareTo(dtA);
+        });
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.video_collection_rounded, color: primaryBrown, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  localizationService.isEnglish ? 'Teacher Videos' : 'Video Tutorial Dari Guru',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ...docs.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final title = data['judul'] ?? 'Video Pembelajaran';
+              final videoId = data['videoId'] ?? '';
+              final desc = data['deskripsi'] ?? '';
+              final guruName = data['guruName'] ?? 'Guru';
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildVideoCard({
+                  'number': 'GURU',
+                  'materi': 'Video Guru',
+                  'judul': title,
+                  'deskripsi': '$desc (Oleh: $guruName)',
+                  'videoId': videoId,
+                  'color': primaryBrown,
+                }),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'settings_screen.dart';
 import 'edit_profile_screen.dart';
 import 'help_support_screen.dart';
@@ -36,7 +37,8 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildStatsSection(context),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 25),
+                      _buildTeacherAwardsSection(context),
                       _buildAchievementsSection(context),
                       const SizedBox(height: 30),
                       _buildMenuSection(context),
@@ -287,6 +289,85 @@ class ProfileScreen extends StatelessWidget {
       title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
       trailing: const Icon(Icons.chevron_right_rounded, size: 20),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildTeacherAwardsSection(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox();
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+        final data = snapshot.data?.data() as Map<String, dynamic>?;
+        final awards = (data?['awards'] as List<dynamic>?) ?? [];
+
+        if (awards.isEmpty) return const SizedBox();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 5, bottom: 12),
+              child: Text(
+                'Apresiasi & Bintang Dari Guru ⭐',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73)),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF8E1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.amber.shade300),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: awards.map((award) {
+                  final badge = award['badge']?.toString() ?? '⭐ Bintang Apresiasi';
+                  final guruName = award['guruName']?.toString() ?? 'Guru';
+                  final catatan = award['catatan']?.toString() ?? '';
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.star_rounded, color: Colors.amber, size: 28),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                badge,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF5C3D2E)),
+                              ),
+                              Text(
+                                'Diberikan oleh: $guruName',
+                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                              if (catatan.isNotEmpty) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  '"$catatan"',
+                                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.black87),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 25),
+          ],
+        );
+      },
     );
   }
 }

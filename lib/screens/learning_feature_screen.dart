@@ -301,7 +301,9 @@ class _LearningFeatureScreenState extends State<LearningFeatureScreen> {
               ? _buildForumDiskusiView()
               : widget.feature == 'Feedback'
                   ? _buildFeedbackView()
-                  : _buildDefaultFeatureView(),
+                  : (widget.feature == 'Penugasan' || widget.feature.toLowerCase() == 'penugasan')
+                      ? _buildPenugasanView()
+                      : _buildDefaultFeatureView(),
     );
   }
 
@@ -735,6 +737,229 @@ class _LearningFeatureScreenState extends State<LearningFeatureScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPenugasanView() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('assignments')
+          .where('materiTitle', isEqualTo: widget.materiTitle)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+
+        if (docs.isEmpty) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                _buildDefaultFeatureView(),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(18),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            final data = docs[index].data() as Map<String, dynamic>;
+            final assignmentId = docs[index].id;
+            final judul = data['judul'] ?? 'Tugas';
+            final deskripsi = data['deskripsi'] ?? '';
+            final guruName = data['guruName'] ?? 'Guru Netropia';
+            final currentUser = FirebaseAuth.instance.currentUser;
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: widget.themeColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.assignment_rounded, color: widget.themeColor),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                judul,
+                                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                'Diterbitkan oleh: $guruName',
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      deskripsi,
+                      style: const TextStyle(fontSize: 14, height: 1.5),
+                    ),
+                    const Divider(height: 24),
+
+                    // Realtime Student Submission Status
+                    StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('assignment_submissions')
+                          .where('assignmentId', isEqualTo: assignmentId)
+                          .where('siswaId', isEqualTo: currentUser?.uid ?? '')
+                          .snapshots(),
+                      builder: (context, subSnapshot) {
+                        final subDocs = subSnapshot.data?.docs ?? [];
+                        final hasSubmitted = subDocs.isNotEmpty;
+
+                        if (hasSubmitted) {
+                          final subData = subDocs.first.data() as Map<String, dynamic>;
+                          final jawaban = subData['jawaban'] ?? '';
+                          final nilai = subData['nilai'];
+                          final catatanGuru = subData['catatanGuru'] ?? '';
+
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade50,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: Colors.green.shade200),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(
+                                  children: [
+                                    Icon(Icons.check_circle_rounded, color: Colors.green, size: 18),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Tugas Sudah Terkumpul',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 13),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text('Jawaban Kamu: "$jawaban"', style: const TextStyle(fontSize: 13)),
+                                if (nilai != null) ...[
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.orange.shade100,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      '⭐ Nilai Guru: $nilai / 100',
+                                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange.shade900, fontSize: 13),
+                                    ),
+                                  ),
+                                ],
+                                if (catatanGuru.toString().isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    'Catatan Guru: "$catatanGuru"',
+                                    style: const TextStyle(fontSize: 12.5, fontStyle: FontStyle.italic, color: Colors.black87),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          );
+                        }
+
+                        // Form Submission
+                        final submissionTextController = TextEditingController();
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Kirim Jawaban / Laporan Tugas:',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                            const SizedBox(height: 6),
+                            TextField(
+                              controller: submissionTextController,
+                              maxLines: 4,
+                              decoration: InputDecoration(
+                                hintText: 'Tuliskan jawaban, hasil analisis, atau tautan dokumen tugasmu di sini...',
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 44,
+                              child: ElevatedButton.icon(
+                                onPressed: () async {
+                                  final text = submissionTextController.text.trim();
+                                  if (text.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Jawaban tugas tidak boleh kosong.')),
+                                    );
+                                    return;
+                                  }
+
+                                  final user = FirebaseAuth.instance.currentUser;
+                                  await FirebaseFirestore.instance.collection('assignment_submissions').add({
+                                    'assignmentId': assignmentId,
+                                    'materiTitle': widget.materiTitle,
+                                    'siswaId': user?.uid ?? '',
+                                    'siswaName': user?.displayName ?? user?.email ?? 'Siswa',
+                                    'jawaban': text,
+                                    'submittedAt': FieldValue.serverTimestamp(),
+                                  });
+
+                                  if (!_isCompleted) {
+                                    await _toggleCompleted();
+                                  }
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Tugas berhasil dikumpulkan ke Guru!'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: widget.themeColor,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                                icon: const Icon(Icons.send_rounded, size: 18),
+                                label: const Text('Kirimkan Tugas Ke Guru'),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

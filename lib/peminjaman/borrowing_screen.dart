@@ -697,6 +697,171 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
   }
 
   // =========================================================
+  // BARANG SEDANG DIPINJAM (ACTIVE LOANS)
+  // =========================================================
+
+  Widget _buildActiveLoansSection() {
+    final user = _auth.currentUser;
+    if (user == null) return const SizedBox();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('loans')
+          .where('siswaId', isEqualTo: user.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+
+        final activeLoans = snapshot.data!.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final status = data['status']?.toString().toLowerCase() ?? '';
+          return status == 'disetujui' || status == 'dipinjam' || status == 'menunggu';
+        }).toList();
+
+        if (activeLoans.isEmpty) {
+          return const SizedBox();
+        }
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0xFFAD8B73).withOpacity(0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.inventory_rounded,
+                    color: Color(0xFFAD8B73),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Barang Sedang Dipinjam',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFAD8B73).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${activeLoans.length} Barang',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFAD8B73),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: activeLoans.length,
+                separatorBuilder: (_, __) => const Divider(height: 16),
+                itemBuilder: (context, index) {
+                  final data = activeLoans[index].data() as Map<String, dynamic>;
+                  final namaItem = data['namaItem'] ?? data['namaBarang'] ?? 'Perangkat';
+                  final jumlah = data['jumlah'] ?? 1;
+                  final status = data['status']?.toString().toLowerCase() ?? 'menunggu';
+                  final tanggalKembali = data['tanggalKembali'] is Timestamp
+                      ? (data['tanggalKembali'] as Timestamp).toDate()
+                      : null;
+
+                  Color statusColor = Colors.orange;
+                  String statusLabel = 'Menunggu';
+
+                  if (status == 'disetujui' || status == 'dipinjam') {
+                    statusColor = Colors.green;
+                    statusLabel = 'Sedang Dipinjam';
+                  }
+
+                  return Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.devices_other_rounded,
+                          color: statusColor,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$namaItem (${jumlah}x)',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            if (tanggalKembali != null)
+                              Text(
+                                'Batas Kembali: ${_formatDate(tanggalKembali)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Theme.of(context).textTheme.bodySmall?.color,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: statusColor.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          statusLabel,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: statusColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // =========================================================
   // BUILD
   // =========================================================
 
@@ -800,6 +965,12 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
             ),
 
             const SizedBox(height: 20),
+
+            // =================================================
+            // BARANG SEDANG DIPINJAM (ACTIVE LOANS)
+            // =================================================
+
+            _buildActiveLoansSection(),
 
             // =================================================
             // SEARCH

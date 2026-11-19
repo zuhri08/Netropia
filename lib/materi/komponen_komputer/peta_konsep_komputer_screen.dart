@@ -5,7 +5,7 @@ class PetaKonsepKomputerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFF1565C0);
+    const themeColor = Color(0xFFAD8B73);
 
     return Scaffold(
       appBar: AppBar(

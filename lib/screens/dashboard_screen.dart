@@ -13,6 +13,7 @@ import '../devices_3d/device_3d_list_screen.dart';
 import '../peminjaman/teacher_borrowing_screen.dart';
 import '../project/project_screen.dart';
 import '../services/localization_service.dart';
+import '../teacher/teacher_panel_screen.dart';
 import 'notification_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -132,7 +133,7 @@ class DashboardScreen extends StatelessWidget {
               FutureBuilder<int>(
                 future: SettingsService().getStreak(),
                 builder: (context, snapshot) {
-                  final streak = snapshot.data ?? 3;
+                  final streak = snapshot.data ?? 1;
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -249,7 +250,13 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildContinueLearning(context),
+                  if (role.toLowerCase() == 'guru') ...[
+                    _buildTeacherManagementPanel(context),
+                    _buildTeacherMonitoringCard(context),
+                  ] else ...[
+                    _buildAnnouncementsCard(context),
+                    _buildContinueLearning(context),
+                  ],
                   const SizedBox(height: 25),
                   Text(
                     localizationService.translate('home'),
@@ -842,6 +849,546 @@ class DashboardScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTeacherManagementPanel(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFFAD8B73),
+            Color(0xFF8E6F5B),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.14),
+            blurRadius: 14,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.admin_panel_settings_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Panel Utama Guru',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Pusat Kelola Pembelajaran & Fasilitas TKJ',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Sub-Section 1: KELOLA PEMBELAJARAN
+          const Text(
+            'KELOLA PEMBELAJARAN',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _teacherActionButton(
+                context,
+                icon: Icons.assignment_add,
+                label: 'Kelola Tugas',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'tugas'),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.quiz_rounded,
+                label: 'Kelola Kuis',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'quiz'),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.note_add_rounded,
+                label: 'Buat Materi',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'materi'),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.campaign_rounded,
+                label: 'Pengumuman',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'pengumuman'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Sub-Section 2: KELOLA KELAS & LAB TKJ
+          const Text(
+            'KELOLA KELAS & LAB TKJ',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+              color: Colors.white70,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _teacherActionButton(
+                context,
+                icon: Icons.rate_review_rounded,
+                label: 'Ulasan & Refleksi',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.assessment_rounded,
+                label: 'Rekap & Apresiasi',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'rekap'),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.fact_check_rounded,
+                label: 'Sesi Absensi QR',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherAttendanceScreen(),
+                    ),
+                  );
+                },
+              ),
+              _teacherActionButton(
+                context,
+                icon: Icons.inventory_2_rounded,
+                label: 'Persetujuan Alat',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherBorrowingScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeacherMonitoringCard(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 25),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFAD8B73).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.analytics_rounded,
+                color: Color(0xFFAD8B73),
+                size: 22,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Ringkasan Monitoring Kelas Guru',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Stat 1: Peminjaman Alat Menunggu Persetujuan
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('loans')
+                .where('status', isEqualTo: 'menunggu')
+                .snapshots(),
+            builder: (context, snapshot) {
+              final pendingCount = snapshot.data?.docs.length ?? 0;
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TeacherBorrowingScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: pendingCount > 0 ? Colors.orange.shade50 : const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.inventory_2_outlined,
+                          size: 20,
+                          color: pendingCount > 0 ? Colors.orange.shade800 : Colors.green.shade700,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Peminjaman Alat Menunggu',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            Text(
+                              pendingCount > 0
+                                  ? '$pendingCount pengajuan alat perlu disetujui Guru'
+                                  : 'Tidak ada pengajuan peminjaman baru',
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (pendingCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.orange,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$pendingCount Baru',
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(height: 18),
+
+          // Stat 2: Refleksi Siswa Belum Ditanggapi
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('reflections')
+                .orderBy('createdAt', descending: true)
+                .limit(10)
+                .snapshots(),
+            builder: (context, snapshot) {
+              final docs = snapshot.data?.docs ?? [];
+              final pendingFeedback = docs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final fb = data['feedbackGuru']?.toString() ?? '';
+                return fb.isEmpty;
+              }).length;
+
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFAD8B73).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.rate_review_rounded,
+                          size: 20,
+                          color: Color(0xFFAD8B73),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Refleksi Belajar Siswa',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            Text(
+                              pendingFeedback > 0
+                                  ? '$pendingFeedback refleksi siswa belum ditanggapi'
+                                  : 'Seluruh refleksi siswa sudah ditanggapi',
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, size: 20, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnnouncementsCard(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('announcements').snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox();
+        }
+
+        final docs = List<QueryDocumentSnapshot>.from(snapshot.data!.docs);
+        docs.sort((a, b) {
+          final dataA = a.data() as Map<String, dynamic>;
+          final dataB = b.data() as Map<String, dynamic>;
+
+          final tsA = dataA['createdAt'];
+          final tsB = dataB['createdAt'];
+
+          DateTime dtA = (tsA is Timestamp) ? tsA.toDate() : DateTime.now();
+          DateTime dtB = (tsB is Timestamp) ? tsB.toDate() : DateTime.now();
+
+          return dtB.compareTo(dtA);
+        });
+
+        final displayDocs = docs.take(2).toList();
+
+        return Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF8E1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.amber.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.amber.withOpacity(0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Colors.amber,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.campaign_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Pengumuman Dari Guru',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF7A4B00),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ...docs.map((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['judul'] ?? 'Pengumuman',
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        data['isi'] ?? '',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade800,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _teacherActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: const Color(0xFFAD8B73)),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2C2C2C),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

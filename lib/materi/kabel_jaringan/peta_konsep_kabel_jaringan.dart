@@ -5,7 +5,7 @@ class PetaKonsepKabelJaringanScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const themeColor = Color(0xFF00897B);
+    const themeColor = Color(0xFFAD8B73);
 
     return Scaffold(
       appBar: AppBar(

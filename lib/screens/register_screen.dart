@@ -21,12 +21,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool obscureConfirmPassword = true;
   bool isLoading = false;
 
+  String selectedRole = 'siswa'; // 'siswa' or 'guru'
   String? selectedClass;
 
   final List<String> classOptions = [
     'X TKJ 1',
     'X TKJ 2',
     'X TKJ 3',
+    'Guru TKJ',
   ];
 
   Future<void> register() async {
@@ -42,21 +44,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // Validasi NISN
-    if (nisn.isEmpty) {
-      showMessage('NISN harus diisi.');
-      return;
-    }
-
-    if (nisn.length != 10 || int.tryParse(nisn) == null) {
-      showMessage('NISN harus terdiri dari 10 digit angka.');
-      return;
-    }
-
-    // Validasi kelas
-    if (selectedClass == null) {
-      showMessage('Silakan pilih kelas.');
-      return;
+    // Validasi NISN / NIP untuk Siswa
+    if (selectedRole == 'siswa') {
+      if (nisn.isEmpty) {
+        showMessage('NISN harus diisi.');
+        return;
+      }
+      if (nisn.length != 10 || int.tryParse(nisn) == null) {
+        showMessage('NISN harus terdiri dari 10 digit angka.');
+        return;
+      }
+      if (selectedClass == null) {
+        showMessage('Silakan pilih kelas.');
+        return;
+      }
     }
 
     // Validasi email
@@ -105,17 +106,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         throw Exception('Akun gagal dibuat.');
       }
 
-      // Menyimpan data siswa ke Firestore
+      // Menyimpan data ke Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
           .set({
         'uid': user.uid,
         'nama': name,
-        'nisn': nisn,
-        'kelas': selectedClass,
+        'nisn': nisn.isNotEmpty ? nisn : (selectedRole == 'guru' ? 'NIP-GURU' : '-'),
+        'kelas': selectedRole == 'guru' ? 'Guru TKJ' : (selectedClass ?? '-'),
         'email': email,
-        'role': 'siswa',
+        'role': selectedRole,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -128,7 +129,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      // Kembali ke halaman login
       await Future.delayed(const Duration(milliseconds: 800));
 
       if (!mounted) return;
@@ -166,22 +166,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         showMessage(message);
       }
     } on FirebaseException catch (e) {
-      debugPrint('===== FIRESTORE ERROR =====');
-      debugPrint('CODE: ${e.code}');
-      debugPrint('MESSAGE: ${e.message}');
-      debugPrint('===========================');
-
       if (mounted) {
-        showMessage(
-          'Gagal menyimpan data siswa: ${e.message ?? e.code}',
-        );
+        showMessage('Gagal menyimpan data akun: ${e.message ?? e.code}');
       }
-    } catch (e, stackTrace) {
-      debugPrint('===== ERROR PENDAFTARAN =====');
-      debugPrint('ERROR: $e');
-      debugPrint('STACK TRACE: $stackTrace');
-      debugPrint('=============================');
-
+    } catch (e) {
       if (mounted) {
         showMessage('Terjadi kesalahan saat pendaftaran: $e');
       }
@@ -220,9 +208,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Daftar Siswa',
-          style: TextStyle(
+        title: Text(
+          selectedRole == 'guru' ? 'Daftar Akun Guru' : 'Daftar Akun Siswa',
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -236,22 +224,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 10),
 
               // Icon
-              const Center(
+              Center(
                 child: Icon(
-                  Icons.person_add,
+                  selectedRole == 'guru' ? Icons.supervisor_account : Icons.person_add,
                   size: 70,
-                  color: Color(0xFFAD8B73),
+                  color: const Color(0xFFAD8B73),
                 ),
               ),
 
               const SizedBox(height: 20),
 
               // Judul
-              const Center(
+              Center(
                 child: Text(
-                  'Buat Akun Siswa',
-                  style: TextStyle(
-                    fontSize: 25,
+                  selectedRole == 'guru' ? 'Buat Akun Guru / Pengajar' : 'Buat Akun Siswa',
+                  style: const TextStyle(
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -262,7 +250,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Deskripsi
               const Center(
                 child: Text(
-                  'Daftar untuk mulai belajar di Netropia.',
+                  'Daftar untuk mengakses platform Netropia.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.grey,
@@ -271,7 +259,113 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 24),
+
+              // =========================
+              // PILIH PERAN (ROLE)
+              // =========================
+              const Text(
+                'Daftar Sebagai',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedRole = 'siswa';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          decoration: BoxDecoration(
+                            color: selectedRole == 'siswa'
+                                ? const Color(0xFFAD8B73)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.school_rounded,
+                                size: 18,
+                                color: selectedRole == 'siswa'
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Siswa',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: selectedRole == 'siswa'
+                                      ? Colors.white
+                                      : Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedRole = 'guru';
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 11),
+                          decoration: BoxDecoration(
+                            color: selectedRole == 'guru'
+                                ? const Color(0xFFAD8B73)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.person_outline_rounded,
+                                size: 18,
+                                color: selectedRole == 'guru'
+                                    ? Colors.white
+                                    : Colors.grey.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Guru / Pengajar',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: selectedRole == 'guru'
+                                      ? Colors.white
+                                      : Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
 
               // =========================
               // NAMA LENGKAP
@@ -288,20 +382,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(
                 controller: nameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan nama lengkap',
-                  prefixIcon: Icon(Icons.person_outline),
+                decoration: InputDecoration(
+                  hintText: selectedRole == 'guru' ? 'Masukkan nama lengkap & gelar' : 'Masukkan nama lengkap',
+                  prefixIcon: const Icon(Icons.person_outline),
                 ),
               ),
 
               const SizedBox(height: 18),
 
               // =========================
-              // NISN
+              // NISN / NIP
               // =========================
-              const Text(
-                'NISN',
-                style: TextStyle(
+              Text(
+                selectedRole == 'guru' ? 'NIP / Identitas Pegawai (Opsional)' : 'NISN',
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -311,10 +405,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(
                 controller: nisnController,
                 keyboardType: TextInputType.number,
-                maxLength: 10,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan 10 digit NISN',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                maxLength: selectedRole == 'guru' ? 20 : 10,
+                decoration: InputDecoration(
+                  hintText: selectedRole == 'guru' ? 'Masukkan NIP (jika ada)' : 'Masukkan 10 digit NISN',
+                  prefixIcon: const Icon(Icons.badge_outlined),
                   counterText: '',
                 ),
               ),
@@ -322,39 +416,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 18),
 
               // =========================
-              // KELAS
+              // KELAS (SISWA SAJA)
               // =========================
-              const Text(
-                'Kelas',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
+              if (selectedRole == 'siswa') ...[
+                const Text(
+                  'Kelas',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
 
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
-              DropdownButtonFormField<String>(
-                value: selectedClass,
-                decoration: const InputDecoration(
-                  hintText: 'Pilih kelas',
-                  prefixIcon: Icon(Icons.class_outlined),
+                DropdownButtonFormField<String>(
+                  value: selectedClass,
+                  decoration: const InputDecoration(
+                    hintText: 'Pilih kelas',
+                    prefixIcon: Icon(Icons.class_outlined),
+                  ),
+                  items: classOptions.where((c) => c != 'Guru TKJ').map((String className) {
+                    return DropdownMenuItem<String>(
+                      value: className,
+                      child: Text(className),
+                    );
+                  }).toList(),
+                  onChanged: isLoading
+                      ? null
+                      : (String? value) {
+                    setState(() {
+                      selectedClass = value;
+                    });
+                  },
                 ),
-                items: classOptions.map((String className) {
-                  return DropdownMenuItem<String>(
-                    value: className,
-                    child: Text(className),
-                  );
-                }).toList(),
-                onChanged: isLoading
-                    ? null
-                    : (String? value) {
-                  setState(() {
-                    selectedClass = value;
-                  });
-                },
-              ),
 
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
+              ],
 
               // =========================
               // EMAIL
@@ -458,6 +554,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 55,
                 child: ElevatedButton.icon(
                   onPressed: isLoading ? null : register,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFAD8B73),
+                    foregroundColor: Colors.white,
+                  ),
                   icon: isLoading
                       ? const SizedBox(
                     width: 20,
@@ -471,7 +571,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: Text(
                     isLoading
                         ? 'Mendaftarkan...'
-                        : 'Daftar Sekarang',
+                        : (selectedRole == 'guru' ? 'Daftar Akun Guru' : 'Daftar Sekarang'),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

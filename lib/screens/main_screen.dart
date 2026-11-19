@@ -6,6 +6,7 @@ import '../virtual_lab/virtual_lab_screen.dart';
 import '../profile/profile_screen.dart';
 import '../widgets/magic_nav_bar.dart';
 import '../services/localization_service.dart';
+import '../services/settings_service.dart';
 
 class MainScreen extends StatefulWidget {
   final String username;
@@ -30,6 +31,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    _initStreak();
     _pages = [
       DashboardScreen(username: widget.username, role: widget.role),
       ProgresScreen(key: _progresKey),
@@ -37,6 +39,10 @@ class _MainScreenState extends State<MainScreen> {
       const VirtualLabScreen(),
       ProfileScreen(username: widget.username, role: widget.role),
     ];
+  }
+
+  Future<void> _initStreak() async {
+    await SettingsService().checkAndUpdateStreak();
   }
 
   @override

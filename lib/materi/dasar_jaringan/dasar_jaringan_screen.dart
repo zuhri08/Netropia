@@ -10,14 +10,12 @@ class DasarJaringanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MateriDetailLayout(
       title: 'Dasar Jaringan',
-      themeColor: const Color(0xFF00838F),
-
+      themeColor: const Color(0xFFAD8B73),
       onMateriTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-            const PengertianJaringanScreen(),
+            builder: (context) => const PengertianJaringanScreen(),
           ),
         );
       },

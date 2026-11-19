@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:netropia/services/progress_service.dart';
-import 'package:netropia/materi/referensi/referensi_screen.dart';
+import '../services/progress_service.dart';
+import 'referensi/referensi_screen.dart';
 
 import '../screens/learning_feature_screen.dart';
 import '../services/localization_service.dart';
@@ -25,16 +25,24 @@ import 'komponen_komputer/peta_konsep_komputer_screen.dart';
 import 'kabel_jaringan/peta_konsep_kabel_jaringan.dart';
 import 'ip_address/peta_konsep_ip_address_screen.dart';
 import 'perangkat_jaringan/peta_konsep_perangkat_jaringan_screen.dart';
+import 'custom_material_reader_screen.dart';
+
 class MateriDetailLayout extends StatefulWidget {
   final String title;
   final Color themeColor;
   final VoidCallback? onMateriTap;
+  final String? customMaterialContent;
+  final String? customMaterialCategory;
+  final String? customMaterialGuruName;
 
   const MateriDetailLayout({
     super.key,
     required this.title,
     this.themeColor = const Color(0xFFAD8B73),
     this.onMateriTap,
+    this.customMaterialContent,
+    this.customMaterialCategory,
+    this.customMaterialGuruName,
   });
 
   @override
@@ -404,6 +412,20 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   }
 
   void _handleMateriTap() {
+    if (widget.customMaterialContent != null) {
+      _navigateTo(
+        CustomMaterialReaderScreen(
+          data: {
+            'judul': widget.title,
+            'kategori': widget.customMaterialCategory ?? 'Umum',
+            'guruName': widget.customMaterialGuruName ?? 'Guru Netropia',
+            'isi': widget.customMaterialContent,
+          },
+        ),
+      );
+      return;
+    }
+
     final materiId = _getMateriId();
 
     // Callback tetap digunakan untuk materi lainnya.

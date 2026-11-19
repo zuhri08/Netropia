@@ -8,7 +8,7 @@ class K3Screen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MateriDetailLayout(
       title: 'K3',
-      themeColor: Color(0xFF2E7D32),
+      themeColor: Color(0xFFAD8B73),
     );
   }
 }

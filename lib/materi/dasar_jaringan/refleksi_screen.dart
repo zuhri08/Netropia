@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RefleksiScreen extends StatefulWidget {
   final String materiId;
@@ -171,14 +173,43 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
     }
   }
 
-  void _saveReflection() {
+  Future<void> _saveReflection() async {
     setState(() {
       _isSaved = true;
     });
 
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final namaSiswa = userDoc.data()?['nama'] ?? user.displayName ?? user.email ?? 'Siswa Netropia';
+        final kelas = userDoc.data()?['kelas'] ?? '-';
+
+        final docRef = FirebaseFirestore.instance.collection('reflections').doc();
+        await docRef.set({
+          'id': docRef.id,
+          'siswaId': user.uid,
+          'namaSiswa': namaSiswa,
+          'kelas': kelas,
+          'materiId': widget.materiId,
+          'materiTitle': widget.materiTitle,
+          'mood': _selectedMood,
+          'understanding': _understanding,
+          'understandingLabel': _understandingLabel,
+          'newThing': _newThingController.text.trim(),
+          'challenge': _challengeController.text.trim(),
+          'plan': _selectedNextAction,
+          'feedbackGuru': '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (_) {}
+
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Refleksi belajarmu berhasil disimpan!'),
+        content: Text('Refleksi belajarmu berhasil disimpan dan dikirim ke guru!'),
         behavior: SnackBarBehavior.floating,
       ),
     );

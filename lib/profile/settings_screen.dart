@@ -5,6 +5,7 @@ import '../screens/login_screen.dart';
 import '../screens/notification_screen.dart';
 import '../services/settings_service.dart';
 import '../services/localization_service.dart';
+import '../services/local_notification_service.dart';
 import 'edit_profile_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -62,15 +63,50 @@ class _SettingsScreenState extends State<SettingsScreen> {
       final formattedTime = picked.format(context);
       await _settingsService.setReminderTime(formattedTime);
       await _settingsService.setReminderEnabled(true);
+
+      // Schedule exact daily local notification & alarm
+      await LocalNotificationService().scheduleDailyReminder(
+        hour: picked.hour,
+        minute: picked.minute,
+        title: 'Pengingat Belajar Netropia 🔥',
+        body: 'Waktunya belajar! Selesaikan materi TKJ dan jaga streak belajar kamu hari ini.',
+      );
+
       setState(() {
         _reminderTime = formattedTime;
         _isReminderEnabled = true;
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(localizationService.isEnglish ? 'Reminder set to $_reminderTime' : 'Pengingat diatur ke $_reminderTime')),
+          SnackBar(
+            content: Text(localizationService.isEnglish 
+                ? 'Reminder set to $_reminderTime & scheduled!' 
+                : 'Pengingat diatur ke $_reminderTime & alarm dijadwalkan!'),
+            action: SnackBarAction(
+              label: localizationService.isEnglish ? 'Test' : 'Uji Notif',
+              textColor: Colors.amber,
+              onPressed: _testAlarmNotification,
+            ),
+          ),
         );
       }
+    }
+  }
+
+  Future<void> _testAlarmNotification() async {
+    await LocalNotificationService().showTestNotification(
+      title: 'Pengingat Belajar Netropia 🔥',
+      body: 'Waktunya belajar! Selesaikan materi TKJ dan tingkatkan pemahamanmu hari ini.',
+    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(localizationService.isEnglish 
+              ? 'Notification & alarm test sent to phone!' 
+              : 'Notifikasi & alarm pengujian dikirim ke HP!'),
+        ),
+      );
     }
   }
 
@@ -309,13 +345,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (val) async {
                         await _settingsService.setReminderEnabled(val);
                         setState(() => _isReminderEnabled = val);
-                        if (val && (_reminderTime == 'Belum diatur' || _reminderTime == 'Not set')) {
+                        if (!val) {
+                          await LocalNotificationService().cancelReminder();
+                        } else if (_reminderTime == 'Belum diatur' || _reminderTime == 'Not set') {
                           _selectReminderTime();
                         }
                       },
                     ),
                     onTap: _selectReminderTime,
                   ),
+                  if (_isReminderEnabled)
+                    _buildSettingsItem(
+                      Icons.notifications_active_rounded,
+                      localizationService.isEnglish ? 'Test Notification & Alarm' : 'Uji Notifikasi & Alarm',
+                      subtitle: localizationService.isEnglish 
+                          ? 'Send test notification & sound to phone' 
+                          : 'Bunyikan notifikasi & alarm seketika di HP',
+                      titleColor: const Color(0xFF1565C0),
+                      onTap: _testAlarmNotification,
+                    ),
                   _buildSettingsItem(
                     Icons.track_changes_rounded,
                     localizationService.translate('daily_target'),

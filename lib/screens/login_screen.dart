@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
   bool isLoading = false;
   bool rememberMe = false;
+  String selectedRoleMode = 'siswa'; // 'siswa' or 'guru'
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       emailController.text = prefs.getString('saved_email') ?? '';
       passwordController.text = prefs.getString('saved_password') ?? '';
       rememberMe = prefs.getBool('remember_me') ?? false;
+      selectedRoleMode = prefs.getString('saved_role_mode') ?? 'siswa';
     });
   }
 
@@ -42,10 +44,12 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('saved_email', email);
       await prefs.setString('saved_password', password);
       await prefs.setBool('remember_me', true);
+      await prefs.setString('saved_role_mode', selectedRoleMode);
     } else {
       await prefs.remove('saved_email');
       await prefs.remove('saved_password');
       await prefs.setBool('remember_me', false);
+      await prefs.remove('saved_role_mode');
     }
   }
 
@@ -91,16 +95,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final data = userDocument.data() as Map<String, dynamic>;
       final String role = (data['role'] ?? 'siswa').toString().toLowerCase().trim();
-
-      // Security check: Prevent login as guru from this login menu
-      if (role == 'guru') {
-        await FirebaseAuth.instance.signOut();
-        if (mounted) {
-          showMessage('Akun guru tidak dapat login melalui menu ini.');
-        }
-        return;
-      }
-
       final String nama = (data['nama'] ?? user.displayName ?? user.email ?? 'Pengguna').toString();
 
       if (!mounted) return;
@@ -300,6 +294,103 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ---------------------------------------------
+                      // TAB PILIH MODE (SISWA / GURU)
+                      // ---------------------------------------------
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedRoleMode = 'siswa';
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: selectedRoleMode == 'siswa'
+                                        ? const Color(0xFFAD8B73)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.school_rounded,
+                                        size: 18,
+                                        color: selectedRoleMode == 'siswa'
+                                            ? Colors.white
+                                            : Colors.grey.shade700,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Siswa',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: selectedRoleMode == 'siswa'
+                                              ? Colors.white
+                                              : Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    selectedRoleMode = 'guru';
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: selectedRoleMode == 'guru'
+                                        ? const Color(0xFFAD8B73)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.person_outline_rounded,
+                                        size: 18,
+                                        color: selectedRoleMode == 'guru'
+                                            ? Colors.white
+                                            : Colors.grey.shade700,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        'Guru',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                          color: selectedRoleMode == 'guru'
+                                              ? Colors.white
+                                              : Colors.grey.shade700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
                       const Text(
                         'Email',
                         style: TextStyle(
@@ -457,15 +548,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Row(
+                              : Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.login_rounded),
-                                    SizedBox(width: 9),
+                                    const Icon(Icons.login_rounded),
+                                    const SizedBox(width: 9),
                                     Text(
-                                      'Masuk ke Netropia',
-                                      style: TextStyle(
+                                      selectedRoleMode == 'guru'
+                                          ? 'Masuk sebagai Guru'
+                                          : 'Masuk ke Netropia',
+                                      style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),

@@ -9,6 +9,7 @@ import 'screens/splash_screen.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_manager.dart';
 import 'services/localization_service.dart';
+import 'services/local_notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +19,17 @@ Future<void> main() async {
   );
 
   await localizationService.init();
+  await LocalNotificationService().init();
 
-  // App Check untuk pengujian lokal Android.
+  // App Check untuk pengujian lokal & rilis Android.
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await FirebaseAppCheck.instance.activate(
-      androidProvider: AndroidProvider.debug,
-    );
+    try {
+      await FirebaseAppCheck.instance.activate(
+        androidProvider: kDebugMode ? AndroidProvider.debug : AndroidProvider.playIntegrity,
+      );
+    } catch (e) {
+      debugPrint('Firebase App Check Exception: $e');
+    }
   }
 
   runApp(

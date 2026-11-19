@@ -123,25 +123,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     });
 
     try {
-      final sessionQuery = await firestore
+      final codeQuery = await firestore
           .collection('attendance_sessions')
           .where('code', isEqualTo: inputCode)
-          .where('status', isEqualTo: 'open')
           .limit(1)
           .get();
 
-      if (sessionQuery.docs.isEmpty) {
-        showMessage(localizationService.isEnglish ? 'Attendance code invalid or session closed.' : 'Kode absensi tidak valid atau sesi sudah ditutup.');
+      if (codeQuery.docs.isEmpty) {
+        showMessage('Kode absensi "$inputCode" tidak ditemukan.');
         return;
       }
 
-      final sessionDoc = sessionQuery.docs.first;
+      final sessionDoc = codeQuery.docs.first;
       final sessionData = sessionDoc.data();
       final sessionId = sessionDoc.id;
+      final sessionStatus = sessionData['status'] ?? 'closed';
       final sessionKelas = sessionData['kelas'] ?? '';
 
+      if (sessionStatus == 'closed') {
+        _showSessionClosedDialog(sessionData);
+        return;
+      }
+
       if (kelas.isNotEmpty && sessionKelas.isNotEmpty && kelas != sessionKelas) {
-        showMessage(localizationService.isEnglish ? 'This session is not for your class.' : 'Sesi absensi ini bukan untuk kelas kamu.');
+        _showWrongClassDialog(sessionKelas, kelas);
         return;
       }
 
@@ -242,6 +247,81 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showSessionClosedDialog(Map<String, dynamic> sessionData) {
+    final mapel = sessionData['mataPelajaran'] ?? 'Materi TKJ';
+    final sessionKelas = sessionData['kelas'] ?? '-';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.block_rounded, color: Colors.redAccent, size: 26),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Sesi Absensi Ditutup',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Sesi presensi untuk mata pelajaran "$mapel" ($sessionKelas) telah resmi ditutup oleh Guru. Kamu tidak dapat mengisi absensi pada sesi ini.',
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFAD8B73),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Mengerti'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showWrongClassDialog(String sessionKelas, String userKelas) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 26),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Kelas Tidak Sesuai',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Sesi absensi ini diperuntukkan khusus untuk kelas "$sessionKelas", sedangkan data akun kamu terdaftar di kelas "$userKelas".',
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFAD8B73),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('Mengerti'),
+          ),
+        ],
       ),
     );
   }

@@ -37,7 +37,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'K3LH',
       'subtitle': 'Keselamatan & Kesehatan Kerja',
       'icon': Icons.health_and_safety_rounded,
-      'color': const Color(0xFF2E7D32),
+      'color': const Color(0xFFAD8B73),
       'screen': const K3Screen(),
     },
     {
@@ -45,7 +45,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Komponen Komputer',
       'subtitle': 'Hardware & Arsitektur Komputer',
       'icon': Icons.memory_rounded,
-      'color': const Color(0xFF6A1B9A),
+      'color': const Color(0xFFAD8B73),
       'screen': const KomponenKomputerScreen(),
     },
     {
@@ -53,7 +53,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Perangkat Jaringan',
       'subtitle': 'Router, Switch, Access Point',
       'icon': Icons.router_rounded,
-      'color': const Color(0xFFEF6C00),
+      'color': const Color(0xFFAD8B73),
       'screen': const PerangkatJaringanScreen(),
     },
     {
@@ -61,7 +61,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Dasar Jaringan',
       'subtitle': 'Konsep LAN, Topologi, Protokol',
       'icon': Icons.account_tree_rounded,
-      'color': const Color(0xFF00838F),
+      'color': const Color(0xFFAD8B73),
       'screen': const DasarJaringanScreen(),
     },
     {
@@ -69,7 +69,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'IP Address',
       'subtitle': 'Pengalamatan IPv4, IPv6 & Subnetting',
       'icon': Icons.language_rounded,
-      'color': const Color(0xFFC62828),
+      'color': const Color(0xFFAD8B73),
       'screen': const IpAddressScreen(),
     },
     {
@@ -77,7 +77,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Kabel Jaringan',
       'subtitle': 'UTP, STP, Crimping & Fiber Optic',
       'icon': Icons.cable_rounded,
-      'color': const Color(0xFF5D4037),
+      'color': const Color(0xFFAD8B73),
       'screen': const KabelJaringanScreen(),
     },
   ];
@@ -246,7 +246,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               FutureBuilder<int>(
                 future: SettingsService().getStreak(),
                 builder: (context, snapshot) {
-                  final streak = snapshot.data ?? 3;
+                  final streak = snapshot.data ?? 1;
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -473,7 +473,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedFeaturesCount',
             subtitle: localizationService.isEnglish ? 'Out of 42 tasks' : 'dari total 42 fitur',
             icon: Icons.task_alt_rounded,
-            color: const Color(0xFF2E7D32),
+            color: const Color(0xFFAD8B73),
           ),
         ),
         const SizedBox(width: 12),
@@ -484,7 +484,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedModulesCount',
             subtitle: localizationService.isEnglish ? 'Out of 6 modules' : 'dari total 6 modul',
             icon: Icons.check_circle_rounded,
-            color: const Color(0xFF00838F),
+            color: const Color(0xFFAD8B73),
           ),
         ),
       ],
@@ -553,24 +553,33 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
 
   Widget _buildTabBar(BuildContext context) {
     return Container(
-      height: 46,
+      height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: TabBar(
         controller: _tabController,
+        indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
           color: const Color(0xFFAD8B73),
           borderRadius: BorderRadius.circular(12),
         ),
         labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
+        unselectedLabelColor: Colors.grey.shade600,
         labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
         tabs: [
           Tab(text: localizationService.isEnglish ? 'By Module' : 'Per Modul'),
           Tab(text: localizationService.isEnglish ? 'Activities' : 'Aktivitas'),
-          Tab(text: localizationService.translate('badges_prestasi')),
+          Tab(text: localizationService.isEnglish ? 'Badges' : 'Lencana'),
         ],
       ),
     );

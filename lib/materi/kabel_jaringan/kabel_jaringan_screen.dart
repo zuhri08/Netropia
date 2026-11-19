@@ -9,7 +9,7 @@ class KabelJaringanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MateriDetailLayout(
       title: 'Kabel Jaringan',
-      themeColor: const Color(0xFF5D4037),
+      themeColor: const Color(0xFFAD8B73),
       onMateriTap: () {
         Navigator.push(
           context,

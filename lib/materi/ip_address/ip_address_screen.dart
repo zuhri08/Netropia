@@ -8,7 +8,7 @@ class IpAddressScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MateriDetailLayout(
       title: 'IP Address',
-      themeColor: Color(0xFFC62828),
+      themeColor: Color(0xFFAD8B73),
     );
   }
 }

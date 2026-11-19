@@ -9,7 +9,7 @@ class PerangkatJaringanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MateriDetailLayout(
       title: 'Perangkat Jaringan',
-      themeColor: const Color(0xFFEF6C00),
+      themeColor: const Color(0xFFAD8B73),
       onMateriTap: () {
         Navigator.push(
           context,
