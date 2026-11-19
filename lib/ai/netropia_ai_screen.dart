@@ -207,6 +207,53 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     _aiService.saveAllSessions(_sessions);
   }
 
+  void _editSessionTitle(ChatSessionItem session) {
+    final TextEditingController editController = TextEditingController(text: session.title);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          localizationService.isEnglish ? 'Edit Chat Title' : 'Edit Judul Riwayat',
+        ),
+        content: TextField(
+          controller: editController,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: localizationService.isEnglish ? 'Enter new title' : 'Masukkan judul baru',
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(localizationService.isEnglish ? 'Cancel' : 'Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _primaryColor,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () {
+              final newTitle = editController.text.trim();
+              if (newTitle.isNotEmpty) {
+                setState(() {
+                  final index = _sessions.indexWhere((s) => s.id == session.id);
+                  if (index >= 0) {
+                    _sessions[index] = _sessions[index].copyWith(title: newTitle);
+                  }
+                });
+                _aiService.saveAllSessions(_sessions);
+              }
+              Navigator.of(context).pop();
+            },
+            child: Text(localizationService.isEnglish ? 'Save' : 'Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleSend() async {
     final text = _controller.text.trim();
 
@@ -509,10 +556,20 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                             '${session.createdAt.day}/${session.createdAt.month}/${session.createdAt.year} ${session.createdAt.hour.toString().padLeft(2, '0')}:${session.createdAt.minute.toString().padLeft(2, '0')}',
                             style: const TextStyle(fontSize: 11, color: Colors.grey),
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
-                            onPressed: () => _deleteSession(session.id),
-                            tooltip: 'Hapus Sesi',
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blueGrey),
+                                onPressed: () => _editSessionTitle(session),
+                                tooltip: localizationService.isEnglish ? 'Edit Title' : 'Edit Judul',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                                onPressed: () => _deleteSession(session.id),
+                                tooltip: localizationService.isEnglish ? 'Delete Session' : 'Hapus Sesi',
+                              ),
+                            ],
                           ),
                           onTap: () => _selectSession(session),
                         );

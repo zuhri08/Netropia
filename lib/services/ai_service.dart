@@ -52,6 +52,18 @@ class ChatSessionItem {
     required this.messages,
   });
 
+  ChatSessionItem copyWith({
+    String? title,
+    List<ChatMessage>? messages,
+  }) {
+    return ChatSessionItem(
+      id: id,
+      title: title ?? this.title,
+      createdAt: createdAt,
+      messages: messages ?? this.messages,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         'id': id,
         'title': title,
@@ -87,8 +99,8 @@ class AiService {
   static const String _ds2 = '30898c53a01d865337b';
   static String get _deepSeekApiKey => '$_ds1$_ds2';
 
-  static const String _gm1 = 'AIzaSyBseGwZ2jVs89y6';
-  static const String _gm2 = 'en7DSunBiAJKN49nqdE';
+  static const String _gm1 = 'AQ.Ab8RN6Jx8i7NZIBLgIYNS';
+  static const String _gm2 = 'Azua4bQGNgFPrCt984i-7KqqC7vQg';
   static String get _geminiApiKey => '$_gm1$_gm2';
 
   late final GenerativeModel _model = GenerativeModel(
