@@ -1323,7 +1323,7 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 10),
-              ...docs.map((doc) {
+              ...displayDocs.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),

@@ -15,7 +15,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
-  TextEditingController();
+      TextEditingController();
 
   bool obscurePassword = true;
   bool obscureConfirmPassword = true;
@@ -38,13 +38,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final password = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    // Validasi nama
     if (name.isEmpty) {
       showMessage('Nama lengkap harus diisi.');
       return;
     }
 
-    // Validasi NISN / NIP untuk Siswa
     if (selectedRole == 'siswa') {
       if (nisn.isEmpty) {
         showMessage('NISN harus diisi.');
@@ -60,13 +58,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     }
 
-    // Validasi email
     if (email.isEmpty) {
       showMessage('Email harus diisi.');
       return;
     }
 
-    // Validasi password
     if (password.isEmpty) {
       showMessage('Password harus diisi.');
       return;
@@ -77,7 +73,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // Validasi konfirmasi password
     if (confirmPassword.isEmpty) {
       showMessage('Konfirmasi password harus diisi.');
       return;
@@ -93,9 +88,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      // Membuat akun Firebase Authentication
       final UserCredential userCredential =
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
@@ -103,75 +97,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final User? user = userCredential.user;
 
       if (user == null) {
-        throw Exception('Akun gagal dibuat.');
+        throw Exception('Gagal membuat akun.');
       }
 
-      // Menyimpan data ke Firestore
+      await user.updateDisplayName(name);
+
+      final userData = {
+        'uid': user.uid,
+        'nama': name,
+        'email': email,
+        'role': selectedRole,
+        'nisn': selectedRole == 'siswa' ? nisn : '-',
+        'kelas': selectedRole == 'siswa' ? (selectedClass ?? 'X TKJ 1') : 'Guru TKJ',
+        'photoUrl': '',
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(user.uid)
-          .set({
-        'uid': user.uid,
-        'nama': name,
-        'nisn': nisn.isNotEmpty ? nisn : (selectedRole == 'guru' ? 'NIP-GURU' : '-'),
-        'kelas': selectedRole == 'guru' ? 'Guru TKJ' : (selectedClass ?? '-'),
-        'email': email,
-        'role': selectedRole,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+          .set(userData);
 
       if (!mounted) return;
 
-      showMessage('Pendaftaran berhasil! Silakan login.');
-
-      // Logout setelah registrasi
-      await FirebaseAuth.instance.signOut();
-
-      if (!mounted) return;
-
-      await Future.delayed(const Duration(milliseconds: 800));
-
-      if (!mounted) return;
+      showMessage('Pendaftaran berhasil! Silakan masuk ke akun Anda.');
 
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String message;
-
       switch (e.code) {
         case 'email-already-in-use':
-          message = 'Email tersebut sudah terdaftar.';
+          message = 'Email ini sudah terdaftar. Gunakan email lain atau langsung login.';
           break;
-
         case 'invalid-email':
           message = 'Format email tidak valid.';
           break;
-
         case 'weak-password':
-          message = 'Password terlalu lemah.';
+          message = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
           break;
-
-        case 'operation-not-allowed':
-          message = 'Pendaftaran email/password belum diaktifkan di Firebase.';
-          break;
-
         case 'network-request-failed':
-          message = 'Tidak ada koneksi internet.';
+          message = 'Tidak dapat terhubung ke internet.';
           break;
-
         default:
           message = 'Pendaftaran gagal: ${e.message ?? e.code}';
       }
-
       if (mounted) {
         showMessage(message);
       }
     } on FirebaseException catch (e) {
       if (mounted) {
-        showMessage('Gagal menyimpan data akun: ${e.message ?? e.code}');
+        showMessage('Terjadi masalah pada database: ${e.message}');
       }
     } catch (e) {
       if (mounted) {
-        showMessage('Terjadi kesalahan saat pendaftaran: $e');
+        showMessage('Terjadi kesalahan saat pendaftaran.');
       }
     } finally {
       if (mounted) {
@@ -184,13 +163,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void showMessage(String message) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
       ),
     );
+  }
+
+  List<Widget> _buildSiswaFields(Color primaryColor) {
+    if (selectedRole != 'siswa') return [];
+    return [
+      const Text('NISN (10 Digit)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+      const SizedBox(height: 6),
+      TextField(
+        controller: nisnController,
+        keyboardType: TextInputType.number,
+        maxLength: 10,
+        decoration: InputDecoration(
+          hintText: 'Contoh: 0051234567',
+          counterText: '',
+          prefixIcon: Icon(Icons.badge_outlined, color: primaryColor, size: 20),
+          filled: true,
+          fillColor: const Color(0xFFF8FAFC),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+        ),
+      ),
+      const SizedBox(height: 16),
+      const Text('Pilih Kelas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+      const SizedBox(height: 6),
+      DropdownButtonFormField<String>(
+        value: selectedClass,
+        decoration: InputDecoration(
+          hintText: 'Pilih Kelas',
+          prefixIcon: Icon(Icons.class_outlined, color: primaryColor, size: 20),
+          filled: true,
+          fillColor: const Color(0xFFF8FAFC),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+        ),
+        items: classOptions
+            .where((c) => c != 'Guru TKJ')
+            .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+            .toList(),
+        onChanged: (val) {
+          if (val != null) setState(() => selectedClass = val);
+        },
+      ),
+      const SizedBox(height: 16),
+    ];
   }
 
   @override
@@ -200,401 +224,257 @@ class _RegisterScreenState extends State<RegisterScreen> {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    const primaryColor = Color(0xFFAD8B73);
+
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFBE9),
       appBar: AppBar(
-        title: Text(
-          selectedRole == 'guru' ? 'Daftar Akun Guru' : 'Daftar Akun Siswa',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('Daftar Akun Baru', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
-
-              // Icon
-              Center(
-                child: Icon(
-                  selectedRole == 'guru' ? Icons.supervisor_account : Icons.person_add,
-                  size: 70,
-                  color: const Color(0xFFAD8B73),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Judul
-              Center(
-                child: Text(
-                  selectedRole == 'guru' ? 'Buat Akun Guru / Pengajar' : 'Buat Akun Siswa',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              // Deskripsi
-              const Center(
-                child: Text(
-                  'Daftar untuk mengakses platform Netropia.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // =========================
-              // PILIH PERAN (ROLE)
-              // =========================
-              const Text(
-                'Daftar Sebagai',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(14),
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(26),
+                  border: Border.all(color: primaryColor.withOpacity(0.2)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedRole = 'siswa';
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          decoration: BoxDecoration(
-                            color: selectedRole == 'siswa'
-                                ? const Color(0xFFAD8B73)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.school_rounded,
-                                size: 18,
-                                color: selectedRole == 'siswa'
-                                    ? Colors.white
-                                    : Colors.grey.shade700,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Siswa',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: selectedRole == 'siswa'
-                                      ? Colors.white
-                                      : Colors.grey.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
+                    const Center(
+                      child: Text(
+                        'Buat Akun Netropia',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: primaryColor,
                         ),
                       ),
                     ),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedRole = 'guru';
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 11),
-                          decoration: BoxDecoration(
-                            color: selectedRole == 'guru'
-                                ? const Color(0xFFAD8B73)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.person_outline_rounded,
-                                size: 18,
-                                color: selectedRole == 'guru'
-                                    ? Colors.white
-                                    : Colors.grey.shade700,
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Guru / Pengajar',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                  color: selectedRole == 'guru'
-                                      ? Colors.white
-                                      : Colors.grey.shade700,
+                    const SizedBox(height: 4),
+                    const Center(
+                      child: Text(
+                        'Isi data di bawah untuk memulai pembelajaran TKJ',
+                        style: TextStyle(fontSize: 12.5, color: Colors.grey),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Role Tab Selector
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedRole = 'siswa';
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: selectedRole == 'siswa'
+                                      ? primaryColor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.school_rounded,
+                                      size: 18,
+                                      color: selectedRole == 'siswa'
+                                          ? Colors.white
+                                          : Colors.grey.shade700,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Siswa',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.5,
+                                        color: selectedRole == 'siswa'
+                                            ? Colors.white
+                                            : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedRole = 'guru';
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                decoration: BoxDecoration(
+                                  color: selectedRole == 'guru'
+                                      ? primaryColor
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline_rounded,
+                                      size: 18,
+                                      color: selectedRole == 'guru'
+                                          ? Colors.white
+                                          : Colors.grey.shade700,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Guru / Pengajar',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13.5,
+                                        color: selectedRole == 'guru'
+                                            ? Colors.white
+                                            : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Nama Lengkap
+                    const Text('Nama Lengkap', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan nama lengkap',
+                        prefixIcon: const Icon(Icons.person_outline_rounded, color: primaryColor, size: 20),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // NISN & Kelas (Siswa)
+                    ..._buildSiswaFields(primaryColor),
+
+                    // Email
+                    const Text('Email', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'Masukkan email',
+                        prefixIcon: const Icon(Icons.email_outlined, color: primaryColor, size: 20),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password
+                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: passwordController,
+                      obscureText: obscurePassword,
+                      decoration: InputDecoration(
+                        hintText: 'Minimal 6 karakter',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: primaryColor, size: 20),
+                        suffixIcon: IconButton(
+                          icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey, size: 20),
+                          onPressed: () => setState(() => obscurePassword = !obscurePassword),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Konfirmasi Password
+                    const Text('Konfirmasi Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: obscureConfirmPassword,
+                      decoration: InputDecoration(
+                        hintText: 'Ulangi password',
+                        prefixIcon: const Icon(Icons.lock_clock_outlined, color: primaryColor, size: 20),
+                        suffixIcon: IconButton(
+                          icon: Icon(obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey, size: 20),
+                          onPressed: () => setState(() => obscureConfirmPassword = !obscureConfirmPassword),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF8FAFC),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Tombol Daftar
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        onPressed: isLoading ? null : register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 3,
+                          shadowColor: primaryColor.withOpacity(0.4),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        icon: isLoading
+                            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            : const Icon(Icons.person_add_rounded, size: 20),
+                        label: Text(
+                          isLoading ? 'Mendaftarkan...' : 'Daftar Akun Netropia',
+                          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
                   ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // NAMA LENGKAP
-              // =========================
-              const Text(
-                'Nama Lengkap',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: nameController,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                  hintText: selectedRole == 'guru' ? 'Masukkan nama lengkap & gelar' : 'Masukkan nama lengkap',
-                  prefixIcon: const Icon(Icons.person_outline),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // =========================
-              // NISN / NIP
-              // =========================
-              Text(
-                selectedRole == 'guru' ? 'NIP / Identitas Pegawai (Opsional)' : 'NISN',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: nisnController,
-                keyboardType: TextInputType.number,
-                maxLength: selectedRole == 'guru' ? 20 : 10,
-                decoration: InputDecoration(
-                  hintText: selectedRole == 'guru' ? 'Masukkan NIP (jika ada)' : 'Masukkan 10 digit NISN',
-                  prefixIcon: const Icon(Icons.badge_outlined),
-                  counterText: '',
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // =========================
-              // KELAS (SISWA SAJA)
-              // =========================
-              if (selectedRole == 'siswa') ...[
-                const Text(
-                  'Kelas',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                DropdownButtonFormField<String>(
-                  value: selectedClass,
-                  decoration: const InputDecoration(
-                    hintText: 'Pilih kelas',
-                    prefixIcon: Icon(Icons.class_outlined),
-                  ),
-                  items: classOptions.where((c) => c != 'Guru TKJ').map((String className) {
-                    return DropdownMenuItem<String>(
-                      value: className,
-                      child: Text(className),
-                    );
-                  }).toList(),
-                  onChanged: isLoading
-                      ? null
-                      : (String? value) {
-                    setState(() {
-                      selectedClass = value;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 18),
-              ],
-
-              // =========================
-              // EMAIL
-              // =========================
-              const Text(
-                'Email',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  hintText: 'Masukkan email',
-                  prefixIcon: Icon(Icons.email_outlined),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // =========================
-              // PASSWORD
-              // =========================
-              const Text(
-                'Password',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: passwordController,
-                obscureText: obscurePassword,
-                decoration: InputDecoration(
-                  hintText: 'Minimal 6 karakter',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        obscurePassword = !obscurePassword;
-                      });
-                    },
-                    icon: Icon(
-                      obscurePassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 18),
-
-              // =========================
-              // KONFIRMASI PASSWORD
-              // =========================
-              const Text(
-                'Konfirmasi Password',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: obscureConfirmPassword,
-                decoration: InputDecoration(
-                  hintText: 'Ulangi password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        obscureConfirmPassword =
-                        !obscureConfirmPassword;
-                      });
-                    },
-                    icon: Icon(
-                      obscureConfirmPassword
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // =========================
-              // TOMBOL DAFTAR
-              // =========================
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: isLoading ? null : register,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFAD8B73),
-                    foregroundColor: Colors.white,
-                  ),
-                  icon: isLoading
-                      ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                      : const Icon(Icons.person_add),
-                  label: Text(
-                    isLoading
-                        ? 'Mendaftarkan...'
-                        : (selectedRole == 'guru' ? 'Daftar Akun Guru' : 'Daftar Sekarang'),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // =========================
-              // KEMBALI KE LOGIN
-              // =========================
-              Center(
-                child: TextButton(
-                  onPressed: isLoading
-                      ? null
-                      : () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    'Sudah punya akun? Login',
-                  ),
                 ),
               ),
             ],

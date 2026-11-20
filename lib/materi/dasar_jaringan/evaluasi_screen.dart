@@ -20,9 +20,7 @@ class _EvaluasiScreenState extends State<EvaluasiScreen> {
   // ============================================================
 
   static const Color _primary = Color(0xFFAD8B73);
-  static const Color _primaryDark = Color(0xFF8E6F5B);
   static const Color _dark = Color(0xFF202A44);
-  static const Color _lightBlue = Color(0xFFFFF8E8);
   static const Color _border = Color(0xFFE8ECF4);
   static const Color _background = Color(0xFFF6F7FB);
 
