@@ -4,6 +4,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../services/ai_service.dart';
 import '../services/localization_service.dart';
+import '../theme/app_theme.dart';
 
 class NetropiaAiScreen extends StatefulWidget {
   final String? initialMessage;
@@ -26,10 +27,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   String? _activeSessionId;
 
   final AiService _aiService = AiService();
-
   bool _isLoading = false;
-
-  static const Color _primaryColor = Color(0xFFAD8B73);
 
   List<String> get _quickPrompts {
     if (localizationService.isEnglish) {
@@ -40,7 +38,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         'Difference between TCP and UDP',
         'Functions of Router and Switch',
         '7 OSI Layers',
-        'Give me a TKJ quiz',
       ];
     }
     return [
@@ -50,14 +47,12 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       'Perbedaan TCP dan UDP',
       'Fungsi Router dan Switch',
       '7 Lapisan OSI Layer',
-      'Beri saya kuis TKJ',
     ];
   }
 
   @override
   void initState() {
     super.initState();
-
     _loadHistoryOrWelcome();
   }
 
@@ -78,11 +73,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     }
 
     final initialMessage = widget.initialMessage?.trim();
-
     if (initialMessage != null && initialMessage.isNotEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-
         _controller.text = initialMessage;
         _handleSend();
       });
@@ -93,7 +86,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
-
     super.dispose();
   }
 
@@ -112,11 +104,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   void _startNewChat({bool savePrevious = true}) {
     if (_isLoading) return;
-
     if (savePrevious && _messages.isNotEmpty) {
       _saveCurrentSession();
     }
-
     _aiService.resetChat();
 
     final newId = DateTime.now().millisecondsSinceEpoch.toString();
@@ -176,7 +166,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       Navigator.of(context).pop();
       return;
     }
-
     _saveCurrentSession();
     _aiService.resetChat();
 
@@ -203,7 +192,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         }
       }
     });
-
     _aiService.saveAllSessions(_sessions);
   }
 
@@ -213,9 +201,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          localizationService.isEnglish ? 'Edit Chat Title' : 'Edit Judul Riwayat',
-        ),
+        title: Text(localizationService.isEnglish ? 'Edit Chat Title' : 'Edit Judul Riwayat'),
         content: TextField(
           controller: editController,
           autofocus: true,
@@ -231,7 +217,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: _primaryColor,
+              backgroundColor: AppTheme.primaryTeal,
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -256,7 +242,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   Future<void> _handleSend() async {
     final text = _controller.text.trim();
-
     if (text.isEmpty || _isLoading) return;
 
     _controller.clear();
@@ -270,7 +255,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           timestamp: DateTime.now(),
         ),
       );
-
       _isLoading = true;
     });
 
@@ -279,7 +263,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
     try {
       final response = await _aiService.getChatResponse(text);
-
       if (!mounted) return;
 
       setState(() {
@@ -291,7 +274,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
             timestamp: DateTime.now(),
           ),
         );
-
         _isLoading = false;
       });
 
@@ -299,7 +281,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       _scrollToBottom();
     } catch (error) {
       if (!mounted) return;
-
       setState(() {
         _isLoading = false;
       });
@@ -318,7 +299,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   void _clearChat() {
     _aiService.resetChat();
-
     if (_activeSessionId != null) {
       _deleteSession(_activeSessionId!);
     } else {
@@ -329,7 +309,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scrollController.hasClients) return;
-
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
@@ -340,9 +319,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   Future<void> _copyToClipboard(String text) async {
     await Clipboard.setData(ClipboardData(text: text));
-
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -357,7 +334,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   void _sendQuickPrompt(String prompt) {
     if (_isLoading) return;
-
     _controller.text = prompt;
     _handleSend();
   }
@@ -386,7 +362,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                           if (index == _messages.length) {
                             return _buildLoadingBubble();
                           }
-
                           return _buildChatBubble(
                             _messages[index],
                             isDark,
@@ -394,10 +369,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                         },
                       ),
               ),
-
-              if (_messages.length <= 2 && !_isLoading)
-                _buildQuickPrompts(),
-
+              if (_messages.length <= 2 && !_isLoading) _buildQuickPrompts(),
               _buildInputArea(isDark),
             ],
           ),
@@ -408,7 +380,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: _primaryColor,
+      backgroundColor: AppTheme.primaryTeal,
       foregroundColor: Colors.white,
       elevation: 0,
       title: Row(
@@ -416,7 +388,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: Colors.white.withAlpha(51),
+              color: Colors.white.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -429,9 +401,9 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                localizationService.translate('ai_assistant'),
-                style: const TextStyle(
+              const Text(
+                'Netropia AI',
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -442,13 +414,13 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                     width: 7,
                     height: 7,
                     decoration: const BoxDecoration(
-                      color: Colors.lightGreenAccent,
+                      color: Color(0xFF4ADE80),
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 5),
                   const Text(
-                    'Firebase AI',
+                    'Firebase AI · Siap membantu',
                     style: TextStyle(
                       fontSize: 10,
                       color: Colors.white70,
@@ -487,13 +459,13 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   Widget _buildHistoryDrawer(bool isDark) {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.78,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF162522) : Colors.white,
       child: SafeArea(
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              color: _primaryColor,
+              color: AppTheme.primaryTeal,
               child: Row(
                 children: [
                   const Icon(Icons.history_rounded, color: Colors.white),
@@ -520,10 +492,10 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
             ),
             Expanded(
               child: _sessions.isEmpty
-                  ? Center(
+                  ? const Center(
                       child: Text(
-                        localizationService.isEnglish ? 'No chat history' : 'Belum ada riwayat',
-                        style: TextStyle(color: Colors.grey.shade500),
+                        'Belum ada riwayat',
+                        style: TextStyle(color: AppTheme.textMuted),
                       ),
                     )
                   : ListView.separated(
@@ -536,10 +508,10 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
                         return ListTile(
                           selected: isActive,
-                          selectedTileColor: _primaryColor.withAlpha(30),
+                          selectedTileColor: AppTheme.tealTint,
                           leading: Icon(
                             isActive ? Icons.chat_rounded : Icons.chat_bubble_outline_rounded,
-                            color: isActive ? _primaryColor : Colors.grey,
+                            color: isActive ? AppTheme.primaryTeal : AppTheme.textMuted,
                             size: 20,
                           ),
                           title: Text(
@@ -549,25 +521,23 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                             style: TextStyle(
                               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                               fontSize: 13,
-                              color: isDark ? Colors.white : Colors.black87,
+                              color: isDark ? Colors.white : AppTheme.textDark,
                             ),
                           ),
                           subtitle: Text(
-                            '${session.createdAt.day}/${session.createdAt.month}/${session.createdAt.year} ${session.createdAt.hour.toString().padLeft(2, '0')}:${session.createdAt.minute.toString().padLeft(2, '0')}',
-                            style: const TextStyle(fontSize: 11, color: Colors.grey),
+                            '${session.createdAt.day}/${session.createdAt.month}/${session.createdAt.year}',
+                            style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blueGrey),
+                                icon: const Icon(Icons.edit_outlined, size: 18, color: AppTheme.textMuted),
                                 onPressed: () => _editSessionTitle(session),
-                                tooltip: localizationService.isEnglish ? 'Edit Title' : 'Edit Judul',
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppTheme.accentRed),
                                 onPressed: () => _deleteSession(session.id),
-                                tooltip: localizationService.isEnglish ? 'Delete Session' : 'Hapus Sesi',
                               ),
                             ],
                           ),
@@ -583,21 +553,19 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             Icons.chat_bubble_outline_rounded,
-            size: 80,
-            color: Colors.grey.shade300,
+            size: 70,
+            color: AppTheme.textMuted,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 14),
           Text(
-            localizationService.isEnglish ? 'No conversation yet' : 'Belum ada percakapan',
-            style: const TextStyle(
-              color: Colors.grey,
-            ),
+            'Belum ada percakapan',
+            style: TextStyle(color: AppTheme.textMuted),
           ),
         ],
       ),
@@ -606,13 +574,12 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   Widget _buildChatBubble(ChatMessage message, bool isDark) {
     final isUser = message.isUser;
-
     final textColor = isUser
         ? Colors.white
-        : (isDark ? Colors.white : Colors.black87);
+        : (isDark ? Colors.white : AppTheme.textDark);
 
     final bubbleColor = isUser
-        ? _primaryColor
+        ? AppTheme.primaryTeal
         : (isDark ? Theme.of(context).cardColor : Colors.white);
 
     return Align(
@@ -620,24 +587,22 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.82,
+          maxWidth: MediaQuery.of(context).size.width * 0.84,
         ),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: bubbleColor,
           borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(18),
-            topRight: const Radius.circular(18),
-            bottomLeft: Radius.circular(isUser ? 18 : 0),
-            bottomRight: Radius.circular(isUser ? 0 : 18),
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isUser ? 16 : 4),
+            bottomRight: Radius.circular(isUser ? 4 : 16),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withAlpha(15),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(
+            color: isUser
+                ? Colors.transparent
+                : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -659,31 +624,28 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
               ),
 
             if (!isUser) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: InkWell(
                   onTap: () => _copyToClipboard(message.message),
                   borderRadius: BorderRadius.circular(8),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 4,
-                    ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.copy_rounded,
                           size: 14,
-                          color: Colors.grey,
+                          color: AppTheme.textMuted,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         Text(
-                          localizationService.isEnglish ? 'Copy' : 'Salin',
-                          style: const TextStyle(
+                          'Salin',
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey,
+                            color: AppTheme.textMuted,
                           ),
                         ),
                       ],
@@ -698,122 +660,46 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     );
   }
 
-  MarkdownStyleSheet _buildMarkdownStyle(
-      Color textColor,
-      bool isDark,
-      ) {
-    final codeBackground = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFF0EDE9);
-
+  MarkdownStyleSheet _buildMarkdownStyle(Color textColor, bool isDark) {
+    final codeBackground = isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream;
     return MarkdownStyleSheet(
-      p: TextStyle(
-        color: textColor,
-        fontSize: 13.5,
-        height: 1.55,
-      ),
-      h1: TextStyle(
-        color: textColor,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-        height: 1.4,
-      ),
-      h2: TextStyle(
-        color: textColor,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        height: 1.4,
-      ),
-      h3: TextStyle(
-        color: textColor,
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        height: 1.4,
-      ),
-      strong: TextStyle(
-        color: textColor,
-        fontWeight: FontWeight.bold,
-      ),
-      em: TextStyle(
-        color: textColor,
-        fontStyle: FontStyle.italic,
-      ),
-      listBullet: TextStyle(
-        color: textColor,
-        fontSize: 13.5,
-      ),
-      code: TextStyle(
-        color: textColor,
-        fontSize: 12.5,
-        fontFamily: 'monospace',
-        backgroundColor: codeBackground,
-      ),
-      codeblockDecoration: BoxDecoration(
-        color: codeBackground,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      blockquote: TextStyle(
-        color: textColor.withAlpha(190),
-        fontSize: 13.5,
-        height: 1.5,
-      ),
-      blockquoteDecoration: const BoxDecoration(
-        border: Border(
-          left: BorderSide(
-            color: _primaryColor,
-            width: 3,
-          ),
-        ),
-      ),
-      horizontalRuleDecoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: isDark ? Colors.white24 : Colors.black12,
-          ),
-        ),
-      ),
-      a: const TextStyle(
-        color: _primaryColor,
-        decoration: TextDecoration.underline,
-      ),
+      p: TextStyle(color: textColor, fontSize: 13.5, height: 1.5),
+      h1: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+      h2: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
+      strong: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+      code: TextStyle(color: textColor, fontSize: 12.5, fontFamily: 'monospace', backgroundColor: codeBackground),
+      codeblockDecoration: BoxDecoration(color: codeBackground, borderRadius: BorderRadius.circular(8)),
+      a: const TextStyle(color: AppTheme.primaryTeal, decoration: TextDecoration.underline),
     );
   }
 
   Widget _buildLoadingBubble() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? Theme.of(context).cardColor : Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.borderCream),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(
+            SizedBox(
               width: 14,
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: _primaryColor,
+                color: AppTheme.primaryTeal,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Text(
-              localizationService.isEnglish
-                  ? 'Netropia AI is processing response...'
-                  : 'Netropia AI sedang memproses jawaban...',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              'Netropia AI sedang memproses jawaban...',
+              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
             ),
           ],
         ),
@@ -822,57 +708,66 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   }
 
   Widget _buildQuickPrompts() {
-    return Container(
-      height: 42,
-      margin: const EdgeInsets.only(bottom: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _quickPrompts.length,
-        itemBuilder: (context, index) {
-          final prompt = _quickPrompts[index];
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ActionChip(
-              avatar: const Icon(
-                Icons.auto_awesome_rounded,
-                size: 14,
-                color: _primaryColor,
-              ),
-              label: Text(
-                prompt,
-                style: const TextStyle(fontSize: 12),
-              ),
-              backgroundColor: Theme.of(context).cardColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: _primaryColor.withAlpha(77),
-                ),
-              ),
-              onPressed: _isLoading
-                  ? null
-                  : () => _sendQuickPrompt(prompt),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Text(
+            'COBA TANYAKAN',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
+              color: AppTheme.textMuted,
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        SizedBox(
+          height: 40,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _quickPrompts.length,
+            itemBuilder: (context, index) {
+              final prompt = _quickPrompts[index];
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  avatar: const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 14,
+                    color: AppTheme.primaryTeal,
+                  ),
+                  label: Text(
+                    prompt,
+                    style: const TextStyle(fontSize: 12, color: AppTheme.textDark),
+                  ),
+                  backgroundColor: AppTheme.surfaceCream,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    side: const BorderSide(color: AppTheme.borderCream),
+                  ),
+                  onPressed: _isLoading ? null : () => _sendQuickPrompt(prompt),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildInputArea(bool isDark) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 82),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 95),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+        border: Border(
+          top: BorderSide(
+            color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
           ),
-        ],
+        ),
       ),
       child: Row(
         children: [
@@ -884,18 +779,13 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
               minLines: 1,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: localizationService.translate('ask_ai_placeholder'),
-                hintStyle: const TextStyle(fontSize: 13.5),
+                hintText: 'Tanyakan tentang materi TKJ...',
+                hintStyle: const TextStyle(fontSize: 13.5, color: AppTheme.textMuted),
                 filled: true,
-                fillColor: isDark
-                    ? const Color(0xFF1E1E1E)
-                    : const Color(0xFFF5F7FA),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -905,7 +795,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           const SizedBox(width: 10),
           Container(
             decoration: const BoxDecoration(
-              color: _primaryColor,
+              color: AppTheme.primaryTeal,
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -915,7 +805,6 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                 size: 20,
               ),
               onPressed: _isLoading ? null : _handleSend,
-              tooltip: localizationService.isEnglish ? 'Send message' : 'Kirim pesan',
             ),
           ),
         ],

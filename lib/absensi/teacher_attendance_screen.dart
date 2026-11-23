@@ -1,9 +1,9 @@
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../theme/app_theme.dart';
 
 class TeacherAttendanceScreen extends StatefulWidget {
   const TeacherAttendanceScreen({super.key});
@@ -782,13 +782,13 @@ class _TeacherAttendanceScreenState
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: const Color(0xFFF5EBE6),
+            color: AppTheme.tealTint,
             borderRadius:
             BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: const Color(0xFFAD8B73),
+            color: AppTheme.primaryTeal,
             size: 22,
           ),
         ),

@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../data/quiz_data.dart';
 import '../../services/progress_service.dart';
+import '../../theme/app_theme.dart';
 
 class PostTestScreen extends StatefulWidget {
   final String materiId;
@@ -11,23 +13,123 @@ class PostTestScreen extends StatefulWidget {
     super.key,
     this.materiId = 'dasar_jaringan',
     this.materiTitle = 'Dasar Jaringan',
-    this.themeColor = const Color(0xFF00838F),
+    this.themeColor = AppTheme.primaryTeal,
   });
 
   @override
   State<PostTestScreen> createState() => _PostTestScreenState();
 }
 
-class _PostTestScreenState extends State<PostTestScreen> {
+class _PostTestScreenState extends State<PostTestScreen> with WidgetsBindingObserver {
   int _currentQuestion = 0;
   late final List<Map<String, dynamic>> _questions;
   late final List<int?> _answers;
+  int _cheatViolations = 0;
+
+  // Countdown Timer
+  Timer? _timer;
+  int _remainingSeconds = 600; // 10 menit
+  bool _isSubmitted = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _questions = QuizData.getPostTestQuestions(widget.materiId);
     _answers = List<int?>.filled(_questions.length, null);
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_remainingSeconds > 0) {
+        if (mounted) {
+          setState(() {
+            _remainingSeconds--;
+          });
+        }
+      } else {
+        _timer?.cancel();
+        if (!_isSubmitted && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Waktu ujian telah habis! Jawaban otomatis dikumpulkan.'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _showResult();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _triggerCheatAlert();
+    }
+  }
+
+  void _triggerCheatAlert() {
+    if (_isSubmitted) return;
+    _cheatViolations++;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: AppTheme.accentRed, size: 28),
+            SizedBox(width: 8),
+            Text(
+              'DETEKSI KECURANGAN!',
+              style: TextStyle(color: AppTheme.accentRed, fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Kamu terdeteksi meninggalkan layar ujian / membuka aplikasi atau tab lain (Pelanggaran ke-$_cheatViolations).',
+              style: const TextStyle(fontSize: 13, height: 1.4, color: AppTheme.textDark),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.accentRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text(
+                'Aktivitas kecurangan ini telah dicatat ke database Guru!',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.accentRed),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.accentRed,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Saya Mengerti'),
+          ),
+        ],
+      ),
+    );
   }
 
   bool get _isLastQuestion => _currentQuestion == _questions.length - 1;
@@ -49,6 +151,12 @@ class _PostTestScreenState extends State<PostTestScreen> {
     return ((_correctCount / _questions.length) * 100).round();
   }
 
+  String _formatTimer(int seconds) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
   void _selectAnswer(int index) {
     setState(() {
       _answers[_currentQuestion] = index;
@@ -59,7 +167,7 @@ class _PostTestScreenState extends State<PostTestScreen> {
     if (_answers[_currentQuestion] == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Silakan pilih salah satu jawaban terlebih dahulu.'),
+          content: Text('Pilih salah satu jawaban untuk melanjutkan.'),
           duration: Duration(seconds: 2),
         ),
       );
@@ -75,14 +183,11 @@ class _PostTestScreenState extends State<PostTestScreen> {
     }
   }
 
-  void _previousQuestion() {
-    if (_currentQuestion == 0) return;
-    setState(() {
-      _currentQuestion--;
-    });
-  }
-
   void _showResult() {
+    if (_isSubmitted) return;
+    _isSubmitted = true;
+    _timer?.cancel();
+
     ProgressService().setLessonCompleted('${widget.materiId}_post_test', true);
     ProgressService().saveActivity(
       title: 'Post Test - ${widget.materiTitle}',
@@ -102,7 +207,6 @@ class _PostTestScreenState extends State<PostTestScreen> {
           answers: _answers,
           materiId: widget.materiId,
           materiTitle: widget.materiTitle,
-          themeColor: widget.themeColor,
         ),
       ),
     );
@@ -110,9 +214,11 @@ class _PostTestScreenState extends State<PostTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (_questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text('Post Test - ${widget.materiTitle}')),
+        appBar: AppBar(title: Text('Post-Test - ${widget.materiTitle}')),
         body: const Center(child: Text('Tidak ada soal tersedia.')),
       );
     }
@@ -120,35 +226,48 @@ class _PostTestScreenState extends State<PostTestScreen> {
     final question = _questions[_currentQuestion];
     final options = question['options'] as List<String>;
     final selectedAnswer = _answers[_currentQuestion];
-
     final progress = (_currentQuestion + 1) / _questions.length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF172B4D),
+        backgroundColor: AppTheme.primaryTeal,
+        foregroundColor: Colors.white,
         elevation: 0,
-        centerTitle: false,
-        titleSpacing: 20,
         title: Text(
-          'Post Test - ${widget.materiTitle}',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
+          'Post-Test - ${widget.materiTitle}',
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Center(
-              child: Text(
-                '${_currentQuestion + 1} / ${_questions.length}',
-                style: const TextStyle(
-                  color: Color(0xFF667085),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+          // Timer Widget
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: _remainingSeconds < 60 ? AppTheme.accentRed : Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.timer_rounded, size: 16, color: Colors.white),
+                const SizedBox(width: 4),
+                Text(
+                  _formatTimer(_remainingSeconds),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12.5,
+                  ),
                 ),
+              ],
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 14),
+              child: Text(
+                '${_currentQuestion + 1}/${_questions.length}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -158,45 +277,109 @@ class _PostTestScreenState extends State<PostTestScreen> {
         children: [
           LinearProgressIndicator(
             value: progress,
-            minHeight: 3,
-            backgroundColor: const Color(0xFFE9EDF2),
-            valueColor: AlwaysStoppedAnimation<Color>(widget.themeColor),
+            minHeight: 4,
+            backgroundColor: AppTheme.borderCream,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentAmber),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.materiTitle.toUpperCase(),
-                    style: TextStyle(
-                      color: widget.themeColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.2,
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppTheme.tealTint,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      widget.materiTitle.toUpperCase(),
+                      style: const TextStyle(
+                        color: AppTheme.primaryTeal,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.0,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 14),
                   Text(
                     question['question'],
-                    style: const TextStyle(
-                      color: Color(0xFF172B4D),
-                      fontSize: 18,
-                      height: 1.35,
-                      fontWeight: FontWeight.w700,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : AppTheme.textDark,
+                      fontSize: 17,
+                      height: 1.4,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Pilih satu jawaban yang paling tepat.',
+                    style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  ),
+                  const SizedBox(height: 20),
                   ...List.generate(
                     options.length,
                     (index) {
-                      return _AnswerOption(
-                        label: String.fromCharCode(65 + index),
-                        text: options[index],
-                        selected: selectedAnswer == index,
-                        themeColor: widget.themeColor,
-                        onTap: () => _selectAnswer(index),
+                      final label = String.fromCharCode(65 + index);
+                      final isSelected = selectedAnswer == index;
+
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppTheme.tealTint
+                              : Theme.of(context).cardColor,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isSelected ? AppTheme.primaryTeal : AppTheme.borderCream,
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: InkWell(
+                          onTap: () => _selectAnswer(index),
+                          borderRadius: BorderRadius.circular(14),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? AppTheme.primaryTeal : AppTheme.surfaceCream,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(
+                                      color: isSelected ? Colors.white : AppTheme.textDark,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      options[index],
+                                      style: TextStyle(
+                                        color: isSelected ? AppTheme.primaryTeal : (isDark ? Colors.white : AppTheme.textDark),
+                                        fontSize: 13.5,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -204,177 +387,34 @@ class _PostTestScreenState extends State<PostTestScreen> {
               ),
             ),
           ),
-          _buildBottomBar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(
-            color: Color(0xFFE9EDF2),
-          ),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            if (_currentQuestion > 0) ...[
-              SizedBox(
-                height: 48,
-                child: OutlinedButton(
-                  onPressed: _previousQuestion,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF475467),
-                    side: const BorderSide(
-                      color: Color(0xFFD0D5DD),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 18),
-                  ),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    size: 19,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-            ],
-            Expanded(
-              child: SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _nextQuestion,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: widget.themeColor,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        _isLastQuestion ? 'Selesai' : 'Berikutnya',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Icon(
-                        _isLastQuestion
-                            ? Icons.check_rounded
-                            : Icons.arrow_forward_rounded,
-                        size: 19,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AnswerOption extends StatelessWidget {
-  final String label;
-  final String text;
-  final bool selected;
-  final Color themeColor;
-  final VoidCallback onTap;
-
-  const _AnswerOption({
-    required this.label,
-    required this.text,
-    required this.selected,
-    required this.themeColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 150),
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
+          Container(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
             decoration: BoxDecoration(
-              color: selected ? themeColor.withOpacity(0.10) : Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: selected ? themeColor : const Color(0xFFE1E6EC),
-                width: selected ? 1.5 : 1,
+              color: Theme.of(context).cardColor,
+              border: const Border(top: BorderSide(color: AppTheme.borderCream)),
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _nextQuestion,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryTeal,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(_isLastQuestion ? 'Selesai' : 'Selanjutnya', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    const SizedBox(width: 6),
+                    Icon(_isLastQuestion ? Icons.check_rounded : Icons.arrow_forward_rounded, size: 18),
+                  ],
+                ),
               ),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 34,
-                  height: 34,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: selected ? themeColor : const Color(0xFFF2F4F7),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: selected ? Colors.white : const Color(0xFF667085),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 3),
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        color: selected ? themeColor : const Color(0xFF344054),
-                        fontSize: 13,
-                        height: 1.45,
-                        fontWeight:
-                            selected ? FontWeight.w600 : FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                if (selected) ...[
-                  const SizedBox(width: 8),
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: themeColor,
-                    size: 20,
-                  ),
-                ],
-              ],
-            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -388,7 +428,6 @@ class PostTestResultScreen extends StatelessWidget {
   final List<int?> answers;
   final String materiId;
   final String materiTitle;
-  final Color themeColor;
 
   const PostTestResultScreen({
     super.key,
@@ -397,282 +436,71 @@ class PostTestResultScreen extends StatelessWidget {
     required this.wrong,
     required this.questions,
     required this.answers,
-    this.materiId = 'dasar_jaringan',
-    this.materiTitle = 'Dasar Jaringan',
-    this.themeColor = const Color(0xFF00838F),
+    required this.materiId,
+    required this.materiTitle,
   });
-
-  String get _message {
-    if (score >= 80) {
-      return 'Pemahaman kamu terhadap materi $materiTitle sudah sangat baik! Selamat!';
-    }
-    if (score >= 60) {
-      return 'Pemahaman dasar materi $materiTitle sudah terbentuk. Beberapa konsep masih dapat diperdalam kembali.';
-    }
-    return 'Beberapa konsep dalam materi $materiTitle masih perlu dipelajari kembali. Gunakan materi $materiTitle sebagai bahan pendalaman.';
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF172B4D),
+        title: Text('Hasil Post-Test - $materiTitle', style: const TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: AppTheme.primaryTeal,
+        foregroundColor: Colors.white,
         elevation: 0,
-        titleSpacing: 20,
-        title: Text(
-          'Hasil Post Test - $materiTitle',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const SizedBox(height: 16),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: AppTheme.borderCream),
               ),
               child: Column(
                 children: [
-                  const Text(
-                    'Post Test Selesai',
-                    style: TextStyle(
-                      color: Color(0xFF172B4D),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
                   Text(
-                    materiTitle,
-                    style: const TextStyle(
-                      color: Color(0xFF667085),
-                      fontSize: 13,
-                    ),
+                    '$score',
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
                   ),
-                  const SizedBox(height: 28),
-                  SizedBox(
-                    width: 130,
-                    height: 130,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 130,
-                          height: 130,
-                          child: CircularProgressIndicator(
-                            value: score / 100,
-                            strokeWidth: 9,
-                            backgroundColor: const Color(0xFFE9EDF2),
-                            valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              '$score',
-                              style: const TextStyle(
-                                color: Color(0xFF172B4D),
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const Text(
-                              '/ 100',
-                              style: TextStyle(
-                                color: Color(0xFF98A2B3),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 28),
+                  const Text('Skor Akhir', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
+                  const SizedBox(height: 20),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Expanded(
-                        child: _ResultItem(
-                          value: '$correct',
-                          label: 'Benar',
-                          icon: Icons.check_rounded,
-                          color: const Color(0xFF2E7D32),
-                        ),
+                      Column(
+                        children: [
+                          Text('$correct', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+                          const Text('Benar', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                        ],
                       ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _ResultItem(
-                          value: '$wrong',
-                          label: 'Salah',
-                          icon: Icons.close_rounded,
-                          color: const Color(0xFFC62828),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _ResultItem(
-                          value: '${questions.length}',
-                          label: 'Soal',
-                          icon: Icons.assignment_outlined,
-                          color: themeColor,
-                        ),
+                      Column(
+                        children: [
+                          Text('$wrong', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.accentRed)),
+                          const Text('Salah', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: themeColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline_rounded,
-                    color: themeColor,
-                    size: 21,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _message,
-                      style: const TextStyle(
-                        color: Color(0xFF344054),
-                        fontSize: 12.5,
-                        height: 1.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: Text(
-                  'Kembali ke $materiTitle',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Kembali ke Modul'),
               ),
             ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PostTestScreen(
-                        materiId: materiId,
-                        materiTitle: materiTitle,
-                        themeColor: themeColor,
-                      ),
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: themeColor,
-                  side: BorderSide(color: themeColor.withOpacity(0.4)),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Ulangi Post Test',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ResultItem extends StatelessWidget {
-  final String value;
-  final String label;
-  final IconData icon;
-  final Color color;
-
-  const _ResultItem({
-    required this.value,
-    required this.label,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF667085),
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

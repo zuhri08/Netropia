@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/app_theme.dart';
 import 'main_screen.dart';
 import 'register_screen.dart';
 
@@ -20,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool obscurePassword = true;
   bool isLoading = false;
   bool rememberMe = false;
-  String selectedRoleMode = 'siswa'; // 'siswa' or 'guru'
+  String selectedRoleMode = 'siswa';
 
   @override
   void initState() {
@@ -210,34 +211,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFAD8B73);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBE9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 30, 24, 30),
+          padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
           child: Column(
             children: [
               // Logo Header Area
               Center(
                 child: Container(
-                  width: 90,
-                  height: 90,
-                  padding: const EdgeInsets.all(6),
+                  width: 86,
+                  height: 86,
+                  padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.18),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
+                        color: AppTheme.primaryTeal.withOpacity(0.18),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                     child: Image.asset(
                       'assets/icon/app_icon.png',
                       fit: BoxFit.cover,
@@ -245,39 +246,41 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               const Text(
                 'NETROPIA',
                 style: TextStyle(
-                  fontSize: 28,
+                  fontSize: 26,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
-                  color: primaryColor,
+                  color: AppTheme.primaryTeal,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               const Text(
                 'Interactive Learning Platform',
                 style: TextStyle(
-                  color: Color(0xFF7A685A),
-                  fontSize: 13.5,
+                  color: AppTheme.textMuted,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
               // Form Card
               Container(
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(26),
-                  border: Border.all(color: primaryColor.withOpacity(0.2)),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: primaryColor.withOpacity(0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -286,10 +289,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     // Role Selector Tab (Siswa / Guru)
                     Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(16),
+                        color: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
@@ -302,41 +305,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(vertical: 11),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRoleMode == 'siswa'
-                                      ? primaryColor
+                                      ? AppTheme.primaryTeal
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: selectedRoleMode == 'siswa'
-                                      ? [
-                                          BoxShadow(
-                                            color: primaryColor.withOpacity(0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                      : [],
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.school_rounded,
-                                      size: 18,
+                                      size: 17,
                                       color: selectedRoleMode == 'siswa'
                                           ? Colors.white
-                                          : Colors.grey.shade700,
+                                          : AppTheme.textMuted,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Siswa',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13.5,
+                                        fontSize: 13,
                                         color: selectedRoleMode == 'siswa'
                                             ? Colors.white
-                                            : Colors.grey.shade700,
+                                            : AppTheme.textMuted,
                                       ),
                                     ),
                                   ],
@@ -353,41 +347,32 @@ class _LoginScreenState extends State<LoginScreen> {
                               },
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.symmetric(vertical: 11),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRoleMode == 'guru'
-                                      ? primaryColor
+                                      ? AppTheme.primaryTeal
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: selectedRoleMode == 'guru'
-                                      ? [
-                                          BoxShadow(
-                                            color: primaryColor.withOpacity(0.3),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ]
-                                      : [],
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.person_outline_rounded,
-                                      size: 18,
+                                      size: 17,
                                       color: selectedRoleMode == 'guru'
                                           ? Colors.white
-                                          : Colors.grey.shade700,
+                                          : AppTheme.textMuted,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Guru',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13.5,
+                                        fontSize: 13,
                                         color: selectedRoleMode == 'guru'
                                             ? Colors.white
-                                            : Colors.grey.shade700,
+                                            : AppTheme.textMuted,
                                       ),
                                     ),
                                   ],
@@ -398,64 +383,58 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 20),
 
                     // Field Email
-                    const Text(
+                    Text(
                       'Email',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13.5,
-                        color: Color(0xFF2C2C2C),
+                        fontSize: 13,
+                        color: isDark ? Colors.white : AppTheme.textDark,
                       ),
                     ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan email',
-                        prefixIcon: const Icon(Icons.email_outlined, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryTeal, size: 20),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: primaryColor, width: 2),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // Field Password
-                    const Text(
+                    Text(
                       'Password',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13.5,
-                        color: Color(0xFF2C2C2C),
+                        fontSize: 13,
+                        color: isDark ? Colors.white : AppTheme.textDark,
                       ),
                     ),
                     const SizedBox(height: 6),
                     TextField(
                       controller: passwordController,
                       obscureText: obscurePassword,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan password',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryTeal, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(
                             obscurePassword
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
-                            color: Colors.grey,
+                            color: AppTheme.textMuted,
                             size: 20,
                           ),
                           onPressed: () {
@@ -465,18 +444,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(14),
-                          borderSide: const BorderSide(color: primaryColor, width: 2),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                     ),
@@ -495,7 +466,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           'Lupa Password?',
                           style: TextStyle(
-                            color: primaryColor,
+                            color: AppTheme.primaryTeal,
                             fontWeight: FontWeight.bold,
                             fontSize: 12.5,
                           ),
@@ -508,13 +479,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       children: [
                         SizedBox(
-                          width: 24,
-                          height: 24,
+                          width: 22,
+                          height: 22,
                           child: Checkbox(
                             value: rememberMe,
-                            activeColor: primaryColor,
+                            activeColor: AppTheme.primaryTeal,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             onChanged: (value) {
                               setState(() {
@@ -524,27 +495,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'Ingat Saya',
-                          style: TextStyle(fontSize: 13, color: Color(0xFF2C2C2C)),
+                          style: TextStyle(fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
 
                     // Tombol Login
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 48,
                       child: ElevatedButton.icon(
                         onPressed: isLoading ? null : login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
+                          backgroundColor: AppTheme.primaryTeal,
                           foregroundColor: Colors.white,
-                          elevation: 3,
-                          shadowColor: primaryColor.withOpacity(0.4),
+                          elevation: 0,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                         icon: isLoading
@@ -560,7 +530,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: Text(
                           isLoading ? 'Memproses...' : 'Masuk ke Netropia',
                           style: const TextStyle(
-                            fontSize: 15.5,
+                            fontSize: 14.5,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -569,7 +539,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 22),
 
               // Footer
               Row(
@@ -577,7 +547,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text(
                     'Belum punya akun? ',
-                    style: TextStyle(fontSize: 13.5, color: Colors.grey),
+                    style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -592,17 +562,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Daftar sekarang',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                        fontSize: 13.5,
+                        color: AppTheme.primaryTeal,
+                        fontSize: 13,
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 16),
               const Text(
                 'Netropia • Platform Pembelajaran Interaktif',
-                style: TextStyle(fontSize: 11.5, color: Colors.grey),
+                style: TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
               ),
               const SizedBox(height: 10),
             ],

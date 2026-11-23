@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'cisco.dart';
 import '../services/localization_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/animated_pressable.dart';
 
 class VirtualLabScreen extends StatelessWidget {
   const VirtualLabScreen({super.key});
@@ -32,56 +34,65 @@ class VirtualLabScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListenableBuilder(
       listenable: localizationService,
       builder: (context, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(
-              localizationService.translate('virtual_lab'),
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: const Text(
+              'Virtual Lab',
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: const Color(0xFFAD8B73),
+            backgroundColor: AppTheme.primaryTeal,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
           body: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 100),
             children: [
-              // Hero Banner Card from Untitled.pdf
+              // Hero Banner Card from PDF
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      Color(0xFFAD8B73),
-                      Color(0xFFCEAB93),
+                      AppTheme.primaryTeal,
+                      AppTheme.darkTeal,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFAD8B73).withOpacity(0.2),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
+                      color: AppTheme.primaryTeal.withOpacity(0.22),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.science_rounded,
-                      color: Colors.white,
-                      size: 38,
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.18),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.science_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Text(
-                      localizationService.isEnglish ? 'Learn Through Direct Practice' : 'Belajar lewat praktik langsung',
+                      localizationService.isEnglish ? 'Learn Through Direct Practice' : 'Belajar lewat praktik langsung.',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
@@ -95,18 +106,19 @@ class VirtualLabScreen extends StatelessWidget {
                           : 'Asah kemampuan teknismu melalui laboratorium virtual.',
                       style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 13.5,
+                        fontSize: 13,
                         height: 1.4,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 22),
 
               // Simulation 01: Simulasi Jaringan
               _buildSimulationCard(
                 context,
+                isDark: isDark,
                 number: '01',
                 title: localizationService.isEnglish ? 'Network Simulation' : 'Simulasi Jaringan',
                 subtitle: localizationService.isEnglish
@@ -124,6 +136,7 @@ class VirtualLabScreen extends StatelessWidget {
               // Simulation 02: Rakit PC
               _buildSimulationCard(
                 context,
+                isDark: isDark,
                 number: '02',
                 title: localizationService.isEnglish ? 'PC Building' : 'Rakit PC',
                 subtitle: localizationService.isEnglish
@@ -136,6 +149,7 @@ class VirtualLabScreen extends StatelessWidget {
               // Simulation 03: Windows Simulator
               _buildSimulationCard(
                 context,
+                isDark: isDark,
                 number: '03',
                 title: 'Windows Simulator',
                 subtitle: localizationService.isEnglish
@@ -153,96 +167,89 @@ class VirtualLabScreen extends StatelessWidget {
 
   Widget _buildSimulationCard(
     BuildContext context, {
+    required bool isDark,
     required String number,
     required String title,
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFAD8B73).withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return AnimatedPressable(
+      onTap: onTap,
+      scaleFactor: 0.96,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(22),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFAD8B73).withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(icon, color: const Color(0xFFAD8B73), size: 26),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.tealTint,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Text(
-                      number,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFAD8B73),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.titleLarge?.color,
+                    child: Icon(icon, color: AppTheme.primaryTeal, size: 24),
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    color: Colors.grey,
-                    height: 1.4,
+                  Text(
+                    number,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryTeal,
+                    ),
                   ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.5,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : AppTheme.textDark,
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      localizationService.isEnglish ? 'Start simulation' : 'Mulai simulasi',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFAD8B73),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 16,
-                      color: Color(0xFFAD8B73),
-                    ),
-                  ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                  height: 1.4,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Text(
+                    localizationService.isEnglish ? 'Start simulation' : 'Mulai simulasi',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryTeal,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 16,
+                    color: AppTheme.primaryTeal,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

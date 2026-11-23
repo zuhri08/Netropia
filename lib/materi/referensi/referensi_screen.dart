@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../theme/app_theme.dart';
 import 'referensi_data.dart';
 
 class ReferensiScreen extends StatefulWidget {
@@ -38,87 +39,62 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
         .map((item) => item.kategori)
         .toSet()
         .toList();
-
     return ['Semua', ...categories];
   }
 
   List<ReferensiItem> get _filteredReferences {
     final query = _searchQuery.trim().toLowerCase();
-
     return _allReferences.where((item) {
-      final matchesCategory = _selectedCategory == 'Semua' ||
-          item.kategori == _selectedCategory;
-
+      final matchesCategory = _selectedCategory == 'Semua' || item.kategori == _selectedCategory;
       final matchesSearch = query.isEmpty ||
           item.nama.toLowerCase().contains(query) ||
           item.kategori.toLowerCase().contains(query) ||
           item.deskripsi.toLowerCase().contains(query);
-
       return matchesCategory && matchesSearch;
     }).toList();
   }
 
   Future<void> _openWebsite(String url) async {
     final uri = Uri.parse(url);
-
     try {
-      final success = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-
+      final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!success && mounted) {
-        _showMessage('Website tidak dapat dibuka.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Website tidak dapat dibuka.')),
+        );
       }
     } catch (e) {
-      if (!mounted) return;
-
-      _showMessage('Terjadi kesalahan saat membuka website.');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Terjadi kesalahan saat membuka website.')),
+        );
+      }
     }
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final references = _filteredReferences;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFAD8B73),
+        backgroundColor: AppTheme.primaryTeal,
         foregroundColor: Colors.white,
         elevation: 0,
-        titleSpacing: 20,
-        title: const Text(
-          'Referensi',
-          style: TextStyle(
-            fontSize: 19,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
+        title: const Text('Referensi', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(),
-            _buildSearch(),
-            _buildCategoryFilter(),
+            _buildSearch(isDark),
+            _buildCategoryFilter(isDark),
             Expanded(
               child: references.isEmpty
                   ? _buildEmptyState()
-                  : _buildReferenceList(references),
+                  : _buildReferenceList(references, isDark),
             ),
           ],
         ),
@@ -130,42 +106,32 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
     final total = _allReferences.length;
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(20, 14, 20, 14),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
+          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFAD8B73),
-            Color(0xFFCEAB93),
-          ],
         ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFAD8B73).withOpacity(0.18),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
           Container(
-            width: 58,
-            height: 58,
+            width: 50,
+            height: 50,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.13),
-              borderRadius: BorderRadius.circular(17),
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(
               Icons.auto_stories_rounded,
               color: Colors.white,
-              size: 29,
+              size: 26,
             ),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,28 +141,25 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
                   style: TextStyle(
                     color: Colors.white70,
                     fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.1,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 3),
                 Text(
                   widget.materiTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 3),
                 Text(
                   '$total sumber pilihan untuk memperluas pemahamanmu.',
                   style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 11.5,
-                    height: 1.4,
                   ),
                 ),
               ],
@@ -207,72 +170,42 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
     );
   }
 
-  Widget _buildSearch() {
+  Widget _buildSearch(bool isDark) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
       child: TextField(
         controller: _searchController,
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-          });
-        },
+        onChanged: (value) => setState(() => _searchQuery = value),
         decoration: InputDecoration(
           hintText: 'Cari sumber referensi...',
-          hintStyle: const TextStyle(
-            color: Color(0xFF98A2B3),
-            fontSize: 13,
-          ),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: Color(0xFFAD8B73),
-          ),
+          hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
+          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryTeal),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-            onPressed: () {
-              _searchController.clear();
-
-              setState(() {
-                _searchQuery = '';
-              });
-            },
-            icon: const Icon(
-              Icons.close_rounded,
-              size: 20,
-            ),
-          )
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchQuery = '');
+                  },
+                  icon: const Icon(Icons.close_rounded, size: 18),
+                )
               : null,
           filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 15,
-          ),
+          fillColor: Theme.of(context).cardColor,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: const BorderSide(
-              color: Color(0xFFAD8B73),
-              width: 1.5,
-            ),
+            borderRadius: BorderRadius.circular(14),
+            borderSide: const BorderSide(color: AppTheme.borderCream),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCategoryFilter() {
+  Widget _buildCategoryFilter(bool isDark) {
     return SizedBox(
-      height: 44,
+      height: 38,
       child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
         scrollDirection: Axis.horizontal,
         itemCount: _categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
@@ -289,359 +222,118 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
               });
             },
             labelStyle: TextStyle(
-              color: selected
-                  ? Colors.white
-                  : const Color(0xFF526071),
+              color: selected ? Colors.white : AppTheme.textDark,
               fontSize: 11,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
-            selectedColor: const Color(0xFFAD8B73),
-            backgroundColor: Colors.white,
-            side: BorderSide(
-              color: selected
-                  ? const Color(0xFFAD8B73)
-                  : const Color(0xFFE4E9EF),
-            ),
+            selectedColor: AppTheme.primaryTeal,
+            backgroundColor: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(16),
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 5,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
           );
         },
       ),
     );
   }
 
-  Widget _buildReferenceList(List<ReferensiItem> references) {
+  Widget _buildReferenceList(List<ReferensiItem> references, bool isDark) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+      padding: const EdgeInsets.fromLTRB(18, 12, 18, 30),
       itemCount: references.length,
       itemBuilder: (context, index) {
-        return _ReferenceCard(
-          item: references[index],
-          index: index,
-          onTap: () => _openWebsite(references[index].url),
+        final item = references[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.tealTint,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        item.kategori,
+                        style: const TextStyle(
+                          color: AppTheme.primaryTeal,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.nama,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textDark,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  item.deskripsi,
+                  style: const TextStyle(
+                    color: AppTheme.textMuted,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Text(
+                      'Sumber belajar eksternal',
+                      style: TextStyle(color: AppTheme.textMuted, fontSize: 10.5),
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      height: 32,
+                      child: ElevatedButton(
+                        onPressed: () => _openWebsite(item.url),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryTeal,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text('Kunjungi', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 76,
-              height: 76,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEAF2FF),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: const Icon(
-                Icons.search_off_rounded,
-                color: Color(0xFFAD8B73),
-                size: 34,
-              ),
-            ),
-            const SizedBox(height: 18),
-            const Text(
-              'Referensi tidak ditemukan',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF172B4D),
-                fontSize: 17,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 7),
-            const Text(
-              'Coba gunakan kata kunci atau kategori lain.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF718096),
-                fontSize: 12,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 18),
-            OutlinedButton(
-              onPressed: () {
-                setState(() {
-                  _searchController.clear();
-                  _searchQuery = '';
-                  _selectedCategory = 'Semua';
-                });
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFFAD8B73),
-                side: const BorderSide(
-                  color: Color(0xFFB9D1F2),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Text(
-                'Tampilkan Semua',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReferenceCard extends StatefulWidget {
-  final ReferensiItem item;
-  final int index;
-  final VoidCallback onTap;
-
-  const _ReferenceCard({
-    required this.item,
-    required this.index,
-    required this.onTap,
-  });
-
-  @override
-  State<_ReferenceCard> createState() => _ReferenceCardState();
-}
-
-class _ReferenceCardState extends State<_ReferenceCard> {
-  bool _pressed = false;
-
-  Color get _accentColor {
-    switch (widget.item.kategori) {
-      case 'K3 & K3LH':
-        return const Color(0xFFE67E22);
-
-      case 'Modul Pembelajaran':
-        return const Color(0xFF8E44AD);
-
-      case 'Materi Komputer':
-        return const Color(0xFFAD8B73);
-
-      case 'Networking':
-        return const Color(0xFF00838F);
-
-      case 'IP Address':
-        return const Color(0xFF2E7D32);
-
-      case 'Kabel Jaringan':
-        return const Color(0xFF6A4C93);
-
-      case 'Dasar Jaringan':
-        return const Color(0xFFAD8B73);
-
-      case 'Bacaan Tambahan':
-        return const Color(0xFFE65100);
-
-      case 'Teknologi':
-        return const Color(0xFF2E7D32);
-
-      default:
-        return const Color(0xFFAD8B73);
-    }
-  }
-
-  IconData get _icon {
-    switch (widget.item.kategori) {
-      case 'K3 & K3LH':
-        return Icons.health_and_safety_rounded;
-
-      case 'Modul Pembelajaran':
-        return Icons.menu_book_rounded;
-
-      case 'Materi Komputer':
-        return Icons.computer_rounded;
-
-      case 'Networking':
-        return Icons.account_tree_rounded;
-
-      case 'IP Address':
-        return Icons.dns_rounded;
-
-      case 'Kabel Jaringan':
-        return Icons.cable_rounded;
-
-      case 'Dasar Jaringan':
-        return Icons.lan_rounded;
-
-      case 'Bacaan Tambahan':
-        return Icons.library_books_rounded;
-
-      case 'Teknologi':
-        return Icons.code_rounded;
-
-      default:
-        return Icons.language_rounded;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = _accentColor;
-
-    return AnimatedScale(
-      scale: _pressed ? 0.985 : 1,
-      duration: const Duration(milliseconds: 100),
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 13),
-        child: Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          child: InkWell(
-            onTap: widget.onTap,
-            onTapDown: (_) {
-              setState(() {
-                _pressed = true;
-              });
-            },
-            onTapCancel: () {
-              setState(() {
-                _pressed = false;
-              });
-            },
-            onTapUp: (_) {
-              setState(() {
-                _pressed = false;
-              });
-            },
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: const Color(0xFFE8EDF3),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.035),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: color.withOpacity(0.09),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          _icon,
-                          color: color,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 13),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              widget.item.nama,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFF172B4D),
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: color.withOpacity(0.08),
-                                borderRadius:
-                                BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                widget.item.kategori,
-                                style: TextStyle(
-                                  color: color,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.arrow_outward_rounded,
-                        color: Colors.grey.shade400,
-                        size: 19,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    widget.item.deskripsi,
-                    style: const TextStyle(
-                      color: Color(0xFF667085),
-                      fontSize: 12,
-                      height: 1.55,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Sumber belajar eksternal',
-                          style: TextStyle(
-                            color: Colors.grey.shade500,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Kunjungi',
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        color: color,
-                        size: 18,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+    return const Center(
+      child: Text(
+        'Referensi tidak ditemukan',
+        style: TextStyle(color: AppTheme.textMuted),
       ),
     );
   }

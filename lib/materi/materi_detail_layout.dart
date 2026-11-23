@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/progress_service.dart';
 import 'referensi/referensi_screen.dart';
 
 import '../screens/learning_feature_screen.dart';
 import '../services/localization_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/animated_pressable.dart';
 import 'dasar_jaringan/evaluasi_screen.dart';
 import 'dasar_jaringan/penugasan_screen.dart';
 import 'dasar_jaringan/portofolio_screen.dart';
@@ -38,7 +41,7 @@ class MateriDetailLayout extends StatefulWidget {
   const MateriDetailLayout({
     super.key,
     required this.title,
-    this.themeColor = const Color(0xFFAD8B73),
+    this.themeColor = AppTheme.primaryTeal,
     this.onMateriTap,
     this.customMaterialContent,
     this.customMaterialCategory,
@@ -51,20 +54,16 @@ class MateriDetailLayout extends StatefulWidget {
 
 class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   final ProgressService _progressService = ProgressService();
-
   late final String _currentMotivation;
+  bool _isBookmarked = false;
 
   static const List<String> _motivations = [
+    'Jenius adalah 1% inspirasi dan 99% keringat. - Thomas Alva Edison',
     'Pendidikan adalah senjata paling mematikan di dunia, karena dengan pendidikan, Anda dapat mengubah dunia. - Nelson Mandela',
     'Hiduplah seolah-olah kamu akan mati besok. Belajarlah seolah-olah kamu akan hidup selamanya. - Mahatma Gandhi',
     'Jangan pernah berhenti belajar, karena hidup tidak pernah berhenti mengajar.',
-    'Kesuksesan bukanlah kunci kebahagiaan. Kebahagiaanlah kunci kesuksesan. Jika Anda mencintai apa yang Anda kerjakan, Anda akan sukses.',
+    'Kesuksesan bukanlah kunci kebahagiaan. Kebahagiaanlah kunci kesuksesan.',
     'Masa depan adalah milik mereka yang percaya pada keindahan mimpi mereka. - Eleanor Roosevelt',
-    'Jenius adalah 1% inspirasi dan 99% keringat. - Thomas Alva Edison',
-    'Tetaplah lapar, tetaplah bodoh. - Steve Jobs',
-    'Peluang besar biasanya disamarkan sebagai kerja keras, sehingga kebanyakan orang tidak mengenalinya.',
-    'Ilmu itu seperti air. Jika ia berhenti mengalir, ia menjadi keruh. - Imam Syafi\'i',
-    'Barangsiapa tidak mau merasakan pahitnya belajar, ia akan merasakan hinanya kebodohan sepanjang hidupnya. - Imam Syafi\'i',
   ];
 
   static const Map<String, String> _englishNames = {
@@ -85,9 +84,42 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   @override
   void initState() {
     super.initState();
+    _currentMotivation = _motivations[Random().nextInt(_motivations.length)];
+    _checkBookmarkStatus();
+  }
 
-    _currentMotivation =
-    _motivations[Random().nextInt(_motivations.length)];
+  Future<void> _checkBookmarkStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> bookmarks = prefs.getStringList('bookmarked_materials') ?? [];
+    if (mounted) {
+      setState(() {
+        _isBookmarked = bookmarks.contains(widget.title);
+      });
+    }
+  }
+
+  Future<void> _toggleBookmark() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> bookmarks = prefs.getStringList('bookmarked_materials') ?? [];
+
+    if (_isBookmarked) {
+      bookmarks.remove(widget.title);
+      if (mounted) {
+        setState(() => _isBookmarked = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Modul dihapus dari bookmark.'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    } else {
+      bookmarks.add(widget.title);
+      if (mounted) {
+        setState(() => _isBookmarked = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Modul berhasil disimpan ke bookmark!'), behavior: SnackBarBehavior.floating),
+        );
+      }
+    }
+    await prefs.setStringList('bookmarked_materials', bookmarks);
   }
 
   String _getEnglishName(String name) {
@@ -96,29 +128,76 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListenableBuilder(
       listenable: localizationService,
       builder: (context, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(widget.title),
-            backgroundColor: widget.themeColor,
+            title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: AppTheme.primaryTeal,
             foregroundColor: Colors.white,
             elevation: 0,
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _isBookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                  color: _isBookmarked ? AppTheme.accentAmber : Colors.white,
+                ),
+                tooltip: 'Simpan Bookmark Modul',
+                onPressed: _toggleBookmark,
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildGrid(),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppTheme.tealTint,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.borderCream),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.school_rounded, color: AppTheme.primaryTeal, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'MODUL PEMBELAJARAN',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.8,
+                            color: AppTheme.primaryTeal,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.darkTeal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  _buildGrid(isDark),
                   const SizedBox(height: 20),
-                  _buildProgressSection(),
-                  const SizedBox(height: 20),
-                  _buildMotivationSection(),
-                  const SizedBox(height: 20),
+                  _buildProgressSection(isDark),
+                  const SizedBox(height: 18),
+                  _buildMotivationSection(isDark),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -128,90 +207,25 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     );
   }
 
-  // ============================================================
-  // MENU GRID
-  // ============================================================
-
-  Widget _buildGrid() {
-    final baseMenuItems = [
-      {
-        'name': 'Materi',
-        'icon': Icons.menu_book_rounded,
-        'color': widget.themeColor,
-      },
-      {
-        'name': 'Video',
-        'icon': Icons.play_circle_fill_rounded,
-        'color': const Color(0xFFE53935),
-      },
-      {
-        'name': 'Peta Konsep',
-        'icon': Icons.account_tree_rounded,
-        'color': const Color(0xFF00897B),
-      },
-      {
-        'name': 'Referensi',
-        'icon': Icons.library_books_rounded,
-        'color': const Color(0xFFCEAB93),
-      },
-      {
-        'name': 'Pre Test',
-        'icon': Icons.assignment_rounded,
-        'color': const Color(0xFFFF9800),
-      },
-      {
-        'name': 'Post Test',
-        'icon': Icons.assignment_turned_in_rounded,
-        'color': const Color(0xFF43A047),
-      },
-      {
-        'name': 'Penugasan',
-        'icon': Icons.task_rounded,
-        'color': const Color(0xFFE65100),
-      },
-      {
-        'name': 'Portofolio',
-        'icon': Icons.folder_shared_rounded,
-        'color': const Color(0xFF8E24AA),
-      },
-      {
-        'name': 'Forum Diskusi',
-        'icon': Icons.forum_rounded,
-        'color': const Color(0xFF1E88E5),
-      },
-      {
-        'name': 'Refleksi',
-        'icon': Icons.psychology_rounded,
-        'color': const Color(0xFFD81B60),
-      },
-      {
-        'name': 'Evaluasi',
-        'icon': Icons.assessment_rounded,
-        'color': const Color(0xFF00ACC1),
-      },
-      {
-        'name': 'Feedback',
-        'icon': Icons.feedback_rounded,
-        'color': const Color(0xFF5E35B1),
-      },
+  Widget _buildGrid(bool isDark) {
+    final menuItems = [
+      {'name': 'Materi', 'icon': Icons.menu_book_rounded, 'color': AppTheme.primaryTeal},
+      {'name': 'Video', 'icon': Icons.play_circle_fill_rounded, 'color': const Color(0xFFE53935)},
+      {'name': 'Peta Konsep', 'icon': Icons.account_tree_rounded, 'color': const Color(0xFF00897B)},
+      {'name': 'Referensi', 'icon': Icons.library_books_rounded, 'color': AppTheme.primaryTeal},
+      {'name': 'Pre Test', 'icon': Icons.assignment_rounded, 'color': AppTheme.accentAmber},
+      {'name': 'Post Test', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF43A047)},
+      {'name': 'Penugasan', 'icon': Icons.task_rounded, 'color': const Color(0xFFE65100)},
+      {'name': 'Portofolio', 'icon': Icons.folder_shared_rounded, 'color': const Color(0xFF8E24AA)},
+      {'name': 'Forum Diskusi', 'icon': Icons.forum_rounded, 'color': const Color(0xFF1E88E5)},
+      {'name': 'Refleksi', 'icon': Icons.psychology_rounded, 'color': const Color(0xFFD81B60)},
+      {'name': 'Evaluasi', 'icon': Icons.assessment_rounded, 'color': const Color(0xFF00ACC1)},
+      {'name': 'Feedback', 'icon': Icons.feedback_rounded, 'color': const Color(0xFF5E35B1)},
     ];
-
-    final menuItems = baseMenuItems.map((item) {
-      final baseColor = item['color'] as Color;
-      final harmonizedColor = baseColor == widget.themeColor
-          ? widget.themeColor
-          : Color.lerp(baseColor, widget.themeColor, 0.55)!;
-      return {
-        'name': item['name'],
-        'icon': item['icon'],
-        'color': harmonizedColor,
-      };
-    }).toList();
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth >= 600 ? 6 : 4;
-
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -219,13 +233,13 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            mainAxisExtent: 95,
+            mainAxisExtent: 92,
           ),
           itemCount: menuItems.length,
           itemBuilder: (context, index) {
             final item = menuItems[index];
-
             return _buildMenuItem(
+              isDark: isDark,
               name: item['name'] as String,
               icon: item['icon'] as IconData,
               iconColor: item['color'] as Color,
@@ -237,64 +251,48 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   }
 
   Widget _buildMenuItem({
+    required bool isDark,
     required String name,
     required IconData icon,
     required Color iconColor,
   }) {
-    final displayName = localizationService.isEnglish
-        ? _getEnglishName(name)
-        : name;
+    final displayName = localizationService.isEnglish ? _getEnglishName(name) : name;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _handleMenuTap(name),
-        borderRadius: BorderRadius.circular(16),
-        splashColor: iconColor.withOpacity(0.12),
-        child: Padding(
-          padding: const EdgeInsets.all(3),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.10),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(
-                    color: iconColor.withOpacity(0.16),
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  color: iconColor,
-                  size: 23,
-                ),
+    return AnimatedPressable(
+      onTap: () => _handleMenuTap(name),
+      scaleFactor: 0.90,
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isDark ? iconColor.withOpacity(0.18) : iconColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: iconColor.withOpacity(0.2)),
               ),
-              const SizedBox(height: 7),
-              Text(
-                displayName,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                ),
+              child: Icon(icon, color: iconColor, size: 22),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              displayName,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : AppTheme.textDark,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  // ============================================================
-  // MENU NAVIGATION
-  // ============================================================
 
   void _handleMenuTap(String name) {
     if (name == 'Materi') {
@@ -313,8 +311,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           _navigateTo(const PetaKonsepKomputerScreen());
         } else if (materiId == 'ip_address') {
           _navigateTo(const PetaKonsepIpAddressScreen());
-        }
-         else if (materiId == 'kabel_jaringan') {
+        } else if (materiId == 'kabel_jaringan') {
           _navigateTo(const PetaKonsepKabelJaringanScreen());
         } else if (materiId == 'perangkat_jaringan') {
           _navigateTo(const PetaKonsepPerangkatJaringanScreen());
@@ -324,7 +321,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               materiId: materiId,
               materiTitle: widget.title,
               feature: name,
-              themeColor: widget.themeColor,
+              themeColor: AppTheme.primaryTeal,
             ),
           );
         }
@@ -348,7 +345,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           PreTestScreen(
             materiId: materiId,
             materiTitle: widget.title,
-            themeColor: widget.themeColor,
+            themeColor: AppTheme.primaryTeal,
           ),
         );
         break;
@@ -358,7 +355,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           PostTestScreen(
             materiId: materiId,
             materiTitle: widget.title,
-            themeColor: widget.themeColor,
+            themeColor: AppTheme.primaryTeal,
           ),
         );
         break;
@@ -405,7 +402,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             materiId: materiId,
             materiTitle: widget.title,
             feature: name,
-            themeColor: widget.themeColor,
+            themeColor: AppTheme.primaryTeal,
           ),
         );
     }
@@ -427,40 +424,31 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     }
 
     final materiId = _getMateriId();
-
-    // Callback tetap digunakan untuk materi lainnya.
     if (widget.onMateriTap != null) {
       widget.onMateriTap!();
       return;
     }
 
     final Widget materiScreen;
-
     switch (materiId) {
       case 'k3':
         materiScreen = const K3MateriScreen(index: 0);
         break;
-
       case 'komponen_komputer':
         materiScreen = const KomponenKomputerMateriScreen(index: 0);
         break;
-
       case 'perangkat_jaringan':
         materiScreen = const PerangkatJaringanMateriScreen(index: 0);
         break;
-
       case 'dasar_jaringan':
         materiScreen = const PengertianJaringanScreen();
         break;
-
       case 'kabel_jaringan':
         materiScreen = const PengertianKabelScreen();
         break;
-
       case 'ip_address':
         materiScreen = const IpAddressMateriScreen(index: 0);
         break;
-
       default:
         materiScreen = const K3MateriScreen(index: 0);
         break;
@@ -472,9 +460,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
   void _navigateTo(Widget screen) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => screen,
-      ),
+      MaterialPageRoute(builder: (context) => screen),
     );
   }
 
@@ -482,34 +468,23 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     switch (widget.title) {
       case 'K3':
         return 'k3';
-
       case 'Komponen Komputer':
         return 'komponen_komputer';
-
       case 'Perangkat Jaringan':
         return 'perangkat_jaringan';
-
       case 'Dasar Jaringan':
         return 'dasar_jaringan';
-
       case 'IP Address':
         return 'ip_address';
-
       case 'Kabel Jaringan':
         return 'kabel_jaringan';
-
       default:
         return 'k3';
     }
   }
 
-  // ============================================================
-  // LEARNING PROGRESS
-  // ============================================================
-
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(bool isDark) {
     final materiId = _getMateriId();
-
     final activities = <String>[
       '${materiId}_pre_test',
       '${materiId}_post_test',
@@ -522,30 +497,20 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
     return FutureBuilder<List<bool>>(
       future: Future.wait(
-        activities.map(
-              (activity) => _progressService.isLessonCompleted(activity),
-        ),
+        activities.map((activity) => _progressService.isLessonCompleted(activity)),
       ),
       builder: (context, snapshot) {
-        final completed =
-            snapshot.data?.where((done) => done).length ?? 0;
-
-        final progressValue = activities.isEmpty
-            ? 0.0
-            : completed / activities.length;
+        final completed = snapshot.data?.where((done) => done).length ?? 0;
+        final progressValue = activities.isEmpty ? 0.0 : completed / activities.length;
 
         return Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,19 +519,19 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    localizationService.translate('learning_progress'),
+                    'Progress Belajar',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).textTheme.titleMedium?.color,
+                      color: isDark ? Colors.white : AppTheme.textDark,
                     ),
                   ),
                   Text(
                     '${(progressValue * 100).round()}%',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: widget.themeColor,
+                      color: AppTheme.primaryTeal,
                     ),
                   ),
                 ],
@@ -577,20 +542,16 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                 child: LinearProgressIndicator(
                   value: progressValue,
                   minHeight: 8,
-                  backgroundColor: widget.themeColor.withOpacity(0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    widget.themeColor,
-                  ),
+                  backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                localizationService.isEnglish
-                    ? '$completed of ${activities.length} main activities completed.'
-                    : '$completed dari ${activities.length} aktivitas utama selesai.',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey.shade600,
+                '$completed dari ${activities.length} aktivitas utama selesai.',
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  color: AppTheme.textMuted,
                 ),
               ),
             ],
@@ -600,53 +561,43 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
     );
   }
 
-  // ============================================================
-  // DAILY MOTIVATION
-  // ============================================================
-
-  Widget _buildMotivationSection() {
+  Widget _buildMotivationSection(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 18,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: widget.themeColor.withOpacity(0.2),
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
         ),
       ),
       child: Column(
         children: [
-          Icon(
+          const Icon(
             Icons.format_quote_rounded,
-            color: widget.themeColor.withOpacity(0.5),
-            size: 32,
+            color: AppTheme.primaryTeal,
+            size: 28,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            _currentMotivation,
+            '“$_currentMotivation”',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 13,
               fontStyle: FontStyle.italic,
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+              color: isDark ? Colors.white : AppTheme.textDark,
               height: 1.5,
-              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            localizationService.isEnglish
-                ? '- Daily Motivation -'
-                : '- Motivasi Hari Ini -',
+          const Text(
+            '- Motivasi Hari Ini -',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 10.5,
               fontWeight: FontWeight.bold,
-              color: widget.themeColor,
-              letterSpacing: 1.1,
+              color: AppTheme.textMuted,
+              letterSpacing: 1.0,
             ),
           ),
         ],

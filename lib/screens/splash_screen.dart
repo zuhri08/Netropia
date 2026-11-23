@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'main_screen.dart';
 
@@ -20,9 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkLoginStatus() async {
-    // Tunggu sebentar untuk efek splash
     await Future.delayed(const Duration(seconds: 2));
-    
     if (!mounted) return;
 
     final User? user = FirebaseAuth.instance.currentUser;
@@ -55,7 +55,6 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     }
 
-    // Jika tidak ada user atau data gagal diambil, ke halaman login
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -76,8 +75,8 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFFAD8B73),
-              Color(0xFFCEAB93),
+              AppTheme.primaryTeal,
+              AppTheme.darkTeal,
             ],
           ),
         ),
@@ -85,54 +84,68 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Logo
-            ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: Image.asset(
-                'assets/icon/app_icon.png',
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+            Container(
+              width: 90,
+              height: 90,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.18),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.asset(
+                  'assets/icon/app_icon.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
 
-            SizedBox(height: 25),
+            const SizedBox(height: 22),
 
             // Nama aplikasi
-            Text(
+            const Text(
               'NETROPIA',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 32,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
               ),
             ),
 
-            SizedBox(height: 8),
+            const SizedBox(height: 6),
 
-            Text(
+            const Text(
               'Interactive TKJ Learning',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white70,
-                fontSize: 15,
+                fontSize: 14,
               ),
             ),
 
-            SizedBox(height: 40),
+            const SizedBox(height: 36),
 
-            SizedBox(
-              width: 28,
-              height: 28,
+            const SizedBox(
+              width: 26,
+              height: 26,
               child: CircularProgressIndicator(
-                color: Colors.white,
+                color: AppTheme.accentAmber,
                 strokeWidth: 3,
               ),
             ),
 
-            SizedBox(height: 15),
+            const SizedBox(height: 14),
 
-            Text(
+            const Text(
               'Mempersiapkan pembelajaran...',
               style: TextStyle(
                 color: Colors.white70,

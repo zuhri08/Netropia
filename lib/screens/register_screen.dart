@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -21,7 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool obscureConfirmPassword = true;
   bool isLoading = false;
 
-  String selectedRole = 'siswa'; // 'siswa' or 'guru'
+  String selectedRole = 'siswa';
   String? selectedClass;
 
   final List<String> classOptions = [
@@ -121,7 +123,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (!mounted) return;
 
       showMessage('Pendaftaran berhasil! Silakan masuk ke akun Anda.');
-
       Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       String message;
@@ -175,35 +176,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  List<Widget> _buildSiswaFields(Color primaryColor) {
+  List<Widget> _buildSiswaFields(bool isDark) {
     if (selectedRole != 'siswa') return [];
     return [
-      const Text('NISN (10 Digit)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+      Text('NISN (10 Digit)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
       const SizedBox(height: 6),
       TextField(
         controller: nisnController,
         keyboardType: TextInputType.number,
         maxLength: 10,
+        style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
         decoration: InputDecoration(
           hintText: 'Contoh: 0051234567',
           counterText: '',
-          prefixIcon: Icon(Icons.badge_outlined, color: primaryColor, size: 20),
+          prefixIcon: const Icon(Icons.badge_outlined, color: AppTheme.primaryTeal, size: 20),
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+          fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
         ),
       ),
       const SizedBox(height: 16),
-      const Text('Pilih Kelas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+      Text('Pilih Kelas', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
       const SizedBox(height: 6),
       DropdownButtonFormField<String>(
         value: selectedClass,
+        style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
+        dropdownColor: Theme.of(context).cardColor,
         decoration: InputDecoration(
           hintText: 'Pilih Kelas',
-          prefixIcon: Icon(Icons.class_outlined, color: primaryColor, size: 20),
+          prefixIcon: const Icon(Icons.class_outlined, color: AppTheme.primaryTeal, size: 20),
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+          fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
         ),
         items: classOptions
             .where((c) => c != 'Guru TKJ')
@@ -229,34 +233,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFFAD8B73);
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFFBE9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: primaryColor,
+        backgroundColor: AppTheme.primaryTeal,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text('Daftar Akun Baru', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(26),
-                  border: Border.all(color: primaryColor.withOpacity(0.2)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.08),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,9 +264,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(
                         'Buat Akun Netropia',
                         style: TextStyle(
-                          fontSize: 22,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: primaryColor,
+                          color: AppTheme.primaryTeal,
                         ),
                       ),
                     ),
@@ -275,17 +274,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const Center(
                       child: Text(
                         'Isi data di bawah untuk memulai pembelajaran TKJ',
-                        style: TextStyle(fontSize: 12.5, color: Colors.grey),
+                        style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     // Role Tab Selector
                     Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(16),
+                        color: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
@@ -301,29 +300,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRole == 'siswa'
-                                      ? primaryColor
+                                      ? AppTheme.primaryTeal
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.school_rounded,
-                                      size: 18,
+                                      size: 17,
                                       color: selectedRole == 'siswa'
                                           ? Colors.white
-                                          : Colors.grey.shade700,
+                                          : AppTheme.textMuted,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Siswa',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13.5,
+                                        fontSize: 13,
                                         color: selectedRole == 'siswa'
                                             ? Colors.white
-                                            : Colors.grey.shade700,
+                                            : AppTheme.textMuted,
                                       ),
                                     ),
                                   ],
@@ -343,29 +342,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRole == 'guru'
-                                      ? primaryColor
+                                      ? AppTheme.primaryTeal
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(11),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.person_outline_rounded,
-                                      size: 18,
+                                      size: 17,
                                       color: selectedRole == 'guru'
                                           ? Colors.white
-                                          : Colors.grey.shade700,
+                                          : AppTheme.textMuted,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(
                                       'Guru / Pengajar',
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 13.5,
+                                        fontSize: 13,
                                         color: selectedRole == 'guru'
                                             ? Colors.white
-                                            : Colors.grey.shade700,
+                                            : AppTheme.textMuted,
                                       ),
                                     ),
                                   ],
@@ -376,101 +375,104 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 18),
 
                     // Nama Lengkap
-                    const Text('Nama Lengkap', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    Text('Nama Lengkap', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: nameController,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan nama lengkap',
-                        prefixIcon: const Icon(Icons.person_outline_rounded, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.person_outline_rounded, color: AppTheme.primaryTeal, size: 20),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // NISN & Kelas (Siswa)
-                    ..._buildSiswaFields(primaryColor),
+                    ..._buildSiswaFields(isDark),
 
                     // Email
-                    const Text('Email', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    Text('Email', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: emailController,
                       keyboardType: TextInputType.emailAddress,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan email',
-                        prefixIcon: const Icon(Icons.email_outlined, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryTeal, size: 20),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // Password
-                    const Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    Text('Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: passwordController,
                       obscureText: obscurePassword,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Minimal 6 karakter',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryTeal, size: 20),
                         suffixIcon: IconButton(
-                          icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey, size: 20),
+                          icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.textMuted, size: 20),
                           onPressed: () => setState(() => obscurePassword = !obscurePassword),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
                     const SizedBox(height: 16),
 
                     // Konfirmasi Password
-                    const Text('Konfirmasi Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                    Text('Konfirmasi Password', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : AppTheme.textDark)),
                     const SizedBox(height: 6),
                     TextField(
                       controller: confirmPasswordController,
                       obscureText: obscureConfirmPassword,
+                      style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Ulangi password',
-                        prefixIcon: const Icon(Icons.lock_clock_outlined, color: primaryColor, size: 20),
+                        prefixIcon: const Icon(Icons.lock_clock_outlined, color: AppTheme.primaryTeal, size: 20),
                         suffixIcon: IconButton(
-                          icon: Icon(obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: Colors.grey, size: 20),
+                          icon: Icon(obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.textMuted, size: 20),
                           onPressed: () => setState(() => obscureConfirmPassword = !obscureConfirmPassword),
                         ),
                         filled: true,
-                        fillColor: const Color(0xFFF8FAFC),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: Colors.grey.shade300)),
+                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
 
                     // Tombol Daftar
                     SizedBox(
                       width: double.infinity,
-                      height: 52,
+                      height: 48,
                       child: ElevatedButton.icon(
                         onPressed: isLoading ? null : register,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
+                          backgroundColor: AppTheme.primaryTeal,
                           foregroundColor: Colors.white,
-                          elevation: 3,
-                          shadowColor: primaryColor.withOpacity(0.4),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         icon: isLoading
                             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                             : const Icon(Icons.person_add_rounded, size: 20),
                         label: Text(
                           isLoading ? 'Mendaftarkan...' : 'Daftar Akun Netropia',
-                          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),

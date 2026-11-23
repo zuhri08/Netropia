@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class PenugasanScreen extends StatefulWidget {
   final String materiId;
@@ -28,13 +29,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   final List<bool> _checkedSteps = List.filled(5, false);
 
-  static const Color primary = Color(0xFFAD8B73);
-  static const Color dark = Color(0xFF172B4D);
-  static const Color muted = Color(0xFF718096);
-  static const Color background = Color(0xFFF4F7FB);
-
   int get _completedSteps => _checkedSteps.where((e) => e).length;
-
   double get _progress => _completedSteps / _steps.length;
 
   @override
@@ -45,44 +40,40 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: primary,
+        backgroundColor: AppTheme.primaryTeal,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        title: Text(
-          'Ruang Penugasan - ${widget.materiTitle}',
-          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+        title: const Text(
+          'Ruang Penugasan',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 32),
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 50),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHero(),
-            const SizedBox(height: 20),
-            _buildProgress(),
-            const SizedBox(height: 26),
-            _buildSectionHeading('Kenali tugasmu', 'Pahami tujuan sebelum mulai.'),
-            const SizedBox(height: 12),
-            _buildOverview(),
-            const SizedBox(height: 26),
-            _buildSectionHeading('Misi pengerjaan', 'Centang setiap langkah yang selesai.'),
-            const SizedBox(height: 12),
-            _buildChecklist(),
-            const SizedBox(height: 26),
-            _buildSectionHeading('Perlengkapan', 'Siapkan sebelum mulai mengerjakan.'),
-            const SizedBox(height: 12),
-            _buildMaterials(),
-            const SizedBox(height: 26),
-            _buildSectionHeading('Lembar jawaban', 'Ceritakan hasil pengerjaanmu.'),
-            const SizedBox(height: 12),
-            _buildAnswer(),
             const SizedBox(height: 18),
-            _buildSubmissionInfo(),
+            _buildProgress(isDark),
+            const SizedBox(height: 22),
+            _buildSectionHeading('KENALI TUGASMU', 'Pahami tujuan sebelum mulai.', isDark),
+            const SizedBox(height: 10),
+            _buildOverview(isDark),
+            const SizedBox(height: 22),
+            _buildSectionHeading('LOKASI & LANGKAH PENGERJAAN', 'Centang setiap langkah yang selesai.', isDark),
+            const SizedBox(height: 10),
+            _buildChecklist(isDark),
+            const SizedBox(height: 22),
+            _buildSectionHeading('LEMBAR JAWABAN', 'Ceritakan hasil pengerjaanmu.', isDark),
+            const SizedBox(height: 10),
+            _buildAnswer(isDark),
             const SizedBox(height: 18),
             _buildSubmitButton(),
           ],
@@ -94,72 +85,59 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
   Widget _buildHero() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [Color(0xFFAD8B73), Color(0xFFCEAB93)],
+          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -8,
-            top: 4,
-            child: Icon(
-              Icons.assignment_turned_in_rounded,
-              size: 112,
-              color: Colors.white.withOpacity(0.12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'TUGAS PRAKTIK · ${widget.materiTitle.toUpperCase()}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          const SizedBox(height: 14),
+          Text(
+            'Penugasan Praktik\n${widget.materiTitle}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              height: 1.2,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Saatnya menerapkan pemahaman modul ${widget.materiTitle} dalam tugas praktik interaktif.',
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 12.5,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Text(
-                  'TUGAS PRAKTIK • ${widget.materiTitle.toUpperCase()}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.7,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 22),
-              Text(
-                'Penugasan Praktik\n${widget.materiTitle}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  height: 1.15,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Saatnya menerapkan pemahaman modul ${widget.materiTitle} dalam tugas praktik interaktif.',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  _heroTag(Icons.schedule_rounded, '60 menit'),
-                  const SizedBox(width: 8),
-                  _heroTag(Icons.category_rounded, 'Praktik'),
-                ],
-              ),
+              _heroTag(Icons.schedule_rounded, '60 menit'),
+              const SizedBox(width: 8),
+              _heroTag(Icons.category_rounded, 'Praktik'),
             ],
           ),
         ],
@@ -169,9 +147,9 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   Widget _heroTag(IconData icon, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.17),
+        color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -183,7 +161,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -191,59 +169,61 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     );
   }
 
-  Widget _buildProgress() {
+  Widget _buildProgress(bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8EDF5)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Progress pengerjaan',
                   style: TextStyle(
-                    color: dark,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
+                    color: isDark ? Colors.white : AppTheme.textDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
                   ),
                 ),
               ),
               Text(
                 '$_completedSteps/${_steps.length} langkah',
                 style: const TextStyle(
-                  color: primary,
-                  fontWeight: FontWeight.w800,
+                  color: AppTheme.primaryTeal,
+                  fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 13),
+          const SizedBox(height: 10),
           ClipRRect(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
               value: _progress,
-              minHeight: 9,
-              backgroundColor: const Color(0xFFEAF0FA),
-              valueColor: const AlwaysStoppedAnimation(primary),
+              minHeight: 8,
+              backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
+              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryTeal),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             _completedSteps == 0
                 ? 'Belum mulai. Yuk, kerjakan langkah pertamamu!'
                 : _completedSteps == _steps.length
-                ? 'Semua langkah selesai. Saatnya kumpulkan jawaban!'
-                : 'Bagus! Kamu sudah menyelesaikan $_completedSteps langkah.',
+                    ? 'Semua langkah selesai. Saatnya kumpulkan jawaban!'
+                    : 'Bagus! Kamu sudah menyelesaikan $_completedSteps langkah.',
             style: const TextStyle(
-              color: muted,
-              fontSize: 12,
+              color: AppTheme.textMuted,
+              fontSize: 11.5,
             ),
           ),
         ],
@@ -251,58 +231,58 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     );
   }
 
-  Widget _buildSectionHeading(String title, String subtitle) {
+  Widget _buildSectionHeading(String title, String subtitle, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            color: dark,
-            fontSize: 19,
-            fontWeight: FontWeight.w900,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
+            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           subtitle,
-          style: const TextStyle(color: muted, fontSize: 12),
+          style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
         ),
       ],
     );
   }
 
-  Widget _buildOverview() {
+  Widget _buildOverview(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8EDF5)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         children: [
           _overviewItem(
             icon: Icons.flag_rounded,
             title: 'Tujuan pembelajaran',
-            description:
-            'Menerapkan konsep ${widget.materiTitle} dalam penyelesaian studi kasus atau tugas praktik.',
-            color: const Color(0xFFAD8B73),
+            description: 'Menerapkan konsep ${widget.materiTitle} dalam penyelesaian studi kasus atau tugas praktik.',
+            isDark: isDark,
           ),
-          const Divider(height: 1, indent: 18, endIndent: 18),
+          const Divider(height: 1, indent: 16, endIndent: 16),
           _overviewItem(
             icon: Icons.assignment_rounded,
             title: 'Tantanganmu',
-            description:
-            'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
-            color: const Color(0xFF0D9488),
+            description: 'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
+            isDark: isDark,
           ),
-          const Divider(height: 1, indent: 18, endIndent: 18),
+          const Divider(height: 1, indent: 16, endIndent: 16),
           _overviewItem(
             icon: Icons.task_alt_rounded,
             title: 'Hasil akhir',
-            description:
-            'Laporan atau rangkuman jawaban penugasan yang jelas, rapi, dan sistematis.',
-            color: const Color(0xFFEA8A18),
+            description: 'Kumpulkan hasil tugas praktikmu.',
+            isDark: isDark,
           ),
         ],
       ),
@@ -313,42 +293,42 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     required IconData icon,
     required String title,
     required String description,
-    required Color color,
+    required bool isDark,
   }) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 38,
+            height: 38,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.10),
-              borderRadius: BorderRadius.circular(12),
+              color: AppTheme.tealTint,
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: color, size: 21),
+            child: Icon(icon, color: AppTheme.primaryTeal, size: 20),
           ),
-          const SizedBox(width: 13),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: dark,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : AppTheme.textDark,
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 2),
                 Text(
                   description,
                   style: const TextStyle(
-                    color: muted,
-                    fontSize: 12,
-                    height: 1.5,
+                    color: AppTheme.textMuted,
+                    fontSize: 11.5,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -359,12 +339,14 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     );
   }
 
-  Widget _buildChecklist() {
+  Widget _buildChecklist(bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8EDF5)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         children: List.generate(_steps.length, (index) {
@@ -374,46 +356,30 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             onTap: _isCompleted
                 ? null
                 : () {
-              setState(() {
-                _checkedSteps[index] = !_checkedSteps[index];
-              });
-            },
+                    setState(() {
+                      _checkedSteps[index] = !_checkedSteps[index];
+                    });
+                  },
             borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               child: Row(
                 children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: 29,
-                    height: 29,
-                    decoration: BoxDecoration(
-                      color: checked ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: Icon(
-                      checked ? Icons.check_rounded : Icons.circle_outlined,
-                      size: 19,
-                      color: checked ? const Color(0xFF16A34A) : muted,
-                    ),
+                  Icon(
+                    checked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    size: 20,
+                    color: checked ? AppTheme.primaryTeal : AppTheme.textMuted,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       _steps[index],
                       style: TextStyle(
-                        color: checked ? muted : dark,
-                        fontSize: 13,
-                        height: 1.45,
+                        color: checked ? AppTheme.textMuted : (isDark ? Colors.white : AppTheme.textDark),
+                        fontSize: 12.5,
                         decoration: checked ? TextDecoration.lineThrough : null,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  Icon(
-                    checked ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
-                    color: checked ? const Color(0xFF16A34A) : const Color(0xFFB5C0CE),
-                    size: 20,
                   ),
                 ],
               ),
@@ -424,165 +390,40 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     );
   }
 
-  Widget _buildMaterials() {
-    final materials = [
-      (Icons.draw_rounded, 'Catatan atau aplikasi pendukung'),
-      (Icons.menu_book_rounded, 'Referensi materi ${widget.materiTitle}'),
-      (Icons.devices_rounded, 'Perangkat pendukung penugasan'),
-    ];
-
-    return Wrap(
-      spacing: 9,
-      runSpacing: 9,
-      children: materials.map((item) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(color: const Color(0xFFE8EDF5)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(item.$1, color: primary, size: 17),
-              const SizedBox(width: 8),
-              Text(
-                item.$2,
-                style: const TextStyle(
-                  color: dark,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildAnswer() {
+  Widget _buildAnswer(bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(17),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE8EDF5)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.edit_note_rounded, color: primary, size: 23),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Tuliskan hasil pengerjaanmu',
-                  style: TextStyle(
-                    color: dark,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              Text(
-                '${_answerController.text.length} karakter',
-                style: const TextStyle(color: muted, fontSize: 10),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
           Text(
             'Jelaskan solusi dan jawabanmu terkait materi ${widget.materiTitle}.',
-            style: const TextStyle(color: muted, fontSize: 12, height: 1.5),
+            style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           TextField(
             controller: _answerController,
             enabled: !_isCompleted,
-            minLines: 6,
-            maxLines: 10,
-            onChanged: (_) => setState(() {}),
-            style: const TextStyle(
-              color: dark,
+            minLines: 5,
+            maxLines: 8,
+            style: TextStyle(
+              color: isDark ? Colors.white : AppTheme.textDark,
               fontSize: 13,
-              height: 1.5,
             ),
             decoration: InputDecoration(
-              hintText: 'Mulai tulis jawaban dan analisis di sini...',
-              hintStyle: const TextStyle(color: Color(0xFFA0AAB8), fontSize: 12),
+              hintText: 'Tuliskan jawaban di sini...',
               filled: true,
-              fillColor: const Color(0xFFF8FAFD),
-              contentPadding: const EdgeInsets.all(15),
+              fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE3EAF3)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: Color(0xFFE3EAF3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
-                borderSide: const BorderSide(color: primary, width: 1.5),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF8E8),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.lightbulb_outline_rounded, color: primary, size: 18),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Tips: Susun jawaban secara runtut agar mudah dipahami.',
-                    style: TextStyle(color: Color(0xFF5C3D2E), fontSize: 11, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubmissionInfo() {
-    return Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: _isCompleted ? const Color(0xFFECFDF3) : const Color(0xFFFFF8E8),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: _isCompleted ? const Color(0xFFBBF7D0) : const Color(0xFFFDE2A7),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            _isCompleted ? Icons.check_circle_rounded : Icons.info_outline_rounded,
-            color: _isCompleted ? const Color(0xFF16A34A) : const Color(0xFFD97706),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              _isCompleted
-                  ? 'Jawaban telah dikumpulkan pada sesi ini.'
-                  : 'Sebelum mengumpulkan, pastikan jawabanmu sudah lengkap.',
-              style: const TextStyle(
-                color: dark,
-                fontSize: 12,
-                height: 1.4,
-                fontWeight: FontWeight.w600,
+                borderSide: BorderSide.none,
               ),
             ),
           ),
@@ -594,28 +435,19 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: 48,
       child: ElevatedButton(
         onPressed: _isCompleted ? null : _submitAssignment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
-          disabledBackgroundColor: const Color(0xFF9CAFCB),
+          backgroundColor: AppTheme.primaryTeal,
           foregroundColor: Colors.white,
-          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(_isCompleted ? Icons.check_circle_rounded : Icons.send_rounded, size: 19),
-            const SizedBox(width: 9),
-            Text(
-              _isCompleted ? 'Tugas sudah dikumpulkan' : 'Kumpulkan tugas',
-              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
-            ),
-          ],
+        child: Text(
+          _isCompleted ? 'Tugas Sudah Dikumpulkan' : 'Mulai Tugas / Kumpulkan',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
       ),
     );
@@ -632,43 +464,15 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       return;
     }
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Text(
-            'Siap mengumpulkan?',
-            style: TextStyle(fontWeight: FontWeight.w800),
-          ),
-          content: const Text(
-            'Pastikan jawabanmu sudah sesuai dengan instruksi. '
-                'Setelah dikumpulkan, jawaban tidak dapat diubah.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Periksa lagi'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isCompleted = true;
-                });
-                Navigator.pop(dialogContext);
+    setState(() {
+      _isCompleted = true;
+    });
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tugas berhasil dikumpulkan.'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              child: const Text('Ya, kumpulkan'),
-            ),
-          ],
-        );
-      },
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tugas berhasil dikumpulkan.'),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 }

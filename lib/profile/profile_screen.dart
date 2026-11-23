@@ -7,6 +7,7 @@ import 'help_support_screen.dart';
 import 'about_app_screen.dart';
 import '../progres/progres_screen.dart';
 import '../services/localization_service.dart';
+import '../theme/app_theme.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String username;
@@ -33,16 +34,16 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 _buildHeader(context, email),
                 Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(18),
                   child: Column(
                     children: [
                       _buildStatsSection(context),
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 22),
                       _buildTeacherAwardsSection(context),
                       _buildAchievementsSection(context),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 24),
                       _buildMenuSection(context),
-                      const SizedBox(height: 75),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -60,18 +61,18 @@ class ProfileScreen extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 60, 20, 30),
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 26),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark 
-            ? [const Color(0xFF2C2C2C), const Color(0xFF1E1E1E)]
-            : [const Color(0xFFAD8B73), const Color(0xFFCEAB93)],
+          colors: isDark
+              ? [const Color(0xFF162522), const Color(0xFF0F1A18)]
+              : [AppTheme.primaryTeal, AppTheme.darkTeal],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
         ),
       ),
       child: Column(
@@ -79,7 +80,7 @@ class ProfileScreen extends StatelessWidget {
           Stack(
             children: [
               Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(
                   color: Colors.white24,
                   shape: BoxShape.circle,
@@ -88,11 +89,11 @@ class ProfileScreen extends StatelessWidget {
                   builder: (context) {
                     final String? photoUrl = user?.photoURL;
                     return CircleAvatar(
-                      radius: 50,
+                      radius: 45,
                       backgroundColor: Colors.white,
                       backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
-                      child: photoUrl == null 
-                          ? const Icon(Icons.person_rounded, size: 60, color: Color(0xFFAD8B73))
+                      child: photoUrl == null
+                          ? const Icon(Icons.person_rounded, size: 55, color: AppTheme.primaryTeal)
                           : null,
                     );
                   },
@@ -102,17 +103,17 @@ class ProfileScreen extends StatelessWidget {
                 bottom: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(5),
                   decoration: const BoxDecoration(
-                    color: Colors.orange,
+                    color: AppTheme.accentAmber,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.edit_rounded, size: 16, color: Colors.white),
+                  child: const Icon(Icons.edit_rounded, size: 14, color: Colors.white),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           Text(
             username,
             style: const TextStyle(
@@ -124,16 +125,16 @@ class ProfileScreen extends StatelessWidget {
           Text(
             email,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.7),
-              fontSize: 14,
+              color: Colors.white.withOpacity(0.75),
+              fontSize: 13.5,
             ),
           ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               role.toUpperCase(),
@@ -145,19 +146,27 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: username, role: role)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(username: username, role: role),
+                ),
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: const Color(0xFFAD8B73),
+              foregroundColor: AppTheme.darkTeal,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
             ),
-            child: Text(localizationService.translate('edit_profile'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+              localizationService.translate('edit_profile'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
           ),
         ],
       ),
@@ -165,24 +174,25 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildStatsSection(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 5)),
-        ],
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem(localizationService.isEnglish ? 'Materials' : 'Materi', '12'),
-          _buildStatDivider(),
+          _buildStatItem('Materi', '12'),
+          _buildStatDivider(isDark),
           _buildStatItem('Lab', '8'),
-          _buildStatDivider(),
-          _buildStatItem(localizationService.isEnglish ? 'Hours' : 'Jam', '14h'),
-          _buildStatDivider(),
+          _buildStatDivider(isDark),
+          _buildStatItem('Jam', '14h'),
+          _buildStatDivider(isDark),
           _buildStatItem('XP', '850'),
         ],
       ),
@@ -192,34 +202,57 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73))),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryTeal,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
+        ),
       ],
     );
   }
 
-  Widget _buildStatDivider() {
-    return Container(height: 30, width: 1, color: Colors.grey.withOpacity(0.2));
+  Widget _buildStatDivider(bool isDark) {
+    return Container(
+      height: 28,
+      width: 1,
+      color: isDark ? Colors.white12 : AppTheme.borderCream,
+    );
   }
 
   Widget _buildAchievementsSection(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 5, bottom: 15),
-          child: Text(localizationService.translate('achievements'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          padding: const EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'PENCAPAIAN',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+              color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+            ),
+          ),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildBadge("Network Beginner", Icons.lan_rounded, const Color(0xFFAD8B73), true),
-              _buildBadge("First Lesson", Icons.school_rounded, Colors.green, true),
-              _buildBadge("Subnet Master", Icons.calculate_rounded, Colors.orange, false),
-              _buildBadge("Lab Explorer", Icons.science_rounded, Colors.purple, true),
-              _buildBadge("7 Day Streak", Icons.local_fire_department_rounded, Colors.red, false),
+              _buildBadge(context, "Network Beginner", Icons.lan_rounded, AppTheme.primaryTeal, true),
+              _buildBadge(context, "First Lesson", Icons.school_rounded, Colors.green, true),
+              _buildBadge(context, "Subnet Master", Icons.calculate_rounded, AppTheme.accentAmber, false),
+              _buildBadge(context, "Lab Explorer", Icons.science_rounded, Colors.purple, true),
+              _buildBadge(context, "7 Day Streak", Icons.local_fire_department_rounded, AppTheme.accentRed, false),
             ],
           ),
         ),
@@ -227,27 +260,32 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge(String label, IconData icon, Color color, bool unlocked) {
+  Widget _buildBadge(BuildContext context, String label, IconData icon, Color color, bool unlocked) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: 15),
+      width: 98,
+      margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: unlocked ? color.withOpacity(0.08) : Colors.grey.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: unlocked ? color.withOpacity(0.2) : Colors.transparent),
+        color: unlocked
+            ? AppTheme.tealTint
+            : (isDark ? const Color(0xFF162522) : AppTheme.surfaceCream),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: unlocked ? color.withOpacity(0.3) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         children: [
-          Icon(unlocked ? icon : Icons.lock_outline_rounded, color: unlocked ? color : Colors.grey, size: 30),
-          const SizedBox(height: 10),
+          Icon(unlocked ? icon : Icons.lock_outline_rounded, color: unlocked ? color : AppTheme.textMuted, size: 28),
+          const SizedBox(height: 8),
           Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 10, 
-              fontWeight: FontWeight.bold, 
-              color: unlocked ? Colors.black87 : Colors.grey
+              fontSize: 10.5,
+              fontWeight: FontWeight.bold,
+              color: unlocked ? (isDark ? Colors.white : AppTheme.textDark) : AppTheme.textMuted,
             ),
           ),
         ],
@@ -256,25 +294,33 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuSection(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(25),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         children: [
           _buildMenuItem(context, Icons.person_outline_rounded, localizationService.translate('edit_profile'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: username, role: role)));
           }),
+          const Divider(height: 1, indent: 50),
           _buildMenuItem(context, Icons.trending_up_rounded, localizationService.translate('learning_progress'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const ProgresScreen()));
           }),
+          const Divider(height: 1, indent: 50),
           _buildMenuItem(context, Icons.settings_outlined, localizationService.translate('settings'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen()));
           }),
+          const Divider(height: 1, indent: 50),
           _buildMenuItem(context, Icons.help_outline_rounded, localizationService.translate('help'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportScreen()));
           }),
+          const Divider(height: 1, indent: 50),
           _buildMenuItem(context, Icons.info_outline_rounded, localizationService.translate('about_netropia'), () {
             Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutAppScreen()));
           }),
@@ -284,10 +330,18 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFFAD8B73)),
-      title: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+      leading: Icon(icon, color: AppTheme.primaryTeal, size: 22),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : AppTheme.textDark,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: AppTheme.textMuted),
       onTap: onTap,
     );
   }
@@ -309,18 +363,18 @@ class ProfileScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
-              padding: EdgeInsets.only(left: 5, bottom: 12),
+              padding: EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Apresiasi & Bintang Dari Guru ⭐',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73)),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
               ),
             ),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF8E1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.amber.shade300),
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFFDE68A)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,11 +384,11 @@ class ProfileScreen extends StatelessWidget {
                   final catatan = award['catatan']?.toString() ?? '';
 
                   return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
+                    margin: const EdgeInsets.only(bottom: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.star_rounded, color: Colors.amber, size: 28),
+                        const Icon(Icons.star_rounded, color: AppTheme.accentAmber, size: 26),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -342,17 +396,17 @@ class ProfileScreen extends StatelessWidget {
                             children: [
                               Text(
                                 badge,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF5C3D2E)),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: AppTheme.textDark),
                               ),
                               Text(
                                 'Diberikan oleh: $guruName',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
                               ),
                               if (catatan.isNotEmpty) ...[
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 3),
                                 Text(
                                   '"$catatan"',
-                                  style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.black87),
+                                  style: const TextStyle(fontSize: 11.5, fontStyle: FontStyle.italic, color: AppTheme.textDark),
                                 ),
                               ],
                             ],
@@ -364,7 +418,7 @@ class ProfileScreen extends StatelessWidget {
                 }).toList(),
               ),
             ),
-            const SizedBox(height: 25),
+            const SizedBox(height: 22),
           ],
         );
       },

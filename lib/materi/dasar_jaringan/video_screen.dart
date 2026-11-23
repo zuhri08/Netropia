@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/localization_service.dart';
+import '../../theme/app_theme.dart';
 import 'video_player_screen.dart';
 
 class VideoScreen extends StatefulWidget {
@@ -11,10 +12,7 @@ class VideoScreen extends StatefulWidget {
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  static const Color primaryBrown = Color(0xFFAD8B73);
-
   final TextEditingController _searchController = TextEditingController();
-
   String _searchQuery = '';
 
   final List<Map<String, dynamic>> _videos = [
@@ -24,7 +22,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Pengertian Jaringan Komputer',
       'deskripsi': 'Memahami pengertian dan konsep dasar jaringan komputer.',
       'videoId': 'xT58k6AB7gk',
-      'color': const Color(0xFFAD8B73),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '02',
@@ -32,7 +30,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Tujuan dan Manfaat Jaringan',
       'deskripsi': 'Mengenal tujuan serta manfaat jaringan komputer.',
       'videoId': 'KLrqNfSfXzo',
-      'color': const Color(0xFF009688),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '03',
@@ -40,7 +38,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Cara Kerja Jaringan',
       'deskripsi': 'Memahami bagaimana data dapat dikirim melalui jaringan.',
       'videoId': 'G0U632DDqqU',
-      'color': const Color(0xFF673AB7),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '04',
@@ -48,7 +46,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Jenis Jaringan',
       'deskripsi': 'Mengenal berbagai jenis jaringan berdasarkan cakupannya.',
       'videoId': 'G0U632DDqqU',
-      'color': const Color(0xFFFF9800),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '05',
@@ -56,7 +54,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Topologi Jaringan',
       'deskripsi': 'Mengenal bentuk dan susunan perangkat dalam jaringan.',
       'videoId': '7Ut4u8qVwRU',
-      'color': const Color(0xFFE91E63),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '06',
@@ -64,7 +62,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Protokol Jaringan',
       'deskripsi': 'Memahami fungsi protokol dalam komunikasi jaringan.',
       'videoId': 'jtqp4tnA5bE',
-      'color': const Color(0xFF0288D1),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '07',
@@ -72,7 +70,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Keamanan Jaringan',
       'deskripsi': 'Mengenal dasar-dasar keamanan dalam penggunaan jaringan.',
       'videoId': 'zlVtbPXDDA4',
-      'color': const Color(0xFF5E35B1),
+      'color': AppTheme.primaryTeal,
     },
     {
       'number': '08',
@@ -80,14 +78,13 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Penerapan Jaringan',
       'deskripsi': 'Melihat contoh penerapan jaringan dalam kehidupan sehari-hari.',
       'videoId': 'D30i_hmXZK0',
-      'color': const Color(0xFFCEAB93),
+      'color': AppTheme.primaryTeal,
     },
   ];
 
   @override
   void initState() {
     super.initState();
-
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -102,18 +99,12 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   List<Map<String, dynamic>> get _filteredVideos {
-    if (_searchQuery.trim().isEmpty) {
-      return _videos;
-    }
-
+    if (_searchQuery.trim().isEmpty) return _videos;
     return _videos.where((video) {
       final judul = video['judul'].toString().toLowerCase();
       final materi = video['materi'].toString().toLowerCase();
       final deskripsi = video['deskripsi'].toString().toLowerCase();
-
-      return judul.contains(_searchQuery) ||
-          materi.contains(_searchQuery) ||
-          deskripsi.contains(_searchQuery);
+      return judul.contains(_searchQuery) || materi.contains(_searchQuery) || deskripsi.contains(_searchQuery);
     }).toList();
   }
 
@@ -132,6 +123,7 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   Widget build(BuildContext context) {
     final filteredVideos = _filteredVideos;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ListenableBuilder(
       listenable: localizationService,
@@ -139,71 +131,36 @@ class _VideoScreenState extends State<VideoScreen> {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: primaryBrown,
+            backgroundColor: AppTheme.primaryTeal,
             foregroundColor: Colors.white,
             elevation: 0,
             centerTitle: false,
-            title: Text(
-              localizationService.isEnglish ? 'Learning Videos' : 'Video Pembelajaran',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
+            title: const Text(
+              'Video Pembelajaran',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            actions: [
-              IconButton(
-                tooltip: localizationService.isEnglish ? 'Search video' : 'Cari video',
-                icon: const Icon(
-                  Icons.search_rounded,
-                  size: 27,
-                ),
-                onPressed: () {
-                  showSearch(
-                    context: context,
-                    delegate: VideoSearchDelegate(
-                      videos: _videos,
-                      onVideoSelected: (title, videoId) => _openVideoPlayer(title, videoId),
-                    ),
-                  );
-                },
-              ),
-              IconButton(
-                tooltip: localizationService.isEnglish ? 'Information' : 'Informasi',
-                icon: const Icon(
-                  Icons.more_vert_rounded,
-                ),
-                onPressed: () {
-                  _showInfoDialog();
-                },
-              ),
-              const SizedBox(width: 6),
-            ],
           ),
           body: SafeArea(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                10,
-                20,
-                30,
-              ),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 50),
               children: [
                 _buildHeroBanner(),
-                const SizedBox(height: 24),
-                _buildSectionHeader(),
+                const SizedBox(height: 22),
+                _buildSectionHeader(isDark),
                 const SizedBox(height: 12),
                 if (filteredVideos.isEmpty)
                   _buildEmptySearch()
                 else
                   ...filteredVideos.map(
                     (video) => Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: 14,
-                      ),
-                      child: _buildVideoCard(video),
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _buildVideoCard(video, isDark),
                     ),
                   ),
-                _buildTeacherCustomVideos(),
+                _buildTeacherCustomVideos(isDark),
               ],
             ),
           ),
@@ -215,292 +172,190 @@ class _VideoScreenState extends State<VideoScreen> {
   Widget _buildHeroBanner() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
           colors: [
-            Color(0xFFAD8B73),
-            Color(0xFFCEAB93),
+            AppTheme.primaryTeal,
+            AppTheme.darkTeal,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryBrown.withValues(alpha: 0.20),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: AppTheme.primaryTeal.withOpacity(0.22),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Positioned(
-            right: -10,
-            top: -20,
-            child: Container(
-              width: 130,
-              height: 130,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 16),
+                SizedBox(width: 6),
+                Text(
+                  '8 Video Pembelajaran',
+                  style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
-          Positioned(
-            right: 20,
-            bottom: -35,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.06),
-              ),
+          const SizedBox(height: 14),
+          const Text(
+            'Kuasai Dasar Jaringan\nMelalui Video!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              height: 1.2,
+              fontWeight: FontWeight.bold,
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: 0.16,
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: Colors.white.withValues(
-                      alpha: 0.15,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.play_circle_fill_rounded,
-                      color: Colors.white,
-                      size: 19,
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      localizationService.isEnglish ? '8 Learning Videos' : '8 Video Pembelajaran',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                localizationService.isEnglish
-                    ? 'Master Network Basics\nThrough Video!'
-                    : 'Kuasi Dasar Jaringan\nMelalui Video!',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  height: 1.15,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                localizationService.isEnglish
-                    ? 'Watch educational videos prepared to deepen your understanding of computer networking basics.'
-                    : 'Tonton video pembelajaran yang sudah disiapkan untuk memperdalam pemahamanmu tentang dasar jaringan komputer.',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 13,
-                  height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 18),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 13,
-                  vertical: 9,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(
-                    alpha: 0.14,
-                  ),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.school_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      localizationService.isEnglish ? 'Learn easier, anytime!' : 'Belajar lebih mudah, kapan saja!',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 8),
+          const Text(
+            'Tonton video pembelajaran yang sudah disiapkan untuk memperdalam pemahamanmu tentang dasar jaringan komputer.',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12.5,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Belajar lebih mudah, kapan saja!',
+              style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+  Widget _buildSectionHeader(bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: primaryBrown.withValues(alpha: 0.10),
-            borderRadius: BorderRadius.circular(13),
-          ),
-          child: const Icon(
-            Icons.video_library_rounded,
-            color: primaryBrown,
-            size: 24,
+        Text(
+          'DAFTAR VIDEO',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
+            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
           ),
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                localizationService.isEnglish ? 'Video List' : 'Daftar Video',
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.titleLarge?.color,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                localizationService.isEnglish ? 'Select a video to start watching' : 'Pilih video untuk mulai menonton',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
-              ),
-            ],
+        const SizedBox(height: 2),
+        const Text(
+          'Pilih video untuk mulai menonton',
+          style: TextStyle(
+            color: AppTheme.textMuted,
+            fontSize: 12,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildVideoCard(Map<String, dynamic> video) {
+  Widget _buildVideoCard(Map<String, dynamic> video, bool isDark) {
     return Material(
       color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => _openVideoPlayer(video['judul'], video['videoId']),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.grey.withValues(alpha: 0.15),
+              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
             ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 58,
-                height: 58,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: (video['color'] as Color).withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
+                  color: AppTheme.tealTint,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
                     video['number'],
-                    style: TextStyle(
-                      color: video['color'] as Color,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
+                    style: const TextStyle(
+                      color: AppTheme.primaryTeal,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 15),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: (video['color'] as Color).withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        video['materi'],
-                        style: TextStyle(
-                          color: video['color'] as Color,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Text(
+                      video['materi'],
+                      style: const TextStyle(
+                        color: AppTheme.primaryTeal,
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 2),
                     Text(
                       video['judul'],
                       style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        height: 1.3,
+                        color: isDark ? Colors.white : AppTheme.textDark,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       video['deskripsi'],
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                        height: 1.4,
+                        color: AppTheme.textMuted,
+                        fontSize: 11.5,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Container(
-                width: 38,
-                height: 38,
-                decoration: BoxDecoration(
-                  color: primaryBrown.withValues(alpha: 0.10),
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppTheme.tealTint,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.play_arrow_rounded,
-                  color: primaryBrown,
-                  size: 22,
+                  color: AppTheme.primaryTeal,
+                  size: 20,
                 ),
               ),
             ],
@@ -511,42 +366,18 @@ class _VideoScreenState extends State<VideoScreen> {
   }
 
   Widget _buildEmptySearch() {
-    return Center(
+    return const Center(
       child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          children: [
-            Icon(
-              Icons.search_off_rounded,
-              size: 54,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              localizationService.isEnglish ? 'Video not found' : 'Video tidak ditemukan',
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              localizationService.isEnglish
-                  ? 'Try using another keyword.'
-                  : 'Coba gunakan kata kunci lain.',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 12,
-              ),
-            ),
-          ],
+        padding: EdgeInsets.all(24),
+        child: Text(
+          'Video tidak ditemukan.',
+          style: TextStyle(color: AppTheme.textMuted),
         ),
       ),
     );
   }
 
-  Widget _buildTeacherCustomVideos() {
+  Widget _buildTeacherCustomVideos(bool isDark) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance.collection('custom_videos').snapshots(),
       builder: (context, snapshot) {
@@ -555,177 +386,35 @@ class _VideoScreenState extends State<VideoScreen> {
         }
 
         final docs = List<QueryDocumentSnapshot>.from(snapshot.data!.docs);
-        docs.sort((a, b) {
-          final dataA = a.data() as Map<String, dynamic>;
-          final dataB = b.data() as Map<String, dynamic>;
-
-          final tsA = dataA['createdAt'];
-          final tsB = dataB['createdAt'];
-
-          DateTime dtA = (tsA is Timestamp) ? tsA.toDate() : DateTime.now();
-          DateTime dtB = (tsB is Timestamp) ? tsB.toDate() : DateTime.now();
-
-          return dtB.compareTo(dtA);
-        });
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 20),
-            Row(
-              children: [
-                const Icon(Icons.video_collection_rounded, color: primaryBrown, size: 20),
-                const SizedBox(width: 8),
-                Text(
-                  localizationService.isEnglish ? 'Teacher Videos' : 'Video Tutorial Dari Guru',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
+            Text(
+              'VIDEO DARI GURU',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.1,
+                color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+              ),
             ),
             const SizedBox(height: 12),
             ...docs.map((doc) {
               final data = doc.data() as Map<String, dynamic>;
-              final title = data['judul'] ?? 'Video Pembelajaran';
-              final videoId = data['videoId'] ?? '';
-              final desc = data['deskripsi'] ?? '';
-              final guruName = data['guruName'] ?? 'Guru';
-
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _buildVideoCard({
                   'number': 'GURU',
                   'materi': 'Video Guru',
-                  'judul': title,
-                  'deskripsi': '$desc (Oleh: $guruName)',
-                  'videoId': videoId,
-                  'color': primaryBrown,
-                }),
+                  'judul': data['judul'] ?? 'Video',
+                  'deskripsi': data['deskripsi'] ?? '',
+                  'videoId': data['videoId'] ?? '',
+                  'color': AppTheme.primaryTeal,
+                }, isDark),
               );
             }),
           ],
-        );
-      },
-    );
-  }
-
-  void _showInfoDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          localizationService.isEnglish ? 'About Learning Videos' : 'Tentang Video Pembelajaran',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Text(
-          localizationService.isEnglish
-              ? 'These videos are curated to help you understand computer networking concepts visually and interactively.'
-              : 'Video-video ini dikurasi untuk membantu Anda memahami materi jaringan komputer secara visual dan interaktif.',
-          style: const TextStyle(fontSize: 13, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(localizationService.translate('close')),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class VideoSearchDelegate extends SearchDelegate<String> {
-  final List<Map<String, dynamic>> videos;
-  final Function(String title, String videoId) onVideoSelected;
-
-  VideoSearchDelegate({
-    required this.videos,
-    required this.onVideoSelected,
-  });
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: const Icon(Icons.clear_rounded),
-        onPressed: () => query = '',
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back_rounded),
-      onPressed: () => close(context, ''),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return _buildList(context);
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return _buildList(context);
-  }
-
-  Widget _buildList(BuildContext context) {
-    final results = videos.where((video) {
-      final q = query.toLowerCase();
-      return video['judul'].toString().toLowerCase().contains(q) ||
-          video['materi'].toString().toLowerCase().contains(q) ||
-          video['deskripsi'].toString().toLowerCase().contains(q);
-    }).toList();
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final video = results[index];
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            leading: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: (video['color'] as Color).withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  video['number'],
-                  style: TextStyle(
-                    color: video['color'] as Color,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            title: Text(
-              video['judul'],
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              video['deskripsi'],
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: const Icon(Icons.play_arrow_rounded),
-            onTap: () {
-              close(context, '');
-              onVideoSelected(video['judul'], video['videoId']);
-            },
-          ),
         );
       },
     );

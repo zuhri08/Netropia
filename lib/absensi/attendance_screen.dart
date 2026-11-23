@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/localization_service.dart';
+import '../theme/app_theme.dart';
 
 class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
@@ -34,41 +35,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   Future<void> loadAttendanceData() async {
     final user = auth.currentUser;
-
     if (user == null) {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
       return;
     }
 
     try {
-      final userDoc = await firestore
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (!userDoc.exists) {
-        throw Exception('Data siswa tidak ditemukan.');
+      final userDoc = await firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        final userData = userDoc.data()!;
+        nama = userData['nama'] ?? '';
+        nisn = userData['nisn'] ?? '';
+        kelas = userData['kelas'] ?? '';
       }
-
-      final userData = userDoc.data()!;
-      nama = userData['nama'] ?? '';
-      nisn = userData['nisn'] ?? '';
-      kelas = userData['kelas'] ?? '';
 
       final sessionSnapshot = await firestore
           .collection('attendance_sessions')
           .where('kelas', isEqualTo: kelas)
           .where('status', isEqualTo: 'open')
-          .orderBy('startTime', descending: true)
           .get();
 
       activeSessions = sessionSnapshot.docs.map((doc) {
-        final data = doc.data();
-        return {'id': doc.id, ...data};
+        return {'id': doc.id, ...doc.data()};
       }).toList();
 
       final historySnapshot = await firestore
@@ -77,55 +65,30 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           .get();
 
       final docs = [...historySnapshot.docs];
-
-      docs.sort((a, b) {
-        final aTime = a.data()['waktu'] as Timestamp?;
-        final bTime = b.data()['waktu'] as Timestamp?;
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-        return bTime.compareTo(aTime);
-      });
-
       attendanceHistory = docs.map((doc) => doc.data()).toList();
 
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   Future<void> submitAttendance() async {
     final inputCode = codeController.text.trim().toUpperCase();
-
     if (inputCode.isEmpty) {
-      showMessage(localizationService.isEnglish ? 'Enter attendance code first.' : 'Masukkan kode absensi terlebih dahulu.');
+      showMessage('Masukkan atau scan kode absensi terlebih dahulu.');
       return;
     }
 
     final user = auth.currentUser;
+    if (user == null) return;
 
-    if (user == null) {
-      showMessage(localizationService.isEnglish ? 'Please log in first.' : 'Silakan login terlebih dahulu.');
-      return;
-    }
-
-    setState(() {
-      isSubmitting = true;
-    });
+    setState(() => isSubmitting = true);
 
     try {
       final codeQuery = await firestore
           .collection('attendance_sessions')
-          .where('code', isEqualTo: inputCode)
+          .where('kode', isEqualTo: inputCode)
           .limit(1)
           .get();
 
@@ -137,27 +100,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       final sessionDoc = codeQuery.docs.first;
       final sessionData = sessionDoc.data();
       final sessionId = sessionDoc.id;
-      final sessionStatus = sessionData['status'] ?? 'closed';
-      final sessionKelas = sessionData['kelas'] ?? '';
-
-      if (sessionStatus == 'closed') {
-        _showSessionClosedDialog(sessionData);
-        return;
-      }
-
-      if (kelas.isNotEmpty && sessionKelas.isNotEmpty && kelas != sessionKelas) {
-        _showWrongClassDialog(sessionKelas, kelas);
-        return;
-      }
 
       final recordId = '${sessionId}_${user.uid}';
       final recordRef = firestore.collection('attendance_records').doc(recordId);
-      final existingRecord = await recordRef.get();
-
-      if (existingRecord.exists) {
-        showMessage(localizationService.isEnglish ? 'You have already recorded attendance for this session.' : 'Kamu sudah melakukan absensi pada sesi ini.');
-        return;
-      }
 
       await recordRef.set({
         'sessionId': sessionId,
@@ -166,29 +111,19 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         'nisn': nisn,
         'kelas': kelas,
         'mataPelajaran': sessionData['mataPelajaran'] ?? '',
-        'materi': sessionData['materi'] ?? '',
-        'pertemuan': sessionData['pertemuan'] ?? '',
         'waktu': FieldValue.serverTimestamp(),
         'status': 'hadir',
       });
 
       codeController.clear();
-
       if (mounted) {
-        showMessage(localizationService.isEnglish ? 'Attendance recorded! Status: PRESENT.' : 'Absensi berhasil! Kamu tercatat HADIR.');
+        showMessage('Absensi berhasil! Kamu tercatat HADIR.');
       }
-
       await loadAttendanceData();
     } catch (e) {
-      if (mounted) {
-        showMessage('Gagal melakukan absensi: $e');
-      }
+      if (mounted) showMessage('Gagal melakukan absensi: $e');
     } finally {
-      if (mounted) {
-        setState(() {
-          isSubmitting = false;
-        });
-      }
+      if (mounted) setState(() => isSubmitting = false);
     }
   }
 
@@ -196,132 +131,91 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     return attendanceHistory.where((item) => item['status'] == status).length;
   }
 
-  String formatDate(dynamic value) {
-    if (value is! Timestamp) {
-      return '-';
-    }
-
-    final date = value.toDate().toLocal();
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    final year = date.year.toString();
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-
-    return '$day/$month/$year • $hour:$minute';
-  }
-
-  String statusLabel(String status) {
-    if (localizationService.isEnglish) {
-      switch (status) {
-        case 'hadir': return 'Present';
-        case 'izin': return 'Permission';
-        case 'sakit': return 'Sick';
-        case 'alpa': return 'Absent';
-        default: return status;
-      }
-    }
-    switch (status) {
-      case 'hadir': return 'Hadir';
-      case 'izin': return 'Izin';
-      case 'sakit': return 'Sakit';
-      case 'alpa': return 'Alpa';
-      default: return status;
-    }
-  }
-
-  IconData statusIcon(String status) {
-    switch (status) {
-      case 'hadir': return Icons.check_circle;
-      case 'izin': return Icons.assignment;
-      case 'sakit': return Icons.healing;
-      case 'alpa': return Icons.cancel;
-      default: return Icons.help_outline;
-    }
-  }
-
   void showMessage(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
 
-  void _showSessionClosedDialog(Map<String, dynamic> sessionData) {
-    final mapel = sessionData['mataPelajaran'] ?? 'Materi TKJ';
-    final sessionKelas = sessionData['kelas'] ?? '-';
+  void _showQrScannerModal() {
+    final TextEditingController qrInputCtrl = TextEditingController();
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 20,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.block_rounded, color: Colors.redAccent, size: 26),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Sesi Absensi Ditutup',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppTheme.borderCream, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            const Text(
+              'Scan QR Code Presensi',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+            ),
+            const SizedBox(height: 6),
+            const Text(
+              'Pindai QR Code dari layar HP Guru atau masukkan kode yang tertera di QR.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.5, color: AppTheme.textMuted),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppTheme.tealTint,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.3)),
+              ),
+              child: const Icon(Icons.qr_code_scanner_rounded, size: 70, color: AppTheme.primaryTeal),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: qrInputCtrl,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                hintText: 'Masukkan 6 Digit Kode QR (Contoh: ABC123)',
+                prefixIcon: const Icon(Icons.qr_code_2_rounded, color: AppTheme.primaryTeal),
+                filled: true,
+                fillColor: AppTheme.surfaceCream,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  final code = qrInputCtrl.text.trim();
+                  if (code.isNotEmpty) {
+                    codeController.text = code;
+                    Navigator.pop(context);
+                    submitAttendance();
+                  }
+                },
+                icon: const Icon(Icons.check_circle_rounded),
+                label: const Text('Gunakan Kode QR Ini', style: TextStyle(fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryTeal,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ),
           ],
         ),
-        content: Text(
-          'Sesi presensi untuk mata pelajaran "$mapel" ($sessionKelas) telah resmi ditutup oleh Guru. Kamu tidak dapat mengisi absensi pada sesi ini.',
-          style: const TextStyle(fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFAD8B73),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text('Mengerti'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showWrongClassDialog(String sessionKelas, String userKelas) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 26),
-            SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                'Kelas Tidak Sesuai',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          'Sesi absensi ini diperuntukkan khusus untuk kelas "$sessionKelas", sedangkan data akun kamu terdaftar di kelas "$userKelas".',
-          style: const TextStyle(fontSize: 14, height: 1.5),
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFAD8B73),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            child: const Text('Mengerti'),
-          ),
-        ],
       ),
     );
   }
@@ -334,72 +228,76 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ListenableBuilder(
       listenable: localizationService,
       builder: (context, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(
-              localizationService.translate('attendance'),
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            backgroundColor: const Color(0xFFAD8B73),
+            title: const Text('Absensi Siswa', style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: AppTheme.primaryTeal,
             foregroundColor: Colors.white,
             elevation: 0,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded),
+                tooltip: 'Scan QR Presensi',
+                onPressed: _showQrScannerModal,
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
           body: isLoading
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFFAD8B73)))
+              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryTeal))
               : RefreshIndicator(
-                  color: const Color(0xFFAD8B73),
+                  color: AppTheme.primaryTeal,
                   onRefresh: loadAttendanceData,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 50),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // PROFIL SISWA
+                        // PROFILE CARD
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFFAD8B73), Color(0xFFCEAB93)],
+                              colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Row(
                             children: [
                               Container(
-                                width: 58,
-                                height: 58,
+                                width: 50,
+                                height: 50,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.18),
+                                  color: Colors.white.withValues(alpha: 0.18),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.person, color: Colors.white, size: 32),
+                                child: const Icon(Icons.person_rounded, color: Colors.white, size: 28),
                               ),
-                              const SizedBox(width: 15),
+                              const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      nama.isEmpty ? 'Siswa' : nama,
+                                      nama.isEmpty ? 'azer' : nama,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 19,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 5),
+                                    const SizedBox(height: 2),
                                     Text(
-                                      '$nisn • $kelas',
-                                      style: const TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 13,
-                                      ),
+                                      '$nisn · $kelas',
+                                      style: const TextStyle(color: Colors.white70, fontSize: 12.5),
                                     ),
                                   ],
                                 ),
@@ -408,128 +306,108 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           ),
                         ),
 
-                        const SizedBox(height: 25),
+                        const SizedBox(height: 22),
 
-                        // RINGKASAN
+                        // SUMMARY
                         Text(
-                          localizationService.isEnglish ? 'Attendance Summary' : 'Ringkasan Kehadiran',
+                          'RINGKASAN KEHADIRAN',
                           style: TextStyle(
-                            fontSize: 19,
+                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.titleLarge?.color,
+                            letterSpacing: 1.1,
+                            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
                           ),
                         ),
-
-                        const SizedBox(height: 12),
-
+                        const SizedBox(height: 10),
                         Row(
                           children: [
-                            Expanded(child: buildSummaryCard(localizationService.isEnglish ? 'Present' : 'Hadir', countStatus('hadir'), Icons.check_circle)),
-                            const SizedBox(width: 10),
-                            Expanded(child: buildSummaryCard(localizationService.isEnglish ? 'Permit' : 'Izin', countStatus('izin'), Icons.assignment)),
-                            const SizedBox(width: 10),
-                            Expanded(child: buildSummaryCard(localizationService.isEnglish ? 'Sick' : 'Sakit', countStatus('sakit'), Icons.healing)),
-                            const SizedBox(width: 10),
-                            Expanded(child: buildSummaryCard(localizationService.isEnglish ? 'Absent' : 'Alpa', countStatus('alpa'), Icons.cancel)),
+                            Expanded(child: buildSummaryCard('Hadir', countStatus('hadir'), isDark)),
+                            const SizedBox(width: 8),
+                            Expanded(child: buildSummaryCard('Izin', countStatus('izin'), isDark)),
+                            const SizedBox(width: 8),
+                            Expanded(child: buildSummaryCard('Sakit', countStatus('sakit'), isDark)),
+                            const SizedBox(width: 8),
+                            Expanded(child: buildSummaryCard('Alpa', countStatus('alpa'), isDark)),
                           ],
                         ),
 
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 22),
 
-                        // ABSENSI AKTIF
-                        Text(
-                          localizationService.isEnglish ? 'Active Session' : 'Absensi Aktif',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.titleLarge?.color,
-                          ),
+                        // SCAN QR BUTTON / CODE INPUT
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'MASUKKAN KODE / SCAN QR',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.1,
+                                color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: _showQrScannerModal,
+                              icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
+                              label: const Text('Scan QR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryTeal),
+                            ),
+                          ],
                         ),
-
-                        const SizedBox(height: 12),
-
-                        if (activeSessions.isEmpty)
-                          buildEmptyCard(
-                            icon: Icons.event_available,
-                            title: localizationService.isEnglish ? 'No active session' : 'Belum ada absensi',
-                            subtitle: localizationService.isEnglish ? 'No attendance session opened for class $kelas.' : 'Belum ada sesi absensi yang dibuka untuk kelas $kelas.',
-                          )
-                        else
-                          ...activeSessions.map((session) => buildActiveSessionCard(session)),
-
-                        const SizedBox(height: 28),
-
-                        // INPUT KODE
-                        Text(
-                          localizationService.isEnglish ? 'Enter Attendance Code' : 'Masukkan Kode Absensi',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.titleLarge?.color,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
+                        const SizedBox(height: 6),
                         TextField(
                           controller: codeController,
                           textCapitalization: TextCapitalization.characters,
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                          style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                           decoration: InputDecoration(
-                            hintText: localizationService.isEnglish ? 'Example: TKJ1025' : 'Contoh: TKJ1025',
-                            prefixIcon: const Icon(Icons.qr_code_2),
+                            hintText: 'Contoh: TKJ1025',
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primaryTeal),
+                              onPressed: _showQrScannerModal,
+                            ),
                             filled: true,
                             fillColor: Theme.of(context).cardColor,
-                          ),
-                        ),
-
-                        const SizedBox(height: 12),
-
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton.icon(
-                            onPressed: isSubmitting ? null : submitAttendance,
-                            icon: isSubmitting
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                  )
-                                : const Icon(Icons.how_to_reg),
-                            label: Text(
-                              isSubmitting
-                                  ? (localizationService.isEnglish ? 'Processing...' : 'Memproses...')
-                                  : (localizationService.isEnglish ? 'Check In Now' : 'Absen Sekarang'),
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(color: AppTheme.borderCream),
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 28),
-
-                        // RIWAYAT ABSENSI
-                        Text(
-                          localizationService.isEnglish ? 'Attendance History' : 'Riwayat Absensi',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).textTheme.titleLarge?.color,
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: isSubmitting ? null : submitAttendance,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryTeal,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            child: const Text('Absen Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 22),
 
+                        // RIWAYAT ABSENSI
+                        Text(
+                          'RIWAYAT ABSENSI',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         if (attendanceHistory.isEmpty)
-                          buildEmptyCard(
-                            icon: Icons.history,
-                            title: localizationService.isEnglish ? 'No history yet' : 'Belum ada riwayat',
-                            subtitle: localizationService.isEnglish ? 'Your attendance history will appear here.' : 'Riwayat kehadiran kamu akan muncul di sini.',
-                          )
-                        else
-                          ...attendanceHistory.map((record) => buildHistoryCard(record)),
-
-                        const SizedBox(height: 30),
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20),
+                              child: Text('Belum ada riwayat absensi.', style: TextStyle(color: AppTheme.textMuted, fontSize: 12.5)),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -539,175 +417,28 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     );
   }
 
-  Widget buildSummaryCard(String title, int value, IconData icon) {
+  Widget buildSummaryCard(String title, int value, bool isDark) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
+        ),
       ),
       child: Column(
         children: [
-          Icon(icon, color: const Color(0xFFAD8B73), size: 25),
-          const SizedBox(height: 7),
           Text(
-            value.toString(),
+            '$value',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
+              color: isDark ? Colors.white : AppTheme.textDark,
             ),
           ),
-          const SizedBox(height: 3),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildActiveSessionCard(Map<String, dynamic> session) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFAD8B73).withOpacity(0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFAD8B73).withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.fact_check, color: Color(0xFFAD8B73)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  session['mataPelajaran'] ?? (localizationService.isEnglish ? 'Attendance Session' : 'Absensi Pembelajaran'),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildEmptyCard({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 48, color: Colors.grey),
-          const SizedBox(height: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildHistoryCard(Map<String, dynamic> record) {
-    final status = record['status']?.toString() ?? 'hadir';
-
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Icon(statusIcon(status), color: const Color(0xFFAD8B73), size: 28),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  record['mataPelajaran'] ?? (localizationService.isEnglish ? 'Attendance' : 'Absensi'),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  formatDate(record['waktu']),
-                  style: const TextStyle(color: Colors.grey, fontSize: 11),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFFAD8B73).withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              statusLabel(status),
-              style: const TextStyle(
-                color: Color(0xFFAD8B73),
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          const SizedBox(height: 2),
+          Text(title, style: const TextStyle(fontSize: 11, color: AppTheme.textMuted)),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../theme/theme_manager.dart';
+import '../theme/app_theme.dart';
 import '../screens/login_screen.dart';
 import '../screens/notification_screen.dart';
 import '../services/settings_service.dart';
@@ -20,7 +21,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _reminderTime = 'Belum diatur';
   int _dailyTarget = 30;
   bool _isReminderEnabled = false;
-  int _streakCount = 3;
+  int _streakCount = 1;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Color(0xFFAD8B73),
+              primary: AppTheme.primaryTeal,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -64,7 +65,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _settingsService.setReminderTime(formattedTime);
       await _settingsService.setReminderEnabled(true);
 
-      // Schedule exact daily local notification & alarm
       await LocalNotificationService().scheduleDailyReminder(
         hour: picked.hour,
         minute: picked.minute,
@@ -80,33 +80,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizationService.isEnglish 
-                ? 'Reminder set to $_reminderTime & scheduled!' 
+            content: Text(localizationService.isEnglish
+                ? 'Reminder set to $_reminderTime & scheduled!'
                 : 'Pengingat diatur ke $_reminderTime & alarm dijadwalkan!'),
-            action: SnackBarAction(
-              label: localizationService.isEnglish ? 'Test' : 'Uji Notif',
-              textColor: Colors.amber,
-              onPressed: _testAlarmNotification,
-            ),
           ),
         );
       }
-    }
-  }
-
-  Future<void> _testAlarmNotification() async {
-    await LocalNotificationService().showTestNotification(
-      title: 'Pengingat Belajar Netropia 🔥',
-      body: 'Waktunya belajar! Selesaikan materi TKJ dan tingkatkan pemahamanmu hari ini.',
-    );
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(localizationService.isEnglish 
-              ? 'Notification & alarm test sent to phone!' 
-              : 'Notifikasi & alarm pengujian dikirim ke HP!'),
-        ),
-      );
     }
   }
 
@@ -115,13 +94,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(localizationService.translate('daily_target_title')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(localizationService.translate('daily_target_desc')),
-            const SizedBox(height: 15),
+            const SizedBox(height: 14),
             TextField(
               controller: controller,
               keyboardType: TextInputType.number,
@@ -168,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(localizationService.translate('logout_title')),
         content: Text(localizationService.translate('logout_desc')),
         actions: [
@@ -178,44 +157,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pop(context);
               _logout();
             },
-            child: Text(localizationService.translate('logout'), style: const TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showStreakInfo() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            const Icon(Icons.local_fire_department_rounded, color: Colors.orange, size: 28),
-            const SizedBox(width: 8),
-            Text(localizationService.translate('streak')),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '$_streakCount${localizationService.translate('streak_days')} 🔥',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              localizationService.translate('streak_desc'),
-              style: const TextStyle(fontSize: 14, height: 1.4),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(localizationService.translate('close')),
+            child: Text(localizationService.translate('logout'), style: const TextStyle(color: AppTheme.accentRed)),
           ),
         ],
       ),
@@ -226,16 +168,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
         title: Text(localizationService.translate('select_language')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Text('🇮🇩', style: TextStyle(fontSize: 24)),
+              leading: const Text('🇮🇩', style: TextStyle(fontSize: 22)),
               title: const Text('Bahasa Indonesia'),
               trailing: localizationService.currentLanguage == 'id'
-                  ? const Icon(Icons.check_rounded, color: Color(0xFFAD8B73))
+                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryTeal)
                   : null,
               onTap: () async {
                 await localizationService.setLanguage('id');
@@ -244,10 +186,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             ListTile(
-              leading: const Text('🇬🇧', style: TextStyle(fontSize: 24)),
+              leading: const Text('🇬🇧', style: TextStyle(fontSize: 22)),
               title: const Text('English'),
               trailing: localizationService.currentLanguage == 'en'
-                  ? const Icon(Icons.check_rounded, color: Color(0xFFAD8B73))
+                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryTeal)
                   : null,
               onTap: () async {
                 await localizationService.setLanguage('en');
@@ -261,6 +203,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void _showEditEmailDialog() {
+    final user = FirebaseAuth.instance.currentUser;
+    final emailController = TextEditingController(text: user?.email ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Edit Email Akun'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Masukkan email baru kamu. Tautan verifikasi akan dikirim ke email tersebut.', style: TextStyle(fontSize: 12.5, color: AppTheme.textMuted)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email Baru',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () async {
+              final newEmail = emailController.text.trim();
+              if (newEmail.isNotEmpty && user != null) {
+                try {
+                  await user.verifyBeforeUpdateEmail(newEmail);
+                  if (mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Email verifikasi dikirim ke $newEmail.'), behavior: SnackBarBehavior.floating),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Gagal memperbarui email: $e'), behavior: SnackBarBehavior.floating),
+                    );
+                  }
+                }
+              }
+            },
+            child: const Text('Kirim Verifikasi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Ubah Password'),
+        content: Text('Tautan reset password akan dikirimkan ke email terdaftar (${user?.email ?? "-"}). Apakah kamu yakin?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          ElevatedButton(
+            onPressed: () async {
+              if (user?.email != null) {
+                await FirebaseAuth.instance.sendPasswordResetEmail(email: user!.email!);
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Email reset password berhasil dikirim! Silakan cek email kamu.'), behavior: SnackBarBehavior.floating),
+                  );
+                }
+              }
+            },
+            child: const Text('Kirim Email Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -269,34 +295,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            title: Text(localizationService.translate('settings'), style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text('Pengaturan', style: TextStyle(fontWeight: FontWeight.bold)),
+            backgroundColor: AppTheme.primaryTeal,
+            foregroundColor: Colors.white,
             elevation: 0,
           ),
           body: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.fromLTRB(18, 18, 18, 50),
             children: [
               _buildSettingsGroup(
-                title: localizationService.translate('account'),
+                title: 'AKUN',
                 items: [
-                  _buildSettingsItem(Icons.person_outline_rounded, localizationService.translate('edit_name'), onTap: () {
+                  _buildSettingsItem(Icons.person_outline_rounded, 'Edit Nama', onTap: () {
                     final user = FirebaseAuth.instance.currentUser;
                     Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
                   }),
-                  _buildSettingsItem(Icons.camera_alt_outlined, localizationService.translate('edit_photo'), onTap: () {
+                  _buildSettingsItem(Icons.camera_alt_outlined, 'Edit Foto', onTap: () {
                     final user = FirebaseAuth.instance.currentUser;
                     Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: user?.displayName ?? "", role: "Siswa")));
                   }),
-                  _buildSettingsItem(Icons.email_outlined, localizationService.translate('edit_email'), onTap: () {}),
-                  _buildSettingsItem(Icons.lock_outline_rounded, localizationService.translate('change_password'), onTap: () {}),
+                  _buildSettingsItem(Icons.email_outlined, 'Edit Email', onTap: _showEditEmailDialog),
+                  _buildSettingsItem(Icons.lock_outline_rounded, 'Ubah Password', onTap: _showChangePasswordDialog),
                 ],
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 22),
               _buildSettingsGroup(
-                title: localizationService.translate('preferences'),
+                title: 'PREFERENSI',
                 items: [
                   _buildSettingsItem(
                     Icons.notifications_none_rounded,
-                    localizationService.translate('notifications'),
+                    'Notifikasi',
                     onTap: () {
                       Navigator.push(
                         context,
@@ -311,9 +339,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     builder: (context, child) {
                       return _buildSettingsItem(
                         themeManager.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                        localizationService.translate('dark_mode'),
+                        'Dark Mode',
                         trailing: Switch(
                           value: themeManager.isDarkMode,
+                          activeColor: AppTheme.primaryTeal,
                           onChanged: (val) => themeManager.toggleTheme(val),
                         ),
                       );
@@ -324,7 +353,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     builder: (context, child) {
                       return _buildSettingsItem(
                         Icons.language_rounded,
-                        localizationService.translate('language'),
+                        'Bahasa',
                         subtitle: localizationService.currentLanguage == 'en' ? 'English' : 'Bahasa Indonesia',
                         onTap: _selectLanguage,
                       );
@@ -332,16 +361,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 22),
               _buildSettingsGroup(
-                title: localizationService.translate('learning'),
+                title: 'PEMBELAJARAN',
                 items: [
                   _buildSettingsItem(
                     Icons.alarm_rounded,
-                    localizationService.translate('learning_reminder'),
+                    'Pengingat Belajar',
                     subtitle: _reminderTime,
                     trailing: Switch(
                       value: _isReminderEnabled,
+                      activeColor: AppTheme.primaryTeal,
                       onChanged: (val) async {
                         await _settingsService.setReminderEnabled(val);
                         setState(() => _isReminderEnabled = val);
@@ -354,44 +384,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     onTap: _selectReminderTime,
                   ),
-                  if (_isReminderEnabled)
-                    _buildSettingsItem(
-                      Icons.notifications_active_rounded,
-                      localizationService.isEnglish ? 'Test Notification & Alarm' : 'Uji Notifikasi & Alarm',
-                      subtitle: localizationService.isEnglish 
-                          ? 'Send test notification & sound to phone' 
-                          : 'Bunyikan notifikasi & alarm seketika di HP',
-                      titleColor: const Color(0xFF1565C0),
-                      onTap: _testAlarmNotification,
-                    ),
                   _buildSettingsItem(
                     Icons.track_changes_rounded,
-                    localizationService.translate('daily_target'),
-                    subtitle: '$_dailyTarget ${localizationService.isEnglish ? 'minutes per day' : 'menit per hari'}',
+                    'Target Belajar Harian',
+                    subtitle: '$_dailyTarget menit per hari',
                     onTap: _setDailyTarget,
                   ),
                   _buildSettingsItem(
                     Icons.local_fire_department_rounded,
-                    localizationService.translate('streak'),
-                    subtitle: '$_streakCount${localizationService.translate('streak_days')}',
-                    titleColor: Colors.orange,
-                    onTap: _showStreakInfo,
+                    'Streak Belajar',
+                    subtitle: '$_streakCount Hari Berturut-turut',
+                    titleColor: AppTheme.accentAmber,
                   ),
                 ],
               ),
-              const SizedBox(height: 25),
+              const SizedBox(height: 22),
               _buildSettingsGroup(
-                title: localizationService.translate('security'),
+                title: 'KEAMANAN',
                 items: [
-                  _buildSettingsItem(Icons.devices_rounded, localizationService.translate('login_session'), onTap: () {}),
-                  _buildSettingsItem(Icons.logout_rounded, localizationService.translate('logout'), titleColor: Colors.red, onTap: _showLogoutDialog),
+                  _buildSettingsItem(Icons.logout_rounded, 'Keluar dari Akun', titleColor: AppTheme.accentRed, onTap: _showLogoutDialog),
                 ],
               ),
-              const SizedBox(height: 50),
+              const SizedBox(height: 40),
               const Center(
                 child: Text(
                   "Netropia v1.0.0",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
                 ),
               ),
             ],
@@ -402,18 +420,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingsGroup({required String title, required List<Widget> items}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10, bottom: 10),
-          child: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFAD8B73))),
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.1,
+              color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+            ),
+          ),
         ),
         Container(
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+            ),
           ),
           child: Column(children: items),
         ),
@@ -422,11 +451,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildSettingsItem(IconData icon, String title, {String? subtitle, Widget? trailing, Color? titleColor, VoidCallback? onTap}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: titleColor ?? const Color(0xFFAD8B73), size: 22),
-      title: Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: titleColor)),
-      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12)) : null,
-      trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 20),
+      leading: Icon(icon, color: titleColor ?? AppTheme.primaryTeal, size: 22),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+          color: titleColor ?? (isDark ? Colors.white : AppTheme.textDark),
+        ),
+      ),
+      subtitle: subtitle != null ? Text(subtitle, style: const TextStyle(fontSize: 12, color: AppTheme.textMuted)) : null,
+      trailing: trailing ?? const Icon(Icons.chevron_right_rounded, size: 20, color: AppTheme.textMuted),
       onTap: onTap,
     );
   }

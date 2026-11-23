@@ -470,8 +470,6 @@ class _PerangkatJaringanMateriScreenState
 
   @override
   Widget build(BuildContext context) {
-    final page = _pages[_currentPage];
-
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(

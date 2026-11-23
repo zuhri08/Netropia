@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class TeacherBorrowingScreen extends StatelessWidget {
   const TeacherBorrowingScreen({super.key});
@@ -103,7 +104,7 @@ class _LoanCard extends StatelessWidget {
       case 'menunggu':
         return Colors.orange;
       case 'disetujui':
-        return Color(0xFFAD8B73);
+        return AppTheme.primaryTeal;
       case 'dipinjam':
         return Colors.green;
       case 'dikembalikan':
@@ -161,12 +162,12 @@ class _LoanCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFAD8B73).withOpacity(0.1),
+                    color: AppTheme.tealTint,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
                     Icons.inventory_2_rounded,
-                    color: Color(0xFFAD8B73),
+                    color: AppTheme.primaryTeal,
                     size: 28,
                   ),
                 ),
