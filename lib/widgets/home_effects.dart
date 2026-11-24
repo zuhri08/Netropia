@@ -563,3 +563,158 @@ class _HeroPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _HeroPainter oldDelegate) => oldDelegate.t != t;
 }
+
+
+// ---------------------------------------------------------------------------
+// 9. AnimatedBackdrop – latar belakang hidup: gumpalan warna lembut yang
+//    melayang pelan + titik-titik kecil yang naik seperti gelembung.
+// ---------------------------------------------------------------------------
+class AnimatedBackdrop extends StatefulWidget {
+  const AnimatedBackdrop({super.key});
+
+  @override
+  State<AnimatedBackdrop> createState() => _AnimatedBackdropState();
+}
+
+class _AnimatedBackdropState extends State<AnimatedBackdrop>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 28));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_reduceMotion(context)) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return IgnorePointer(
+      child: RepaintBoundary(
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: _BackdropPainter(_controller, isDark ? 0.35 : 1.0),
+        ),
+      ),
+    );
+  }
+}
+
+class _Blob {
+  const _Blob(this.x, this.y, this.r, this.speed, this.phase, this.ampX,
+      this.ampY, this.color, this.opacity);
+
+  final double x, y; // posisi dasar (fraksi)
+  final double r; // radius (fraksi lebar)
+  final int speed; // integer supaya loop mulus
+  final double phase;
+  final double ampX, ampY;
+  final Color color;
+  final double opacity;
+}
+
+class _BackdropPainter extends CustomPainter {
+  _BackdropPainter(this.anim, this.strength) : super(repaint: anim);
+
+  final Animation<double> anim;
+  final double strength;
+
+  static const _blobs = <_Blob>[
+    _Blob(0.90, 0.08, 0.62, 1, 0.00, 0.10, 0.05, Color(0xFFF0B993), 0.55),
+    _Blob(0.05, 0.32, 0.55, 1, 0.35, 0.12, 0.06, Color(0xFFF6DCA0), 0.60),
+    _Blob(0.95, 0.58, 0.58, 2, 0.60, 0.08, 0.06, Color(0xFFE3A99D), 0.40),
+    _Blob(0.10, 0.82, 0.60, 1, 0.15, 0.12, 0.05, Color(0xFFD9B79E), 0.50),
+    _Blob(0.60, 0.98, 0.50, 2, 0.80, 0.10, 0.04, Color(0xFFF2CDA6), 0.50),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double t = anim.value;
+    final double w = size.width;
+    final double h = size.height;
+
+    // Gumpalan warna lembut
+    for (final b in _blobs) {
+      final double a = (t * b.speed + b.phase) * 2 * math.pi;
+      final Offset c = Offset(
+        (b.x + math.sin(a) * b.ampX) * w,
+        (b.y + math.cos(a) * b.ampY) * h,
+      );
+      final double r = b.r * w;
+      canvas.drawCircle(
+        c,
+        r,
+        Paint()
+          ..shader = RadialGradient(
+            colors: [
+              b.color.withOpacity(b.opacity * strength),
+              b.color.withOpacity(0),
+            ],
+          ).createShader(Rect.fromCircle(center: c, radius: r)),
+      );
+    }
+
+    // Gelembung kecil yang naik pelan
+    const int n = 16;
+    final Paint dot = Paint();
+    for (int i = 0; i < n; i++) {
+      final double progress = (t * (1 + i % 2) + i / n) % 1.0;
+      final double x = ((i * 0.137 + 0.05) % 1.0) +
+          math.sin((t * 3 + i * 0.3) * 2 * math.pi) * 0.02;
+      final double y = 1.05 - progress * 1.1;
+      final double fade = math.sin(progress * math.pi);
+      final double r = 2 + (i % 3) * 1.3;
+      dot.color = const Color(0xFFAD8B73)
+          .withOpacity((0.28 * fade * strength).clamp(0.0, 1.0));
+      canvas.drawCircle(Offset(x * w, y * h), r, dot);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_BackdropPainter old) => old.strength != strength;
+}
+
+// ---------------------------------------------------------------------------
+// 10. BottomFade – tepi bawah konten memudar halus (tidak terpotong kasar).
+// ---------------------------------------------------------------------------
+class BottomFade extends StatelessWidget {
+  const BottomFade({super.key, required this.child, this.height = 36});
+
+  final Widget child;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (rect) {
+        final double h = rect.height <= 0 ? 1.0 : rect.height;
+        final double stop = ((h - height) / h).clamp(0.0, 1.0);
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: const [Colors.white, Colors.white, Colors.transparent],
+          stops: [0.0, stop, 1.0],
+        ).createShader(rect);
+      },
+      child: child,
+    );
+  }
+}

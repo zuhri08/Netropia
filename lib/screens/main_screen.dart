@@ -51,7 +51,7 @@ class _MainScreenState extends State<MainScreen> {
       listenable: localizationService,
       builder: (context, child) {
         return Scaffold(
-          extendBody: false,
+          extendBody: true,
           body: IndexedStack(
             index: _selectedIndex,
             children: _pages,

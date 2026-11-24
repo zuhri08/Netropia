@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../theme/app_theme.dart';
 
 class MateriDasarTkjScreen extends StatefulWidget {
   const MateriDasarTkjScreen({super.key});
@@ -20,7 +19,7 @@ class _MateriDasarTkjScreenState
       'title': 'OBSERVE',
       'subtitle': 'Amati',
       'icon': Icons.visibility_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': Color(0xFFCEAB93),
     },
     {
       'title': 'THINK',
@@ -54,7 +53,7 @@ class _MateriDasarTkjScreenState
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: const Text('Materi Dasar TKJ'),
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: const Color(0xFFAD8B73),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -84,8 +83,8 @@ class _MateriDasarTkjScreenState
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [
-            AppTheme.primaryTeal,
-            AppTheme.primaryTeal,
+            Color(0xFFAD8B73),
+            Color(0xFFCEAB93),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -245,7 +244,7 @@ class _MateriDasarTkjScreenState
     return _contentCard(
       title: 'Amati Lingkungan di Sekitarmu',
       icon: Icons.visibility_rounded,
-      color: AppTheme.primaryTeal,
+      color: const Color(0xFFCEAB93),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -317,7 +316,7 @@ class _MateriDasarTkjScreenState
         children: [
           Icon(
             icon,
-            color: AppTheme.primaryTeal,
+            color: const Color(0xFFAD8B73),
             size: 32,
           ),
           const SizedBox(height: 8),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
 import 'cara_kerja_jaringan_screen.dart';
-
 class TujuanManfaatScreen extends StatelessWidget {
   final VoidCallback? onNext;
 
@@ -10,20 +8,20 @@ class TujuanManfaatScreen extends StatelessWidget {
     this.onNext,
   });
 
-  static const Color primaryBlue = AppTheme.primaryTeal;
-  static const Color darkBlue = AppTheme.darkTeal;
-  static const Color lightBlue = AppTheme.tealTint;
-  static const Color textDark = AppTheme.textDark;
-  static const Color textGrey = AppTheme.textMuted;
-  static const Color borderGrey = AppTheme.borderCream;
+  static const Color primaryBlue = Color(0xFFAD8B73);
+  static const Color darkBlue = Color(0xFF123B7A);
+  static const Color lightBlue = Color(0xFFF5EBE6);
+  static const Color textDark = Color(0xFF263238);
+  static const Color textGrey = Color(0xFF607D8B);
+  static const Color borderGrey = Color(0xFFDCE3EA);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFF7F9FB),
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: textDark,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -45,19 +43,32 @@ class TujuanManfaatScreen extends StatelessWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: lightBlue,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
               '02 / 08',
               style: TextStyle(
-                color: Colors.white,
+                color: primaryBlue,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(3),
+          child: Container(
+            height: 3,
+            alignment: Alignment.centerLeft,
+            child: FractionallySizedBox(
+              widthFactor: 0.25,
+              child: Container(
+                color: primaryBlue,
+              ),
+            ),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

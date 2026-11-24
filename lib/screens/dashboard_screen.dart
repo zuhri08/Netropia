@@ -238,10 +238,14 @@ class DashboardScreen extends StatelessWidget {
               const SizedBox(width: 8),
             ],
           ),
-          body: SafeArea(
-            child: SingleChildScrollView(
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AnimatedBackdrop()),
+              SafeArea(
+                child: BottomFade(
+                  child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -313,8 +317,8 @@ class DashboardScreen extends StatelessWidget {
                         title: localizationService.translate('study_materials'),
                         subtitle: localizationService.translate('study_materials_desc'),
                         icon: Icons.menu_book_rounded,
-                        iconColor: const Color(0xFF0288D1),
-                        backgroundColor: const Color(0xFFE3F2FD),
+                        iconColor: const Color(0xFFAD8B73),
+                        backgroundColor: const Color(0xFFF4EBE8),
                         onTap: () {
                           _openMateri(context);
                         },
@@ -334,8 +338,8 @@ class DashboardScreen extends StatelessWidget {
                         title: localizationService.translate('device_3d'),
                         subtitle: localizationService.translate('device_3d_desc'),
                         icon: Icons.view_in_ar_rounded,
-                        iconColor: const Color(0xFF00897B),
-                        backgroundColor: const Color(0xFFE0F2F1),
+                        iconColor: const Color(0xFFB08968),
+                        backgroundColor: const Color(0xFFF5EBE6),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -351,8 +355,8 @@ class DashboardScreen extends StatelessWidget {
                         title: localizationService.translate('subnet_calculator'),
                         subtitle: localizationService.translate('subnet_desc'),
                         icon: Icons.calculate_rounded,
-                        iconColor: const Color(0xFFE65100),
-                        backgroundColor: const Color(0xFFFFF3E0),
+                        iconColor: const Color(0xFF8E6F5B),
+                        backgroundColor: const Color(0xFFF0EBE1),
                         onTap: () {
                           _openSubnetCalculator(context);
                         },
@@ -380,8 +384,8 @@ class DashboardScreen extends StatelessWidget {
                         title: localizationService.translate('attendance'),
                         subtitle: localizationService.translate('attendance_desc'),
                         icon: Icons.fact_check_rounded,
-                        iconColor: const Color(0xFF7B1FA2),
-                        backgroundColor: const Color(0xFFF3E5F5),
+                        iconColor: const Color(0xFF5C3D2E),
+                        backgroundColor: const Color(0xFFEAE0D5),
                         onTap: () async {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user == null) return;
@@ -423,8 +427,8 @@ class DashboardScreen extends StatelessWidget {
                             ? (localizationService.isEnglish ? 'Manage tool borrowing' : 'Kelola peminjaman alat')
                             : localizationService.translate('borrowing_desc'),
                         icon: Icons.inventory_2_rounded,
-                        iconColor: const Color(0xFF0277BD),
-                        backgroundColor: const Color(0xFFE1F5FE),
+                        iconColor: const Color(0xFF9C6644),
+                        backgroundColor: const Color(0xFFF3ECE4),
                         onTap: () async {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user == null) return;
@@ -464,8 +468,8 @@ class DashboardScreen extends StatelessWidget {
                         title: localizationService.translate('project'),
                         subtitle: localizationService.translate('project_desc'),
                         icon: Icons.assignment_rounded,
-                        iconColor: const Color(0xFF2E7D32),
-                        backgroundColor: const Color(0xFFE8F5E9),
+                        iconColor: const Color(0xFF7F5539),
+                        backgroundColor: const Color(0xFFEFECE6),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -483,8 +487,8 @@ class DashboardScreen extends StatelessWidget {
                             ? 'Your work & results'
                             : 'Karya & hasil belajarmu',
                         icon: Icons.workspace_premium_rounded,
-                        iconColor: const Color(0xFFAD1457),
-                        backgroundColor: const Color(0xFFFCE4EC),
+                        iconColor: const Color(0xFF6F4E37),
+                        backgroundColor: const Color(0xFFF1E6DC),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -551,6 +555,9 @@ class DashboardScreen extends StatelessWidget {
                 ],
               ),
             ),
+            ),
+          ),
+            ],
           ),
         );
       },
@@ -735,25 +742,57 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Gradient tiap kartu menu (gelap di kiri-bawah -> terang di kanan-atas).
-  // Semua tetap dalam keluarga cokelat/beige supaya serasi dengan aplikasi.
-  static const List<List<Color>> _menuGradients = [
-    [Color(0xFF5C3D2E), Color(0xFFA07A5E)], // 0 Materi TKJ (utama)
-    [Color(0xFF9A7860), Color(0xFFC09C82)], // 1 Perangkat 3D
-    [Color(0xFF8E6F5B), Color(0xFFB8967D)], // 2 Kalkulator Subnet
-    [Color(0xFF7F5539), Color(0xFFAB7F5E)], // 3 Absensi
-    [Color(0xFFA0714A), Color(0xFFBE9468)], // 4 Peminjaman
-    [Color(0xFF6F4E37), Color(0xFF9C7458)], // 5 Projek
-    [Color(0xFF8A5A3C), Color(0xFFB58660)], // 6 Portofolio
+  // Gaya tiap kartu menu: latar putih -> krem pastel, aksen warna hangat.
+  // (accent, accentLight, tint)
+  static const List<_MenuStyle> _menuStyles = [
+    _MenuStyle(Color(0xFFA9623F), Color(0xFFDB9570), Color(0xFFFBE6D8)), // 0 Materi TKJ - terakota
+    _MenuStyle(Color(0xFFB07F2F), Color(0xFFD9AC57), Color(0xFFFBEFCF)), // 1 Perangkat 3D - madu
+    _MenuStyle(Color(0xFFAE6A66), Color(0xFFDA9E98), Color(0xFFF9E0DC)), // 2 Subnet - rose
+    _MenuStyle(Color(0xFF8C6D5A), Color(0xFFBC9C86), Color(0xFFF1E5DC)), // 3 Absensi - mocha
+    _MenuStyle(Color(0xFF9B7A4A), Color(0xFFC9AA7A), Color(0xFFF4EAD5)), // 4 Peminjaman - emas pasir
+    _MenuStyle(Color(0xFF7E5C47), Color(0xFFAB8770), Color(0xFFEFE2D9)), // 5 Projek - kopi
+    _MenuStyle(Color(0xFFA67C57), Color(0xFFD2AC85), Color(0xFFF6E8D8)), // 6 Portofolio - latte
   ];
 
-  Widget _decorCircle(double size, double opacity) {
+  List<Color> _cardBg(BuildContext context, _MenuStyle st) {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      final base = Theme.of(context).cardColor;
+      return [
+        Color.alphaBlend(st.accent.withOpacity(0.10), base),
+        Color.alphaBlend(st.accent.withOpacity(0.22), base),
+      ];
+    }
+    return [Colors.white, st.tint];
+  }
+
+  Color _cardTitle(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? Colors.white
+          : const Color(0xFF4A3428);
+
+  Color _cardSub(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? Colors.white70
+          : const Color(0xFF8A7366);
+
+  Widget _decorCircle(double size, double opacity, [Color color = Colors.white]) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white.withOpacity(opacity),
+        color: color.withOpacity(opacity),
+      ),
+    );
+  }
+
+  Widget _decorRing(double size, double opacity, [Color color = Colors.white]) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withOpacity(opacity), width: 12),
       ),
     );
   }
@@ -769,7 +808,7 @@ class DashboardScreen extends StatelessWidget {
     required VoidCallback onTap,
     int index = 0,
   }) {
-    final colors = _menuGradients[index % _menuGradients.length];
+    final st = _menuStyles[index % _menuStyles.length];
     final delay = Duration(milliseconds: 420 + index * 90);
 
     return FadeSlideIn(
@@ -783,13 +822,14 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight,
+              colors: _cardBg(context, st),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            border: Border.all(color: st.accent.withOpacity(0.2)),
             boxShadow: [
               BoxShadow(
-                color: colors.first.withOpacity(0.4),
+                color: st.accent.withOpacity(0.2),
                 blurRadius: 18,
                 offset: const Offset(0, 9),
               ),
@@ -801,19 +841,19 @@ class DashboardScreen extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: onTap,
-                splashColor: Colors.white.withOpacity(0.2),
-                highlightColor: Colors.white.withOpacity(0.08),
+                splashColor: st.accent.withOpacity(0.15),
+                highlightColor: st.accent.withOpacity(0.06),
                 child: Stack(
                   children: [
                     Positioned(
                       right: -30,
                       top: -40,
-                      child: _decorCircle(140, 0.12),
+                      child: _decorCircle(140, 0.10, st.accent),
                     ),
                     Positioned(
                       right: 70,
                       bottom: -34,
-                      child: _decorCircle(70, 0.08),
+                      child: _decorCircle(70, 0.07, st.accentLight),
                     ),
                     Positioned(
                       right: -8,
@@ -824,7 +864,7 @@ class DashboardScreen extends StatelessWidget {
                         child: Icon(
                           icon,
                           size: 128,
-                          color: Colors.white.withOpacity(0.14),
+                          color: st.accent.withOpacity(0.11),
                         ),
                       ),
                     ),
@@ -842,11 +882,19 @@ class DashboardScreen extends StatelessWidget {
                               width: 66,
                               height: 66,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
+                                gradient: LinearGradient(
+                                  colors: [st.accentLight, st.accent],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: st.accent.withOpacity(0.4),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
                               ),
                               child: Icon(icon, color: Colors.white, size: 36),
                             ),
@@ -861,17 +909,10 @@ class DashboardScreen extends StatelessWidget {
                                   title,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: Color(0x26000000),
-                                        blurRadius: 4,
-                                        offset: Offset(0, 1),
-                                      ),
-                                    ],
+                                    color: _cardTitle(context),
                                   ),
                                 ),
                                 const SizedBox(height: 3),
@@ -882,7 +923,7 @@ class DashboardScreen extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 12.5,
                                     height: 1.25,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: _cardSub(context),
                                   ),
                                 ),
                                 const SizedBox(height: 10),
@@ -892,8 +933,17 @@ class DashboardScreen extends StatelessWidget {
                                     vertical: 5,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.22),
+                                    gradient: LinearGradient(
+                                      colors: [st.accentLight, st.accent],
+                                    ),
                                     borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: st.accent.withOpacity(0.35),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -938,7 +988,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  /// Kartu kecil gradient (grid 2 kolom).
+  /// Kartu kecil terang (grid 2 kolom).
   Widget _buildMenuCard(
     BuildContext context, {
     required String title,
@@ -949,7 +999,7 @@ class DashboardScreen extends StatelessWidget {
     required VoidCallback onTap,
     int index = 0,
   }) {
-    final colors = _menuGradients[index % _menuGradients.length];
+    final st = _menuStyles[index % _menuStyles.length];
     final delay = Duration(milliseconds: 420 + index * 90);
 
     return FadeSlideIn(
@@ -962,13 +1012,14 @@ class DashboardScreen extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
             gradient: LinearGradient(
-              colors: colors,
-              begin: Alignment.bottomLeft,
-              end: Alignment.topRight,
+              colors: _cardBg(context, st),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            border: Border.all(color: st.accent.withOpacity(0.18)),
             boxShadow: [
               BoxShadow(
-                color: colors.first.withOpacity(0.35),
+                color: st.accent.withOpacity(0.18),
                 blurRadius: 14,
                 offset: const Offset(0, 8),
               ),
@@ -980,27 +1031,33 @@ class DashboardScreen extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: onTap,
-                splashColor: Colors.white.withOpacity(0.2),
-                highlightColor: Colors.white.withOpacity(0.08),
+                splashColor: st.accent.withOpacity(0.15),
+                highlightColor: st.accent.withOpacity(0.06),
                 child: Stack(
                   children: [
                     Positioned(
                       right: -24,
                       top: -26,
-                      child: _decorCircle(96, 0.13),
+                      child: index.isEven
+                          ? _decorCircle(96, 0.10, st.accent)
+                          : _decorRing(96, 0.10, st.accent),
                     ),
                     Positioned(
                       right: 34,
                       top: 52,
-                      child: _decorCircle(24, 0.1),
+                      child: _decorCircle(24, 0.09, st.accentLight),
                     ),
                     Positioned(
                       right: -14,
                       bottom: -16,
-                      child: Icon(
-                        icon,
-                        size: 72,
-                        color: Colors.white.withOpacity(0.1),
+                      child: Floating(
+                        amplitude: 3,
+                        duration: Duration(milliseconds: 2800 + index * 350),
+                        child: Icon(
+                          icon,
+                          size: 72,
+                          color: st.accent.withOpacity(0.11),
+                        ),
                       ),
                     ),
                     Padding(
@@ -1022,11 +1079,19 @@ class DashboardScreen extends StatelessWidget {
                                   width: 50,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.28),
+                                    gradient: LinearGradient(
+                                      colors: [st.accentLight, st.accent],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: st.accent.withOpacity(0.35),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 5),
+                                      ),
+                                    ],
                                   ),
                                   child: Icon(
                                     icon,
@@ -1040,12 +1105,12 @@ class DashboardScreen extends StatelessWidget {
                                 height: 28,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.22),
+                                  color: st.accent.withOpacity(0.14),
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.arrow_forward_rounded,
                                   size: 16,
-                                  color: Colors.white,
+                                  color: st.accent,
                                 ),
                               ),
                             ],
@@ -1055,17 +1120,10 @@ class DashboardScreen extends StatelessWidget {
                             title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
-                              color: Colors.white,
-                              shadows: [
-                                Shadow(
-                                  color: Color(0x26000000),
-                                  blurRadius: 4,
-                                  offset: Offset(0, 1),
-                                ),
-                              ],
+                              color: _cardTitle(context),
                             ),
                           ),
                           const SizedBox(height: 3),
@@ -1076,7 +1134,7 @@ class DashboardScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11.5,
                               height: 1.25,
-                              color: Colors.white.withOpacity(0.88),
+                              color: _cardSub(context),
                             ),
                           ),
                         ],
@@ -1802,4 +1860,12 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MenuStyle {
+  final Color accent;
+  final Color accentLight;
+  final Color tint;
+
+  const _MenuStyle(this.accent, this.accentLight, this.tint);
 }

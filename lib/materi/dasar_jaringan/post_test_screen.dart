@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../data/quiz_data.dart';
 import '../../services/progress_service.dart';
@@ -185,48 +183,10 @@ class _PostTestScreenState extends State<PostTestScreen> with WidgetsBindingObse
     }
   }
 
-  Future<void> _saveQuizResultToFirestore() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      final userData = userDoc.data() ?? {};
-
-      final String nama = userData['nama']?.toString() ?? 'Siswa';
-      final String nisn = userData['nisn']?.toString() ?? '-';
-      final String kelas = userData['kelas']?.toString() ?? 'X TKJ 1';
-
-      final docRef = FirebaseFirestore.instance.collection('quiz_results').doc();
-
-      await docRef.set({
-        'id': docRef.id,
-        'siswaId': user.uid,
-        'namaSiswa': nama,
-        'nisn': nisn,
-        'kelas': kelas,
-        'materiId': widget.materiId,
-        'materiTitle': widget.materiTitle,
-        'testType': 'Post-Test',
-        'score': _score,
-        'correct': _correctCount,
-        'wrong': _wrongCount,
-        'totalQuestions': _questions.length,
-        'cheatViolations': _cheatViolations,
-        'isCheated': _cheatViolations > 0,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      debugPrint('Error saving quiz result to firestore: $e');
-    }
-  }
-
-  void _showResult() async {
+  void _showResult() {
     if (_isSubmitted) return;
     _isSubmitted = true;
     _timer?.cancel();
-
-    await _saveQuizResultToFirestore();
 
     ProgressService().setLessonCompleted('${widget.materiId}_post_test', true);
     ProgressService().saveActivity(
@@ -235,8 +195,6 @@ class _PostTestScreenState extends State<PostTestScreen> with WidgetsBindingObse
       time: 'Baru saja',
       type: 'post_test',
     );
-
-    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,

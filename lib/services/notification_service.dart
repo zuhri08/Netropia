@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum NotificationType { belajar, peminjaman, absensi, project, system }
@@ -106,69 +103,20 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString(_storageKey);
 
-    List<AppNotification> list = [];
-
-    if (jsonString != null) {
-      try {
-        final List<dynamic> decoded = jsonDecode(jsonString);
-        list = decoded.map((e) => AppNotification.fromJson(e)).toList();
-      } catch (e) {
-        list = _getDefaultNotifications();
-        await _saveNotifications(list);
-      }
-    } else {
-      list = _getDefaultNotifications();
-      await _saveNotifications(list);
+    if (jsonString == null) {
+      final defaults = _getDefaultNotifications();
+      await _saveNotifications(defaults);
+      return defaults;
     }
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final snapshot = await FirebaseFirestore.instance
-            .collection('notifications')
-            .where('userId', isEqualTo: user.uid)
-            .get();
-
-        final firestoreNotifs = snapshot.docs.map((doc) {
-          final data = doc.data();
-          final ts = data['timestamp'];
-          DateTime dt = DateTime.now();
-          if (ts is Timestamp) {
-            dt = ts.toDate();
-          } else if (ts is String) {
-            dt = DateTime.tryParse(ts) ?? DateTime.now();
-          }
-
-          final typeStr = data['type']?.toString() ?? 'system';
-          final type = NotificationType.values.firstWhere(
-            (e) => e.name == typeStr,
-            orElse: () => NotificationType.peminjaman,
-          );
-
-          return AppNotification(
-            id: doc.id,
-            title: data['title']?.toString() ?? 'Notifikasi',
-            message: data['message']?.toString() ?? '',
-            timestamp: dt,
-            type: type,
-            isRead: data['isRead'] ?? false,
-            route: data['route']?.toString() ?? 'peminjaman',
-          );
-        }).toList();
-
-        final existingIds = list.map((n) => n.id).toSet();
-        for (final fn in firestoreNotifs) {
-          if (!existingIds.contains(fn.id)) {
-            list.insert(0, fn);
-          }
-        }
-      }
+      final List<dynamic> decoded = jsonDecode(jsonString);
+      return decoded.map((e) => AppNotification.fromJson(e)).toList();
     } catch (e) {
-      debugPrint('Error fetching firestore notifications: $e');
+      final defaults = _getDefaultNotifications();
+      await _saveNotifications(defaults);
+      return defaults;
     }
-
-    list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-    return list;
   }
 
   Future<void> _saveNotifications(List<AppNotification> notifications) async {

@@ -1,8 +1,4 @@
-import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../theme/app_theme.dart';
 
 class PenugasanScreen extends StatefulWidget {
@@ -21,12 +17,7 @@ class PenugasanScreen extends StatefulWidget {
 
 class _PenugasanScreenState extends State<PenugasanScreen> {
   bool _isCompleted = false;
-  bool _isSubmitting = false;
   final TextEditingController _answerController = TextEditingController();
-
-  XFile? _pickedFile;
-  String? _base64File;
-  String? _fileName;
 
   final List<String> _steps = [
     'Tentukan kebutuhan dan pemahaman terkait materi.',
@@ -40,20 +31,6 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   int get _completedSteps => _checkedSteps.where((e) => e).length;
   double get _progress => _completedSteps / _steps.length;
-
-  Future<void> _pickFile() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      final base64Str = base64Encode(bytes);
-      setState(() {
-        _pickedFile = image;
-        _fileName = image.name;
-        _base64File = 'data:image/jpeg;base64,$base64Str';
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -94,7 +71,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             const SizedBox(height: 10),
             _buildChecklist(isDark),
             const SizedBox(height: 22),
-            _buildSectionHeading('LEMBAR JAWABAN & BUKTI FOTO/FILE', 'Ceritakan hasil pengerjaanmu dan lampirkan bukti.', isDark),
+            _buildSectionHeading('LEMBAR JAWABAN', 'Ceritakan hasil pengerjaanmu.', isDark),
             const SizedBox(height: 10),
             _buildAnswer(isDark),
             const SizedBox(height: 18),
@@ -123,7 +100,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -153,6 +130,38 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               color: Colors.white70,
               fontSize: 12.5,
               height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              _heroTag(Icons.schedule_rounded, '60 menit'),
+              const SizedBox(width: 8),
+              _heroTag(Icons.category_rounded, 'Praktik'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _heroTag(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 14),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
@@ -205,6 +214,18 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               valueColor: const AlwaysStoppedAnimation(AppTheme.primaryBrown),
             ),
           ),
+          const SizedBox(height: 8),
+          Text(
+            _completedSteps == 0
+                ? 'Belum mulai. Yuk, kerjakan langkah pertamamu!'
+                : _completedSteps == _steps.length
+                    ? 'Semua langkah selesai. Saatnya kumpulkan jawaban!'
+                    : 'Bagus! Kamu sudah menyelesaikan $_completedSteps langkah.',
+            style: const TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: 11.5,
+            ),
+          ),
         ],
       ),
     );
@@ -251,9 +272,16 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           ),
           const Divider(height: 1, indent: 16, endIndent: 16),
           _overviewItem(
+            icon: Icons.assignment_rounded,
+            title: 'Tantanganmu',
+            description: 'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
+            isDark: isDark,
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          _overviewItem(
             icon: Icons.task_alt_rounded,
             title: 'Hasil akhir',
-            description: 'Kumpulkan hasil tugas praktikmu dan lampirkan foto/file pendukung.',
+            description: 'Kumpulkan hasil tugas praktikmu.',
             isDark: isDark,
           ),
         ],
@@ -383,8 +411,8 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           TextField(
             controller: _answerController,
             enabled: !_isCompleted,
-            minLines: 4,
-            maxLines: 7,
+            minLines: 5,
+            maxLines: 8,
             style: TextStyle(
               color: isDark ? Colors.white : AppTheme.textDark,
               fontSize: 13,
@@ -399,64 +427,6 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'LAMPIRKAN FOTO / BUKTI PRAKTIK (OPSIONAL):',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
-          ),
-          const SizedBox(height: 8),
-          if (_base64File != null) ...[
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppTheme.tealTint,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppTheme.primaryTeal.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.image_rounded, color: AppTheme.primaryTeal, size: 24),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _fileName ?? 'foto_praktik.jpg',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppTheme.textDark,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (!_isCompleted)
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 18, color: AppTheme.accentRed),
-                      onPressed: () => setState(() {
-                        _pickedFile = null;
-                        _base64File = null;
-                        _fileName = null;
-                      }),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
-          if (!_isCompleted)
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: OutlinedButton.icon(
-                onPressed: _pickFile,
-                icon: const Icon(Icons.attach_file_rounded, size: 18),
-                label: Text(_base64File == null ? 'Unggah Foto Bukti / File' : 'Ganti Foto / File'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.primaryTeal,
-                  side: const BorderSide(color: AppTheme.primaryTeal),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
         ],
       ),
     );
@@ -467,7 +437,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: (_isCompleted || _isSubmitting) ? null : _submitAssignment,
+        onPressed: _isCompleted ? null : _submitAssignment,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryBrown,
           foregroundColor: Colors.white,
@@ -475,19 +445,16 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: _isSubmitting
-            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-            : Text(
-                _isCompleted ? 'Tugas Sudah Dikumpulkan' : 'Kumpulkan Tugas Ke Guru',
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              ),
+        child: Text(
+          _isCompleted ? 'Tugas Sudah Dikumpulkan' : 'Mulai Tugas / Kumpulkan',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
       ),
     );
   }
 
-  Future<void> _submitAssignment() async {
-    final answerText = _answerController.text.trim();
-    if (answerText.isEmpty) {
+  void _submitAssignment() {
+    if (_answerController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Isi jawabanmu terlebih dahulu sebelum mengumpulkan.'),
@@ -497,58 +464,15 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       return;
     }
 
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isCompleted = true;
+    });
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-        final userData = userDoc.data() ?? {};
-        final namaSiswa = userData['nama']?.toString() ?? 'Siswa';
-        final kelasSiswa = userData['kelas']?.toString() ?? 'X TKJ 1';
-
-        final docRef = FirebaseFirestore.instance.collection('assignment_submissions').doc();
-
-        await docRef.set({
-          'id': docRef.id,
-          'assignmentId': widget.materiId,
-          'materiTitle': widget.materiTitle,
-          'siswaId': user.uid,
-          'siswaName': namaSiswa,
-          'kelas': kelasSiswa,
-          'jawaban': answerText,
-          'fileUrl': _base64File,
-          'fileName': _fileName,
-          'nilai': null,
-          'catatanGuru': null,
-          'submittedAt': FieldValue.serverTimestamp(),
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-
-      if (mounted) {
-        setState(() {
-          _isCompleted = true;
-          _isSubmitting = false;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tugas berhasil dikumpulkan dan dikirim ke Dasbor Guru!'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal mengirim tugas: $e'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Tugas berhasil dikumpulkan.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 }

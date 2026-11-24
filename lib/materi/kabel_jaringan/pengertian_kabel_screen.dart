@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
 import 'jenis_kabel_screen.dart';
 
 class PengertianKabelScreen extends StatelessWidget {
   const PengertianKabelScreen({super.key});
 
-  static const Color primaryBrown = AppTheme.primaryTeal;
-  static const Color darkBrown = AppTheme.darkTeal;
-  static const Color lightBrown = AppTheme.tealTint;
-  static const Color textDark = AppTheme.textDark;
-  static const Color textGrey = AppTheme.textMuted;
-  static const Color borderGrey = AppTheme.borderCream;
+  static const Color primaryBrown = Color(0xFF5D4037);
+  static const Color darkBrown = Color(0xFF3E2723);
+  static const Color lightBrown = Color(0xFFF3ECE9);
+  static const Color textDark = Color(0xFF263238);
+  static const Color textGrey = Color(0xFF607D8B);
+  static const Color borderGrey = Color(0xFFDCE3EA);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: const Color(0xFFF7F9FB),
       appBar: _appBar(),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -50,13 +49,14 @@ class PengertianKabelScreen extends StatelessWidget {
   }
 
   PreferredSizeWidget _appBar() => AppBar(
-    backgroundColor: AppTheme.primaryTeal,
-    foregroundColor: Colors.white,
+    backgroundColor: Colors.white,
+    foregroundColor: textDark,
     elevation: 0,
     scrolledUnderElevation: 0,
     leading: Builder(builder: (context) => IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => Navigator.pop(context))),
     title: const Text('Kabel Jaringan', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-    actions: [Container(margin: const EdgeInsets.only(right: 16), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: Colors.white.withOpacity(0.18), borderRadius: BorderRadius.circular(8)), child: const Text('01 / 08', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w700)))],
+    actions: [Container(margin: const EdgeInsets.only(right: 16), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), decoration: BoxDecoration(color: lightBrown, borderRadius: BorderRadius.circular(8)), child: const Text('01 / 08', style: TextStyle(color: primaryBrown, fontSize: 12, fontWeight: FontWeight.w700)))],
+    bottom: PreferredSize(preferredSize: const Size.fromHeight(3), child: Container(height: 3, alignment: Alignment.centerLeft, child: FractionallySizedBox(widthFactor: .125, child: Container(color: primaryBrown)))),
   );
 
   Widget _header() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [

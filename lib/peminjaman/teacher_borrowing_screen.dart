@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../services/notification_service.dart';
 import '../theme/app_theme.dart';
 
 class TeacherBorrowingScreen extends StatelessWidget {
@@ -350,32 +349,6 @@ class _LoanCard extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Future<void> _sendNotificationToStudent({
-    required String title,
-    required String message,
-  }) async {
-    try {
-      final siswaId = data['siswaId']?.toString() ?? '';
-      if (siswaId.isNotEmpty) {
-        await FirebaseFirestore.instance.collection('notifications').add({
-          'userId': siswaId,
-          'title': title,
-          'message': message,
-          'type': 'peminjaman',
-          'route': 'peminjaman',
-          'isRead': false,
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-      }
-      await NotificationService().addNotification(
-        title: title,
-        message: message,
-        type: NotificationType.peminjaman,
-        route: 'peminjaman',
-      );
-    } catch (_) {}
-  }
-
   Future<void> _setujuiPeminjaman(
       BuildContext context,
       int jumlah,
@@ -460,12 +433,6 @@ class _LoanCard extends StatelessWidget {
         },
       );
 
-      final namaItem = data['namaItem']?.toString() ?? 'Alat';
-      await _sendNotificationToStudent(
-        title: 'Pengajuan Peminjaman Disetujui ✅',
-        message: 'Pengajuan peminjaman "$namaItem" oleh ${data['namaSiswa'] ?? "Siswa"} telah DISETUJUI oleh Guru.',
-      );
-
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -502,12 +469,6 @@ class _LoanCard extends StatelessWidget {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      final namaItem = data['namaItem']?.toString() ?? 'Alat';
-      await _sendNotificationToStudent(
-        title: 'Pengajuan Peminjaman Ditolak ❌',
-        message: 'Pengajuan peminjaman "$namaItem" oleh ${data['namaSiswa'] ?? "Siswa"} DITOLAK oleh Guru.',
-      );
-
       if (!context.mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -537,12 +498,6 @@ class _LoanCard extends StatelessWidget {
         'status': 'dipinjam',
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      final namaItem = data['namaItem']?.toString() ?? 'Alat';
-      await _sendNotificationToStudent(
-        title: 'Status Peminjaman Dipinjam 🛠️',
-        message: 'Status peminjaman "$namaItem" diperbarui menjadi SEDANG DIPINJAM.',
-      );
 
       if (!context.mounted) return;
 
