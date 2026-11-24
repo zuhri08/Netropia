@@ -9,6 +9,9 @@ class AppTheme {
   static const Color deepEspresso = Color(0xFF4A3428);
 
   // Kompatibilitas warna tema tambahan
+  static const Color primaryTeal = Color(0xFF1F5C56);
+  static const Color darkTeal = Color(0xFF123835);
+  static const Color tealTint = Color(0xFFE8F1EF);
   static const Color darkBrown = Color(0xFF8E6F5B);
   static const Color brownTint = Color(0xFFF5EBE6);
   static const Color textDark = Color(0xFF2C3E50);
