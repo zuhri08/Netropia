@@ -604,10 +604,10 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                               children: [
                                 Row(
                                   children: [
-                                    const CircleAvatar(
+                                    CircleAvatar(
                                       radius: 16,
                                       backgroundColor: AppTheme.primaryBrown,
-                                      child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
+                                      child: const Icon(Icons.person_rounded, size: 16, color: Colors.white),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -634,7 +634,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                                 Text('Jawaban Siswa:\n"$jawaban"', style: const TextStyle(fontSize: 13, height: 1.4)),
                                 if (imageBytes != null) ...[
                                   const SizedBox(height: 10),
-                                  const Text('Foto Bukti Jawaban:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                                  Text('Foto Bukti Jawaban:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
                                   const SizedBox(height: 6),
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -1880,7 +1880,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
         const SizedBox(height: 20),
         Row(
           children: [
-            Icon(Icons.quiz_rounded, color: AppTheme.primaryTeal),
+            Icon(Icons.quiz_rounded, color: AppTheme.primaryBrown),
             const SizedBox(width: 8),
             const Text(
               'Daftar Nilai Kuis & Deteksi Kecurangan',
@@ -2033,7 +2033,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
         const SizedBox(height: 24),
         Row(
           children: [
-            Icon(Icons.rocket_launch_rounded, color: AppTheme.primaryTeal),
+            Icon(Icons.rocket_launch_rounded, color: AppTheme.primaryBrown),
             const SizedBox(width: 8),
             const Text(
               'Pengumpulan Project Praktik Siswa',
@@ -2113,9 +2113,9 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                       children: [
                         Row(
                           children: [
-                            const CircleAvatar(
-                              backgroundColor: AppTheme.primaryTeal,
-                              child: Icon(Icons.rocket_launch_rounded, size: 18, color: Colors.white),
+                            CircleAvatar(
+                              backgroundColor: AppTheme.primaryBrown,
+                              child: const Icon(Icons.rocket_launch_rounded, size: 18, color: Colors.white),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -2172,7 +2172,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
 
                         // Image / Attachment Preview
                         if (imageBytes != null) ...[
-                          const Text('Foto Bukti Praktik Project:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                          Text('Foto Bukti Praktik Project:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
                           const SizedBox(height: 6),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -2188,12 +2188,12 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppTheme.tealTint,
+                              color: AppTheme.brownTint,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.attach_file_rounded, color: AppTheme.primaryTeal, size: 20),
+                                Icon(Icons.attach_file_rounded, color: AppTheme.primaryBrown, size: 20),
                                 const SizedBox(width: 8),
                                 Expanded(child: Text(fileName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
                               ],
@@ -2247,7 +2247,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryTeal,
+                              backgroundColor: AppTheme.primaryBrown,
                               foregroundColor: Colors.white,
                             ),
                             icon: const Icon(Icons.check_rounded, size: 16),
