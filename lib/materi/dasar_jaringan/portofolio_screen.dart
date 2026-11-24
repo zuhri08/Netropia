@@ -33,7 +33,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
           'Dokumentasi praktik pembuatan kabel UTP straight dan cross. Karya ini berisi proses penyusunan warna kabel, pemasangan konektor RJ45, dan pengujian menggunakan LAN tester.',
       date: '12 September 2026',
       icon: Icons.cable_rounded,
-      color: AppTheme.primaryTeal,
+      color: AppTheme.primaryBrown,
       tag: 'Kabel Jaringan',
     ),
     _PortfolioItem(
@@ -43,7 +43,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
           'Rancangan jaringan LAN sederhana untuk laboratorium komputer sekolah dengan memperhatikan kebutuhan perangkat dan hubungan antarkomputer.',
       date: '15 September 2026',
       icon: Icons.hub_rounded,
-      color: AppTheme.primaryTeal,
+      color: AppTheme.primaryBrown,
       tag: 'Dasar Jaringan',
     ),
   ];
@@ -60,7 +60,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
@@ -100,7 +100,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddWorkDialog,
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 2,
         icon: const Icon(Icons.add_rounded),
@@ -119,7 +119,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -170,9 +170,9 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
   Widget _buildStats(bool isDark) {
     return Row(
       children: [
-        _statCard('Total Karya', '${_items.length}', Icons.work_history_rounded, AppTheme.primaryTeal, isDark),
+        _statCard('Total Karya', '${_items.length}', Icons.work_history_rounded, AppTheme.primaryBrown, isDark),
         const SizedBox(width: 10),
-        _statCard('Praktik', '${_items.where((e) => e.category == 'Praktik').length}', Icons.build_rounded, AppTheme.primaryTeal, isDark),
+        _statCard('Praktik', '${_items.where((e) => e.category == 'Praktik').length}', Icons.build_rounded, AppTheme.primaryBrown, isDark),
         const SizedBox(width: 10),
         _statCard('Proyek', '${_items.where((e) => e.category == 'Proyek').length}', Icons.account_tree_rounded, AppTheme.accentAmber, isDark),
       ],
@@ -230,17 +230,17 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
                   _selectedCategory = category;
                 });
               },
-              selectedColor: AppTheme.primaryTeal,
+              selectedColor: AppTheme.primaryBrown,
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : (isDark ? Colors.white : AppTheme.textDark),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 11.5,
               ),
-              backgroundColor: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
+              backgroundColor: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
                 side: BorderSide(
-                  color: isSelected ? AppTheme.primaryTeal : AppTheme.borderCream,
+                  color: isSelected ? AppTheme.primaryBrown : AppTheme.borderCream,
                 ),
               ),
             ),
@@ -286,10 +286,10 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(item.icon, color: AppTheme.primaryTeal, size: 20),
+                child: Icon(item.icon, color: AppTheme.primaryBrown, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -315,13 +315,13 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   item.category,
                   style: const TextStyle(
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -342,7 +342,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+              color: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -405,7 +405,7 @@ class _PortofolioScreenState extends State<PortofolioScreen> {
                         description: descCtrl.text.trim().isEmpty ? 'Dokumentasi karya.' : descCtrl.text.trim(),
                         date: 'Hari ini',
                         icon: Icons.star_rounded,
-                        color: AppTheme.primaryTeal,
+                        color: AppTheme.primaryBrown,
                         tag: widget.materiTitle,
                       ),
                     );

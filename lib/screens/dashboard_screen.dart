@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../services/progress_service.dart';
 import '../services/settings_service.dart';
 import '../services/notification_service.dart';
-import '../theme/app_theme.dart';
-import '../widgets/animated_pressable.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
 import '../kalkulator_subnet/subnet_calculator_screen.dart';
@@ -14,9 +12,11 @@ import '../peminjaman/borrowing_screen.dart';
 import '../devices_3d/device_3d_list_screen.dart';
 import '../peminjaman/teacher_borrowing_screen.dart';
 import '../project/project_screen.dart';
+import '../materi/dasar_jaringan/portofolio_screen.dart';
 import '../services/localization_service.dart';
 import '../teacher/teacher_panel_screen.dart';
 import 'notification_screen.dart';
+import '../widgets/home_effects.dart';
 
 class DashboardScreen extends StatelessWidget {
   final String username;
@@ -38,6 +38,7 @@ class DashboardScreen extends StatelessWidget {
   }
 
   void _openSubnetCalculator(BuildContext context) {
+    debugPrint('Membuka Kalkulator Subnet');
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const SubnetCalculatorScreen(),
@@ -54,7 +55,7 @@ class DashboardScreen extends StatelessWidget {
           children: [
             const Icon(
               Icons.local_fire_department_rounded,
-              color: AppTheme.accentAmber,
+              color: Colors.orange,
               size: 28,
             ),
             const SizedBox(width: 8),
@@ -66,11 +67,11 @@ class DashboardScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$streak ${localizationService.translate('streak_days')} 🔥',
+              '$streak${localizationService.translate('streak_days')} 🔥',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.accentAmber,
+                color: Colors.orange,
               ),
             ),
             const SizedBox(height: 10),
@@ -107,39 +108,31 @@ class DashboardScreen extends StatelessWidget {
     return ListenableBuilder(
       listenable: localizationService,
       builder: (context, child) {
-        final bool isDark = Theme.of(context).brightness == Brightness.dark;
-
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: const Color(0xFFAD8B73),
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 20,
-            title: Row(
+            title: FadeSlideIn(
+              offset: const Offset(-24, 0),
+              child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(
-                    Icons.school_rounded,
-                    size: 22,
-                    color: Colors.white,
-                  ),
+                const Icon(
+                  Icons.school_rounded,
+                  size: 28,
                 ),
                 const SizedBox(width: 10),
                 Text(
                   localizationService.translate('netropia'),
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 21,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
                   ),
                 ),
               ],
+            ),
             ),
             actions: [
               FutureBuilder<int>(
@@ -173,17 +166,19 @@ class DashboardScreen extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
-                                  Icons.local_fire_department_rounded,
-                                  color: AppTheme.accentAmber,
-                                  size: 18,
+                                const Pulse(
+                                  child: Icon(
+                                    Icons.local_fire_department_rounded,
+                                    color: Colors.orange,
+                                    size: 20,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Streak $streak',
+                                  '$streak',
                                   style: const TextStyle(
-                                    color: AppTheme.darkTeal,
-                                    fontSize: 12.5,
+                                    color: Color(0xFF5C3D2E),
+                                    fontSize: 13.5,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -213,22 +208,27 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(
-                          Icons.notifications_none_rounded,
-                          color: Colors.white,
-                        ),
+                        icon: unreadCount > 0
+                            ? const RingingBell(
+                                child: Icon(Icons.notifications_none_rounded),
+                              )
+                            : const Icon(Icons.notifications_none_rounded),
                       ),
                       if (unreadCount > 0)
                         Positioned(
                           top: 12,
                           right: 12,
-                          child: Container(
+                          child: Pulse(
+                            minScale: 0.75,
+                            maxScale: 1.3,
+                            child: Container(
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: AppTheme.accentRed,
+                              color: Colors.redAccent,
                               shape: BoxShape.circle,
                             ),
+                          ),
                           ),
                         ),
                     ],
@@ -240,46 +240,85 @@ class DashboardScreen extends StatelessWidget {
           ),
           body: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 100),
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${localizationService.translate('welcome_halo')}$username',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : AppTheme.textDark,
+                  FadeSlideIn(
+                    offset: const Offset(0, 18),
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: '${localizationService.translate('welcome_halo')}$username ',
+                          ),
+                          const WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: WavingHand(fontSize: 25),
+                          ),
+                        ],
+                      ),
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.titleLarge?.color,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
+                  const SizedBox(height: 6),
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 120),
+                    offset: const Offset(0, 14),
+                    child: Text(
                     role.toLowerCase() == 'guru'
                         ? (localizationService.isEnglish ? 'Welcome to Netropia.' : 'Selamat datang di Netropia.')
-                        : 'Semangat belajar, masa depanmu dimulai dari sini.',
-                    style: TextStyle(
-                      fontSize: 13.5,
-                      color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                        : localizationService.translate('welcome_subtitle'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
                     ),
+                  ),
                   ),
                   const SizedBox(height: 20),
                   if (role.toLowerCase() == 'guru') ...[
-                    _buildTeacherManagementPanel(context),
-                    _buildTeacherMonitoringCard(context),
-                  ] else ...[
-                    _buildAnnouncementsCard(context),
-                    _buildContinueLearning(context),
-                  ],
-                  const SizedBox(height: 24),
-                  Text(
-                    'JELAJAHI NETROPIA',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.1,
-                      color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                    FadeSlideIn(
+                      delay: const Duration(milliseconds: 150),
+                      child: _buildTeacherManagementPanel(context),
                     ),
+                    FadeSlideIn(
+                      delay: const Duration(milliseconds: 320),
+                      child: _buildTeacherMonitoringCard(context),
+                    ),
+                  ] else ...[
+                    FadeSlideIn(
+                      delay: const Duration(milliseconds: 150),
+                      child: _buildAnnouncementsCard(context),
+                    ),
+                    FadeSlideIn(
+                      delay: const Duration(milliseconds: 280),
+                      child: _buildContinueLearning(context),
+                    ),
+                  ],
+                  const SizedBox(height: 25),
+                  _buildSectionLabel(
+                    context,
+                    localizationService.isEnglish ? 'Learn & Practice' : 'Belajar & Praktik',
+                    0,
                   ),
+                  const SizedBox(height: 12),
+                      _buildFeaturedMenuCard(
+                        context,
+                        index: 0,
+                        title: localizationService.translate('study_materials'),
+                        subtitle: localizationService.translate('study_materials_desc'),
+                        icon: Icons.menu_book_rounded,
+                        iconColor: const Color(0xFF0288D1),
+                        backgroundColor: const Color(0xFFE3F2FD),
+                        onTap: () {
+                          _openMateri(context);
+                        },
+                      ),
                   const SizedBox(height: 12),
                   GridView.count(
                     crossAxisCount: 2,
@@ -287,21 +326,13 @@ class DashboardScreen extends StatelessWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 1.25,
+                    childAspectRatio: 1.08,
                     children: [
                       _buildMenuCard(
                         context,
-                        title: localizationService.translate('study_materials'),
-                        subtitle: 'Pilih modul',
-                        icon: Icons.menu_book_rounded,
-                        iconColor: AppTheme.primaryTeal,
-                        backgroundColor: AppTheme.tealTint,
-                        onTap: () => _openMateri(context),
-                      ),
-                      _buildMenuCard(
-                        context,
+                        index: 1,
                         title: localizationService.translate('device_3d'),
-                        subtitle: 'Eksplorasi 3D',
+                        subtitle: localizationService.translate('device_3d_desc'),
                         icon: Icons.view_in_ar_rounded,
                         iconColor: const Color(0xFF00897B),
                         backgroundColor: const Color(0xFFE0F2F1),
@@ -316,30 +347,54 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       _buildMenuCard(
                         context,
+                        index: 2,
                         title: localizationService.translate('subnet_calculator'),
-                        subtitle: 'Hitung IP',
+                        subtitle: localizationService.translate('subnet_desc'),
                         icon: Icons.calculate_rounded,
-                        iconColor: AppTheme.accentAmber,
+                        iconColor: const Color(0xFFE65100),
                         backgroundColor: const Color(0xFFFFF3E0),
-                        onTap: () => _openSubnetCalculator(context),
+                        onTap: () {
+                          _openSubnetCalculator(context);
+                        },
                       ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSectionLabel(
+                    context,
+                    localizationService.isEnglish ? 'Class Activities' : 'Aktivitas Kelas',
+                    3,
+                  ),
+                  const SizedBox(height: 12),
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.08,
+                    children: [
                       _buildMenuCard(
                         context,
+                        index: 3,
                         title: localizationService.translate('attendance'),
-                        subtitle: 'Presensi digital',
+                        subtitle: localizationService.translate('attendance_desc'),
                         icon: Icons.fact_check_rounded,
                         iconColor: const Color(0xFF7B1FA2),
-                        backgroundColor: const Color(0xFFF3E8FF),
+                        backgroundColor: const Color(0xFFF3E5F5),
                         onTap: () async {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user == null) return;
+
                           try {
                             final userDoc = await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(user.uid)
                                 .get();
                             final role = userDoc.data()?['role'];
+
                             if (!context.mounted) return;
+
                             if (role == 'guru') {
                               Navigator.push(
                                 context,
@@ -362,23 +417,27 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       _buildMenuCard(
                         context,
+                        index: 4,
                         title: localizationService.translate('borrowing'),
                         subtitle: role.toLowerCase() == 'guru'
-                            ? 'Kelola alat'
-                            : 'Pinjam alat TKJ',
+                            ? (localizationService.isEnglish ? 'Manage tool borrowing' : 'Kelola peminjaman alat')
+                            : localizationService.translate('borrowing_desc'),
                         icon: Icons.inventory_2_rounded,
                         iconColor: const Color(0xFF0277BD),
-                        backgroundColor: const Color(0xFFE3F2FD),
+                        backgroundColor: const Color(0xFFE1F5FE),
                         onTap: () async {
                           final user = FirebaseAuth.instance.currentUser;
                           if (user == null) return;
+
                           try {
                             final userDoc = await FirebaseFirestore.instance
                                 .collection('users')
                                 .doc(user.uid)
                                 .get();
                             final userRole = userDoc.data()?['role'];
+
                             if (!context.mounted) return;
+
                             if (userRole == 'guru') {
                               Navigator.push(
                                 context,
@@ -401,8 +460,9 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       _buildMenuCard(
                         context,
+                        index: 5,
                         title: localizationService.translate('project'),
-                        subtitle: 'Proyek praktik',
+                        subtitle: localizationService.translate('project_desc'),
                         icon: Icons.assignment_rounded,
                         iconColor: const Color(0xFF2E7D32),
                         backgroundColor: const Color(0xFFE8F5E9),
@@ -415,29 +475,43 @@ class DashboardScreen extends StatelessWidget {
                           );
                         },
                       ),
+                      _buildMenuCard(
+                        context,
+                        index: 6,
+                        title: localizationService.translate('portofolio'),
+                        subtitle: localizationService.isEnglish
+                            ? 'Your work & results'
+                            : 'Karya & hasil belajarmu',
+                        icon: Icons.workspace_premium_rounded,
+                        iconColor: const Color(0xFFAD1457),
+                        backgroundColor: const Color(0xFFFCE4EC),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PortofolioScreen(),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'AKTIVITAS TERBARU',
+                        localizationService.translate('recent_activities'),
                         style: TextStyle(
-                          fontSize: 13,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1.1,
-                          color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
                       TextButton(
                         onPressed: () {
                           _showComingSoon(context, localizationService.translate('recent_activities'));
                         },
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppTheme.primaryTeal,
-                          padding: EdgeInsets.zero,
-                        ),
                         child: Text(localizationService.translate('see_all')),
                       ),
                     ],
@@ -445,31 +519,34 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(height: 8),
                   _buildActivityCard(
                     context,
+                    index: 0,
                     icon: Icons.health_and_safety_rounded,
-                    iconColor: AppTheme.primaryTeal,
+                    iconColor: const Color(0xFFAD8B73),
                     title: 'K3LH',
-                    subtitle: 'Pelajari materi TKJ',
+                    subtitle: localizationService.translate('study_materials_desc'),
                     time: localizationService.isEnglish ? 'Today' : 'Hari ini',
                   ),
                   const SizedBox(height: 10),
                   _buildActivityCard(
                     context,
+                    index: 1,
                     icon: Icons.calculate_rounded,
-                    iconColor: AppTheme.accentAmber,
+                    iconColor: const Color(0xFFB08968),
                     title: localizationService.translate('subnet_calculator'),
-                    subtitle: 'Hitung subnet',
+                    subtitle: localizationService.translate('subnet_desc'),
                     time: localizationService.isEnglish ? 'Not used' : 'Belum digunakan',
                   ),
                   const SizedBox(height: 10),
                   _buildActivityCard(
                     context,
+                    index: 2,
                     icon: Icons.fact_check_rounded,
-                    iconColor: const Color(0xFF7B1FA2),
+                    iconColor: const Color(0xFF8E6F5B),
                     title: localizationService.translate('attendance'),
-                    subtitle: 'Kehadiran belajar',
+                    subtitle: localizationService.translate('attendance_desc'),
                     time: localizationService.isEnglish ? 'Not checked in' : 'Belum absen',
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   _buildProgressCard(context),
                 ],
               ),
@@ -481,60 +558,42 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildContinueLearning(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppTheme.primaryTeal,
-            AppTheme.darkTeal,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryTeal.withOpacity(0.25),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+    return AnimatedHeroCard(
+      colors: const [
+        Color(0xFFAD8B73),
+        Color(0xFFCEAB93),
+      ],
+      borderRadius: 20,
+      padding: const EdgeInsets.all(18),
+      shadowColor: const Color(0xFFAD8B73),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              'LANJUTKAN BELAJAR',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.8,
-              ),
+          Text(
+            localizationService.translate('continue_learning'),
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.18),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
-                  Icons.menu_book_rounded,
-                  color: Colors.white,
-                  size: 26,
+                child: const Floating(
+                  amplitude: 3,
+                  child: Icon(
+                    Icons.menu_book_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -546,13 +605,13 @@ class DashboardScreen extends StatelessWidget {
                       'K3LH',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: 4),
                     Text(
-                      'Keselamatan & Kesehatan Kerja',
+                      'Modul Pembelajaran',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -561,27 +620,52 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const Text(
-                '66% selesai',
-                style: TextStyle(
+              const Floating(
+                axis: Axis.horizontal,
+                amplitude: 3,
+                duration: Duration(milliseconds: 1400),
+                child: Icon(
+                  Icons.arrow_forward_ios_rounded,
                   color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  size: 17,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: const LinearProgressIndicator(
-              value: 0.66,
-              minHeight: 6,
-              backgroundColor: Color(0x44FFFFFF),
-              valueColor: AlwaysStoppedAnimation<Color>(AppTheme.accentAmber),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0, end: 0.66),
+                    duration: const Duration(milliseconds: 2200),
+                    curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
+                    builder: (context, value, _) => LinearProgressIndicator(
+                      value: value,
+                      minHeight: 7,
+                      backgroundColor: const Color(0x55FFFFFF),
+                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              const CountUpText(
+                value: 66,
+                suffix: '%',
+                duration: Duration(milliseconds: 2200),
+                curve: Interval(0.35, 1.0, curve: Curves.easeOutCubic),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -590,19 +674,19 @@ class DashboardScreen extends StatelessWidget {
                 _openMateri(context);
               },
               icon: const Icon(
-                Icons.play_arrow_rounded,
-                size: 22,
+                Icons.play_circle_fill_rounded,
+                size: 20,
               ),
-              label: const Text(
-                'Lanjutkan Pembelajaran',
-                style: TextStyle(
+              label: Text(
+                localizationService.translate('continue_button'),
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 14,
+                  fontSize: 13.5,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: AppTheme.darkTeal,
+                foregroundColor: const Color(0xFFAD8B73),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -615,6 +699,246 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionLabel(BuildContext context, String text, int index) {
+    return FadeSlideIn(
+      delay: Duration(milliseconds: 380 + index * 90),
+      offset: const Offset(-20, 0),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 18,
+            decoration: BoxDecoration(
+              color: const Color(0xFFAD8B73),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.2,
+              color: Theme.of(context).textTheme.titleLarge?.color,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: const Color(0xFFAD8B73).withOpacity(0.18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Gradient tiap kartu menu (gelap di kiri-bawah -> terang di kanan-atas).
+  // Semua tetap dalam keluarga cokelat/beige supaya serasi dengan aplikasi.
+  static const List<List<Color>> _menuGradients = [
+    [Color(0xFF5C3D2E), Color(0xFFA07A5E)], // 0 Materi TKJ (utama)
+    [Color(0xFF9A7860), Color(0xFFC09C82)], // 1 Perangkat 3D
+    [Color(0xFF8E6F5B), Color(0xFFB8967D)], // 2 Kalkulator Subnet
+    [Color(0xFF7F5539), Color(0xFFAB7F5E)], // 3 Absensi
+    [Color(0xFFA0714A), Color(0xFFBE9468)], // 4 Peminjaman
+    [Color(0xFF6F4E37), Color(0xFF9C7458)], // 5 Projek
+    [Color(0xFF8A5A3C), Color(0xFFB58660)], // 6 Portofolio
+  ];
+
+  Widget _decorCircle(double size, double opacity) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withOpacity(opacity),
+      ),
+    );
+  }
+
+  /// Kartu lebar untuk menu utama (Materi TKJ).
+  Widget _buildFeaturedMenuCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color iconColor,
+    required Color backgroundColor,
+    required VoidCallback onTap,
+    int index = 0,
+  }) {
+    final colors = _menuGradients[index % _menuGradients.length];
+    final delay = Duration(milliseconds: 420 + index * 90);
+
+    return FadeSlideIn(
+      delay: delay,
+      offset: const Offset(0, 30),
+      scaleFrom: 0.94,
+      duration: const Duration(milliseconds: 650),
+      child: PressScale(
+        pressedScale: 0.97,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: LinearGradient(
+              colors: colors,
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colors.first.withOpacity(0.4),
+                blurRadius: 18,
+                offset: const Offset(0, 9),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                splashColor: Colors.white.withOpacity(0.2),
+                highlightColor: Colors.white.withOpacity(0.08),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -30,
+                      top: -40,
+                      child: _decorCircle(140, 0.12),
+                    ),
+                    Positioned(
+                      right: 70,
+                      bottom: -34,
+                      child: _decorCircle(70, 0.08),
+                    ),
+                    Positioned(
+                      right: -8,
+                      bottom: -26,
+                      child: Floating(
+                        amplitude: 4,
+                        duration: const Duration(milliseconds: 3400),
+                        child: Icon(
+                          icon,
+                          size: 128,
+                          color: Colors.white.withOpacity(0.14),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Row(
+                        children: [
+                          FadeSlideIn(
+                            delay: delay + const Duration(milliseconds: 250),
+                            offset: Offset.zero,
+                            scaleFrom: 0.2,
+                            curve: Curves.elasticOut,
+                            duration: const Duration(milliseconds: 900),
+                            child: Container(
+                              width: 66,
+                              height: 66,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Icon(icon, color: Colors.white, size: 36),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  title,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Color(0x26000000),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 1),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  subtitle,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    height: 1.25,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.22),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        localizationService.isEnglish
+                                            ? 'Start learning'
+                                            : 'Mulai belajar',
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Floating(
+                                        axis: Axis.horizontal,
+                                        amplitude: 2,
+                                        duration: Duration(milliseconds: 1200),
+                                        child: Icon(
+                                          Icons.arrow_forward_rounded,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Kartu kecil gradient (grid 2 kolom).
   Widget _buildMenuCard(
     BuildContext context, {
     required String title,
@@ -623,69 +947,144 @@ class DashboardScreen extends StatelessWidget {
     required Color iconColor,
     required Color backgroundColor,
     required VoidCallback onTap,
+    int index = 0,
   }) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return AnimatedPressable(
-      onTap: onTap,
-      scaleFactor: 0.94,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+    final colors = _menuGradients[index % _menuGradients.length];
+    final delay = Duration(milliseconds: 420 + index * 90);
+
+    return FadeSlideIn(
+      delay: delay,
+      offset: const Offset(0, 34),
+      scaleFrom: 0.88,
+      duration: const Duration(milliseconds: 650),
+      child: PressScale(
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+            gradient: LinearGradient(
+              colors: colors,
+              begin: Alignment.bottomLeft,
+              end: Alignment.topRight,
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: isDark ? iconColor.withOpacity(0.18) : backgroundColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: iconColor,
-                    size: 22,
-                  ),
+            boxShadow: [
+              BoxShadow(
+                color: colors.first.withOpacity(0.35),
+                blurRadius: 14,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                splashColor: Colors.white.withOpacity(0.2),
+                highlightColor: Colors.white.withOpacity(0.08),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -24,
+                      top: -26,
+                      child: _decorCircle(96, 0.13),
+                    ),
+                    Positioned(
+                      right: 34,
+                      top: 52,
+                      child: _decorCircle(24, 0.1),
+                    ),
+                    Positioned(
+                      right: -14,
+                      bottom: -16,
+                      child: Icon(
+                        icon,
+                        size: 72,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FadeSlideIn(
+                                delay: delay + const Duration(milliseconds: 250),
+                                offset: Offset.zero,
+                                scaleFrom: 0.2,
+                                curve: Curves.elasticOut,
+                                duration: const Duration(milliseconds: 900),
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.28),
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    icon,
+                                    color: Colors.white,
+                                    size: 28,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: 28,
+                                height: 28,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.22),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Spacer(),
+                          Text(
+                            title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x26000000),
+                                  blurRadius: 4,
+                                  offset: Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitle,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              height: 1.25,
+                              color: Colors.white.withOpacity(0.88),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const Spacer(),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : AppTheme.textDark,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -700,35 +1099,41 @@ class DashboardScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required String time,
+    int index = 0,
   }) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
+    return FadeSlideIn(
+      delay: Duration(milliseconds: 1000 + index * 110),
+      offset: const Offset(40, 0),
+      child: Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-          width: 1,
-        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.12),
+              color: iconColor.withOpacity(0.10),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
               color: iconColor,
-              size: 20,
+              size: 22,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 13),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,19 +1141,19 @@ class DashboardScreen extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : AppTheme.textDark,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11,
-                    color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                 ),
               ],
@@ -757,85 +1162,99 @@ class DashboardScreen extends StatelessWidget {
           Text(
             time,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: isDark ? Colors.grey.shade500 : AppTheme.textMuted,
+              fontSize: 10,
+              color: Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.5),
             ),
           ),
         ],
       ),
+    ),
     );
   }
 
   Widget _buildProgressCard(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return FutureBuilder<int>(
       future: ProgressService().getOverallProgress(),
       builder: (context, snapshot) {
         final progress = snapshot.data ?? 0;
         final progressVal = progress / 100.0;
 
-        return Container(
+        return FadeSlideIn(
+          delay: const Duration(milliseconds: 1350),
+          child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-              width: 1,
-            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Progress Belajar',
+                localizationService.translate('learning_progress'),
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : AppTheme.textDark,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 15),
               Row(
                 children: [
                   SizedBox(
-                    width: 70,
-                    height: 70,
+                    width: 75,
+                    height: 75,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        SizedBox(
-                          width: 70,
-                          height: 70,
+                        TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0, end: progressVal),
+                          duration: const Duration(milliseconds: 2000),
+                          curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
+                          builder: (context, animatedValue, _) => SizedBox(
+                          width: 75,
+                          height: 75,
                           child: CircularProgressIndicator(
-                            value: progressVal,
-                            strokeWidth: 7,
-                            backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
+                            value: animatedValue,
+                            strokeWidth: 8,
+                            backgroundColor: const Color(0xFFE8EDF3),
                             valueColor: const AlwaysStoppedAnimation<Color>(
-                              AppTheme.primaryTeal,
+                              Color(0xFFAD8B73),
                             ),
                           ),
                         ),
-                        Text(
-                          '$progress%',
+                        ),
+                        CountUpText(
+                          value: progress,
+                          suffix: '%',
+                          duration: const Duration(milliseconds: 2000),
+                          curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? Colors.white : AppTheme.textDark,
+                            color: Theme.of(context).textTheme.bodyLarge?.color,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 18),
+                  const SizedBox(width: 20),
                   Expanded(
                     child: Text(
-                      'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progres belajar.',
-                      style: TextStyle(
+                      localizationService.isEnglish
+                          ? 'Keep improving your learning! Complete materials and practices to increase learning progress.'
+                          : 'Terus tingkatkan belajarmu! Selesaikan materi dan praktik untuk meningkatkan progress belajar.',
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+                        color: Color(0xFF7B8494),
                         height: 1.4,
                       ),
                     ),
@@ -844,27 +1263,23 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
         );
       },
     );
   }
 
   Widget _buildTeacherManagementPanel(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AnimatedHeroCard(
+      colors: const [
+        Color(0xFFAD8B73),
+        Color(0xFF8E6F5B),
+      ],
+      borderRadius: 24,
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [
-            AppTheme.primaryTeal,
-            AppTheme.darkTeal,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shadowColor: Colors.black,
+      shadowOpacity: 0.16,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -873,13 +1288,13 @@ class DashboardScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
                   Icons.admin_panel_settings_rounded,
                   color: Colors.white,
-                  size: 24,
+                  size: 26,
                 ),
               ),
               const SizedBox(width: 12),
@@ -891,7 +1306,7 @@ class DashboardScreen extends StatelessWidget {
                       'Panel Utama Guru',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -908,7 +1323,9 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 20),
+
+          // Sub-Section 1: KELOLA PEMBELAJARAN
           const Text(
             'KELOLA PEMBELAJARAN',
             style: TextStyle(
@@ -977,7 +1394,10 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 16),
+
+          // Sub-Section 2: KELOLA KELAS & LAB TKJ
           const Text(
             'KELOLA KELAS & LAB TKJ',
             style: TextStyle(
@@ -1054,12 +1474,19 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildTeacherMonitoringCard(BuildContext context) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 24),
+      margin: const EdgeInsets.only(bottom: 25),
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.borderCream),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFAD8B73).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1068,20 +1495,22 @@ class DashboardScreen extends StatelessWidget {
             children: [
               Icon(
                 Icons.analytics_rounded,
-                color: AppTheme.primaryTeal,
+                color: Color(0xFFAD8B73),
                 size: 22,
               ),
               SizedBox(width: 8),
               Text(
                 'Ringkasan Monitoring Kelas Guru',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 14),
+
+          // Stat 1: Peminjaman Alat Menunggu Persetujuan
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('loans')
@@ -1104,13 +1533,13 @@ class DashboardScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: pendingCount > 0 ? const Color(0xFFFFF3E0) : AppTheme.tealTint,
+                          color: pendingCount > 0 ? Colors.orange.shade50 : const Color(0xFFE8F5E9),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           Icons.inventory_2_outlined,
                           size: 20,
-                          color: pendingCount > 0 ? AppTheme.accentAmber : AppTheme.primaryTeal,
+                          color: pendingCount > 0 ? Colors.orange.shade800 : Colors.green.shade700,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1130,7 +1559,7 @@ class DashboardScreen extends StatelessWidget {
                               pendingCount > 0
                                   ? '$pendingCount pengajuan alat perlu disetujui Guru'
                                   : 'Tidak ada pengajuan peminjaman baru',
-                              style: const TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
                             ),
                           ],
                         ),
@@ -1139,7 +1568,7 @@ class DashboardScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppTheme.accentAmber,
+                            color: Colors.orange,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -1147,6 +1576,78 @@ class DashboardScreen extends StatelessWidget {
                             style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                         ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(height: 18),
+
+          // Stat 2: Refleksi Siswa Belum Ditanggapi
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('reflections')
+                .orderBy('createdAt', descending: true)
+                .limit(10)
+                .snapshots(),
+            builder: (context, snapshot) {
+              final docs = snapshot.data?.docs ?? [];
+              final pendingFeedback = docs.where((doc) {
+                final data = doc.data() as Map<String, dynamic>;
+                final fb = data['feedbackGuru']?.toString() ?? '';
+                return fb.isEmpty;
+              }).length;
+
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFAD8B73).withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.rate_review_rounded,
+                          size: 20,
+                          color: Color(0xFFAD8B73),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Refleksi Belajar Siswa',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).textTheme.bodyLarge?.color,
+                              ),
+                            ),
+                            Text(
+                              pendingFeedback > 0
+                                  ? '$pendingFeedback refleksi siswa belum ditanggapi'
+                                  : 'Seluruh refleksi siswa sudah ditanggapi',
+                              style: TextStyle(fontSize: 11.5, color: Colors.grey.shade600),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right_rounded, size: 20, color: Colors.grey),
                     ],
                   ),
                 ),
@@ -1170,10 +1671,13 @@ class DashboardScreen extends StatelessWidget {
         docs.sort((a, b) {
           final dataA = a.data() as Map<String, dynamic>;
           final dataB = b.data() as Map<String, dynamic>;
+
           final tsA = dataA['createdAt'];
           final tsB = dataB['createdAt'];
+
           DateTime dtA = (tsA is Timestamp) ? tsA.toDate() : DateTime.now();
           DateTime dtB = (tsB is Timestamp) ? tsB.toDate() : DateTime.now();
+
           return dtB.compareTo(dtA);
         });
 
@@ -1184,34 +1688,45 @@ class DashboardScreen extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 20),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFFFBEB),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFFDE68A)),
+            color: const Color(0xFFFFF8E1),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.amber.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.amber.withOpacity(0.12),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Container(
+                  Pulse(
+                    minScale: 0.92,
+                    maxScale: 1.12,
+                    child: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: const BoxDecoration(
-                      color: AppTheme.accentAmber,
+                      color: Colors.amber,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.campaign_rounded,
                       color: Colors.white,
-                      size: 16,
+                      size: 18,
                     ),
+                  ),
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     'Pengumuman Dari Guru',
                     style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF92400E),
+                      color: Color(0xFF7A4B00),
                     ),
                   ),
                 ],
@@ -1220,24 +1735,24 @@ class DashboardScreen extends StatelessWidget {
               ...displayDocs.map((doc) {
                 final data = doc.data() as Map<String, dynamic>;
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                  padding: const EdgeInsets.only(bottom: 8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         data['judul'] ?? 'Pengumuman',
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.textDark,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         data['isi'] ?? '',
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          color: AppTheme.textMuted,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade800,
                           height: 1.4,
                         ),
                       ),
@@ -1258,7 +1773,8 @@ class DashboardScreen extends StatelessWidget {
     required String label,
     required VoidCallback onTap,
   }) {
-    return Material(
+    return PressScale(
+      child: Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
@@ -1269,19 +1785,20 @@ class DashboardScreen extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: AppTheme.primaryTeal),
+              Icon(icon, size: 16, color: const Color(0xFFAD8B73)),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.textDark,
+                  color: Color(0xFF2C2C2C),
                 ),
               ),
             ],
           ),
         ),
+      ),
       ),
     );
   }

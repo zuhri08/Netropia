@@ -13,7 +13,7 @@ class AboutAppScreen extends StatelessWidget {
         final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
-          backgroundColor: AppTheme.primaryTeal,
+          backgroundColor: AppTheme.primaryBrown,
           appBar: AppBar(
             title: const Text(
               'Tentang Netropia',
@@ -28,7 +28,7 @@ class AboutAppScreen extends StatelessWidget {
             height: double.infinity,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+                colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -94,7 +94,7 @@ class AboutAppScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF162522) : Colors.white,
+                      color: isDark ? const Color(0xFF241C17) : Colors.white,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
@@ -131,7 +131,7 @@ class AboutAppScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF162522) : Colors.white,
+                      color: isDark ? const Color(0xFF241C17) : Colors.white,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
@@ -165,7 +165,7 @@ class AboutAppScreen extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF162522) : Colors.white,
+                      color: isDark ? const Color(0xFF241C17) : Colors.white,
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
@@ -189,12 +189,12 @@ class AboutAppScreen extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.tealTint,
+                                  color: AppTheme.brownTint,
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: const Column(
                                   children: [
-                                    Icon(Icons.person_rounded, size: 24, color: AppTheme.primaryTeal),
+                                    Icon(Icons.person_rounded, size: 24, color: AppTheme.primaryBrown),
                                     SizedBox(height: 6),
                                     Text(
                                       'Aziz',
@@ -213,12 +213,12 @@ class AboutAppScreen extends StatelessWidget {
                               child: Container(
                                 padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.tealTint,
+                                  color: AppTheme.brownTint,
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: const Column(
                                   children: [
-                                    Icon(Icons.person_rounded, size: 24, color: AppTheme.primaryTeal),
+                                    Icon(Icons.person_rounded, size: 24, color: AppTheme.primaryBrown),
                                     SizedBox(height: 6),
                                     Text(
                                       'Zuhrifal',
@@ -266,10 +266,10 @@ class AboutAppScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppTheme.tealTint,
+              color: AppTheme.brownTint,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, size: 18, color: AppTheme.primaryTeal),
+            child: Icon(icon, size: 18, color: AppTheme.primaryBrown),
           ),
           const SizedBox(width: 12),
           Expanded(

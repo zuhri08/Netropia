@@ -782,13 +782,13 @@ class _TeacherAttendanceScreenState
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppTheme.tealTint,
+            color: AppTheme.brownTint,
             borderRadius:
             BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
             size: 22,
           ),
         ),

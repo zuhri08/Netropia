@@ -46,7 +46,7 @@ class VirtualLabScreen extends StatelessWidget {
               'Virtual Lab',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -60,8 +60,8 @@ class VirtualLabScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [
-                      AppTheme.primaryTeal,
-                      AppTheme.darkTeal,
+                      AppTheme.primaryBrown,
+                      AppTheme.darkBrown,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -69,7 +69,7 @@ class VirtualLabScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: AppTheme.primaryTeal.withOpacity(0.22),
+                      color: AppTheme.primaryBrown.withOpacity(0.22),
                       blurRadius: 14,
                       offset: const Offset(0, 6),
                     ),
@@ -197,17 +197,17 @@ class VirtualLabScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealTint,
+                      color: AppTheme.brownTint,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(icon, color: AppTheme.primaryTeal, size: 24),
+                    child: Icon(icon, color: AppTheme.primaryBrown, size: 24),
                   ),
                   Text(
                     number,
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryBrown,
                     ),
                   ),
                 ],
@@ -238,14 +238,14 @@ class VirtualLabScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryBrown,
                     ),
                   ),
                   const SizedBox(width: 6),
                   const Icon(
                     Icons.arrow_forward_rounded,
                     size: 16,
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                   ),
                 ],
               ),

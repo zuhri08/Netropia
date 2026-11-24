@@ -41,7 +41,7 @@ class MateriDetailLayout extends StatefulWidget {
   const MateriDetailLayout({
     super.key,
     required this.title,
-    this.themeColor = AppTheme.primaryTeal,
+    this.themeColor = AppTheme.primaryBrown,
     this.onMateriTap,
     this.customMaterialContent,
     this.customMaterialCategory,
@@ -137,7 +137,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
@@ -162,13 +162,13 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealTint,
+                      color: AppTheme.brownTint,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppTheme.borderCream),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.school_rounded, color: AppTheme.primaryTeal, size: 20),
+                        const Icon(Icons.school_rounded, color: AppTheme.primaryBrown, size: 20),
                         const SizedBox(width: 8),
                         Text(
                           'MODUL PEMBELAJARAN',
@@ -176,7 +176,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.8,
-                            color: AppTheme.primaryTeal,
+                            color: AppTheme.primaryBrown,
                           ),
                         ),
                         const Spacer(),
@@ -185,7 +185,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: AppTheme.darkTeal,
+                            color: AppTheme.darkBrown,
                           ),
                         ),
                       ],
@@ -209,10 +209,10 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
 
   Widget _buildGrid(bool isDark) {
     final menuItems = [
-      {'name': 'Materi', 'icon': Icons.menu_book_rounded, 'color': AppTheme.primaryTeal},
+      {'name': 'Materi', 'icon': Icons.menu_book_rounded, 'color': AppTheme.primaryBrown},
       {'name': 'Video', 'icon': Icons.play_circle_fill_rounded, 'color': const Color(0xFFE53935)},
       {'name': 'Peta Konsep', 'icon': Icons.account_tree_rounded, 'color': const Color(0xFF00897B)},
-      {'name': 'Referensi', 'icon': Icons.library_books_rounded, 'color': AppTheme.primaryTeal},
+      {'name': 'Referensi', 'icon': Icons.library_books_rounded, 'color': AppTheme.primaryBrown},
       {'name': 'Pre Test', 'icon': Icons.assignment_rounded, 'color': AppTheme.accentAmber},
       {'name': 'Post Test', 'icon': Icons.assignment_turned_in_rounded, 'color': const Color(0xFF43A047)},
       {'name': 'Penugasan', 'icon': Icons.task_rounded, 'color': const Color(0xFFE65100)},
@@ -321,7 +321,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
               materiId: materiId,
               materiTitle: widget.title,
               feature: name,
-              themeColor: AppTheme.primaryTeal,
+              themeColor: AppTheme.primaryBrown,
             ),
           );
         }
@@ -345,7 +345,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           PreTestScreen(
             materiId: materiId,
             materiTitle: widget.title,
-            themeColor: AppTheme.primaryTeal,
+            themeColor: AppTheme.primaryBrown,
           ),
         );
         break;
@@ -355,7 +355,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
           PostTestScreen(
             materiId: materiId,
             materiTitle: widget.title,
-            themeColor: AppTheme.primaryTeal,
+            themeColor: AppTheme.primaryBrown,
           ),
         );
         break;
@@ -402,7 +402,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
             materiId: materiId,
             materiTitle: widget.title,
             feature: name,
-            themeColor: AppTheme.primaryTeal,
+            themeColor: AppTheme.primaryBrown,
           ),
         );
     }
@@ -531,7 +531,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryBrown,
                     ),
                   ),
                 ],
@@ -543,7 +543,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
                   value: progressValue,
                   minHeight: 8,
                   backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+                  valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBrown),
                 ),
               ),
               const SizedBox(height: 8),
@@ -576,7 +576,7 @@ class _MateriDetailLayoutState extends State<MateriDetailLayout> {
         children: [
           const Icon(
             Icons.format_quote_rounded,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
             size: 28,
           ),
           const SizedBox(height: 6),

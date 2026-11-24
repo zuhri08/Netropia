@@ -65,8 +65,8 @@ class ProfileScreen extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF162522), const Color(0xFF0F1A18)]
-              : [AppTheme.primaryTeal, AppTheme.darkTeal],
+              ? [const Color(0xFF241C17), const Color(0xFF18120F)]
+              : [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                       backgroundColor: Colors.white,
                       backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
                       child: photoUrl == null
-                          ? const Icon(Icons.person_rounded, size: 55, color: AppTheme.primaryTeal)
+                          ? const Icon(Icons.person_rounded, size: 55, color: AppTheme.primaryBrown)
                           : null,
                     );
                   },
@@ -158,7 +158,7 @@ class ProfileScreen extends StatelessWidget {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: AppTheme.darkTeal,
+              foregroundColor: AppTheme.darkBrown,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
@@ -207,7 +207,7 @@ class ProfileScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
           ),
         ),
         const SizedBox(height: 2),
@@ -248,7 +248,7 @@ class ProfileScreen extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildBadge(context, "Network Beginner", Icons.lan_rounded, AppTheme.primaryTeal, true),
+              _buildBadge(context, "Network Beginner", Icons.lan_rounded, AppTheme.primaryBrown, true),
               _buildBadge(context, "First Lesson", Icons.school_rounded, Colors.green, true),
               _buildBadge(context, "Subnet Master", Icons.calculate_rounded, AppTheme.accentAmber, false),
               _buildBadge(context, "Lab Explorer", Icons.science_rounded, Colors.purple, true),
@@ -268,8 +268,8 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: unlocked
-            ? AppTheme.tealTint
-            : (isDark ? const Color(0xFF162522) : AppTheme.surfaceCream),
+            ? AppTheme.brownTint
+            : (isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: unlocked ? color.withOpacity(0.3) : AppTheme.borderCream,
@@ -332,7 +332,7 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: AppTheme.primaryTeal, size: 22),
+      leading: Icon(icon, color: AppTheme.primaryBrown, size: 22),
       title: Text(
         title,
         style: TextStyle(
@@ -366,7 +366,7 @@ class ProfileScreen extends StatelessWidget {
               padding: EdgeInsets.only(left: 4, bottom: 10),
               child: Text(
                 'Apresiasi & Bintang Dari Guru ⭐',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
               ),
             ),
             Container(

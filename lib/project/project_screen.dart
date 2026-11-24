@@ -26,7 +26,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '2–3 Pertemuan',
       icon: Icons.lan_rounded,
       progress: 0,
-      color: AppTheme.primaryTeal,
+      color: AppTheme.primaryBrown,
       steps: [
         'Memahami masalah',
         'Membuat perencanaan',
@@ -44,7 +44,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       duration: '1–2 Pertemuan',
       icon: Icons.cable_rounded,
       progress: 0,
-      color: AppTheme.primaryTeal,
+      color: AppTheme.primaryBrown,
       steps: [
         'Mengenal kabel',
         'Menentukan susunan warna',
@@ -106,7 +106,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: const Text('Project', style: TextStyle(fontWeight: FontWeight.bold)),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -152,7 +152,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -197,8 +197,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
             label: Text(categories[index]),
             selected: isSelected,
             onSelected: (_) => setState(() => selectedCategory = index),
-            selectedColor: AppTheme.primaryTeal,
-            backgroundColor: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
+            selectedColor: AppTheme.primaryBrown,
+            backgroundColor: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
             labelStyle: TextStyle(
               color: isSelected ? Colors.white : (isDark ? Colors.white : AppTheme.textDark),
               fontSize: 11.5,
@@ -240,8 +240,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 Container(
                   width: 44,
                   height: 44,
-                  decoration: BoxDecoration(color: AppTheme.tealTint, borderRadius: BorderRadius.circular(12)),
-                  child: Icon(project.icon, color: AppTheme.primaryTeal, size: 22),
+                  decoration: BoxDecoration(color: AppTheme.brownTint, borderRadius: BorderRadius.circular(12)),
+                  child: Icon(project.icon, color: AppTheme.primaryBrown, size: 22),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -254,8 +254,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(color: AppTheme.tealTint, borderRadius: BorderRadius.circular(6)),
-                            child: Text(project.category, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                            decoration: BoxDecoration(color: AppTheme.brownTint, borderRadius: BorderRadius.circular(6)),
+                            child: Text(project.category, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
                           ),
                           const SizedBox(width: 6),
                           Text(project.difficulty, style: const TextStyle(fontSize: 10.5, color: AppTheme.textMuted)),
@@ -276,7 +276,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Text('Mulai Project', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: Colors.white)),

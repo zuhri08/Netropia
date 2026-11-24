@@ -513,7 +513,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryTeal,
+              backgroundColor: AppTheme.primaryBrown,
               foregroundColor: Colors.white,
             ),
             icon: const Icon(Icons.star_rounded, color: Colors.amber),
@@ -540,7 +540,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
             children: [
               Row(
                 children: [
-                  Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryTeal),
+                  Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryBrown),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -606,7 +606,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                                   children: [
                                     const CircleAvatar(
                                       radius: 16,
-                                      backgroundColor: AppTheme.primaryTeal,
+                                      backgroundColor: AppTheme.primaryBrown,
                                       child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
                                     ),
                                     const SizedBox(width: 10),
@@ -692,7 +692,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                                       }
                                     },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.primaryTeal,
+                                      backgroundColor: AppTheme.primaryBrown,
                                       foregroundColor: Colors.white,
                                     ),
                                     icon: const Icon(Icons.check_rounded, size: 16),
@@ -717,7 +717,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = AppTheme.primaryTeal;
+    final primaryColor = AppTheme.primaryBrown;
 
     return ListenableBuilder(
       listenable: localizationService,
@@ -784,7 +784,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.add_task_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.add_task_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Buat Penugasan Baru',
@@ -834,7 +834,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createAssignment,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -903,8 +903,8 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                             child: OutlinedButton.icon(
                               onPressed: () => _showSubmissionsDialog(assignmentId, judul),
                               style: OutlinedButton.styleFrom(
-                                foregroundColor: AppTheme.primaryTeal,
-                                side: BorderSide(color: AppTheme.primaryTeal),
+                                foregroundColor: AppTheme.primaryBrown,
+                                side: BorderSide(color: AppTheme.primaryBrown),
                               ),
                               icon: const Icon(Icons.rate_review_rounded, size: 16),
                               label: const Text('Lihat Jawaban & Beri Nilai Siswa'),
@@ -941,7 +941,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.quiz_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.quiz_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Tambah Soal Kuis & Evaluasi Baru',
@@ -1027,7 +1027,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createQuizQuestion,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1096,7 +1096,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
         Radio<int>(
           value: index,
           groupValue: _quizCorrectAnswerIndex,
-          activeColor: AppTheme.primaryTeal,
+          activeColor: AppTheme.primaryBrown,
           onChanged: (val) {
             if (val != null) setState(() => _quizCorrectAnswerIndex = val);
           },
@@ -1109,7 +1109,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: isSelected ? AppTheme.primaryTeal : Colors.grey),
+                borderSide: BorderSide(color: isSelected ? AppTheme.primaryBrown : Colors.grey),
               ),
             ),
           ),
@@ -1136,7 +1136,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.note_add_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.note_add_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Terbitkan Materi Pembelajaran',
@@ -1182,7 +1182,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createMaterial,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1262,7 +1262,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.video_call_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.video_call_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Terbitkan Video Pembelajaran',
@@ -1322,7 +1322,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createVideo,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1345,7 +1345,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.library_books_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.library_books_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Tambah Referensi / Buku Bacaan',
@@ -1404,7 +1404,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createReference,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1439,7 +1439,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.campaign_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.campaign_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text(
                         'Buat Pengumuman Kelas',
@@ -1489,7 +1489,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                     child: ElevatedButton.icon(
                       onPressed: _isSubmitting ? null : _createAnnouncement,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryTeal,
+                        backgroundColor: AppTheme.primaryBrown,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -1609,7 +1609,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                   ];
                 }).toList(),
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF1F5C56)),
+                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFAD8B73)),
                 rowDecoration: const pw.BoxDecoration(
                   border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
                 ),
@@ -1647,7 +1647,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primaryTeal),
+                      Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primaryBrown),
                       SizedBox(width: 8),
                       Text('Export Rekap Nilai & Presensi (PDF)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ],
@@ -1678,7 +1678,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                           return ElevatedButton.icon(
                             onPressed: students.isEmpty ? null : () => _exportGradebookToPdf(students),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryTeal,
+                              backgroundColor: AppTheme.primaryBrown,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
@@ -1756,7 +1756,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                           Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor: AppTheme.primaryTeal.withOpacity(0.15),
+                                backgroundColor: AppTheme.primaryBrown.withOpacity(0.15),
                                 child: Text(
                                   mood,
                                   style: const TextStyle(fontSize: 18),
@@ -1851,8 +1851,8 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                               OutlinedButton.icon(
                                 onPressed: () => _showGiveFeedbackDialog(docId, namaSiswa, feedbackGuru.toString()),
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppTheme.primaryTeal,
-                                  side: BorderSide(color: AppTheme.primaryTeal),
+                                  foregroundColor: AppTheme.primaryBrown,
+                                  side: BorderSide(color: AppTheme.primaryBrown),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                 ),
                                 icon: const Icon(Icons.rate_review_rounded, size: 16),
@@ -2306,7 +2306,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryTeal,
+              backgroundColor: AppTheme.primaryBrown,
               foregroundColor: Colors.white,
             ),
             child: const Text('Kirim Tanggapan'),

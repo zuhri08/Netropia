@@ -183,7 +183,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Text(
@@ -235,12 +235,12 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   step['icon'] as IconData,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   size: 20,
                 ),
               ),
@@ -269,7 +269,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                 ),
               ),
             ],
@@ -281,7 +281,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
               value: _progress,
               minHeight: 5,
               backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBrown),
             ),
           ),
         ],
@@ -319,11 +319,11 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.tealTint
+                      ? AppTheme.brownTint
                       : Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? AppTheme.primaryTeal : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
+                    color: isSelected ? AppTheme.primaryBrown : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
                     width: isSelected ? 1.5 : 1,
                   ),
                 ),
@@ -343,7 +343,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: isSelected ? AppTheme.primaryTeal : (isDark ? Colors.white : AppTheme.textDark),
+                              color: isSelected ? AppTheme.primaryBrown : (isDark ? Colors.white : AppTheme.textDark),
                             ),
                           ),
                           const SizedBox(height: 2),
@@ -355,7 +355,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                       ),
                     ),
                     if (isSelected)
-                      const Icon(Icons.check_circle_rounded, color: AppTheme.primaryTeal, size: 20),
+                      const Icon(Icons.check_circle_rounded, color: AppTheme.primaryBrown, size: 20),
                   ],
                 ),
               ),
@@ -396,7 +396,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                   style: const TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -405,7 +405,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                   min: 1,
                   max: 5,
                   divisions: 4,
-                  activeColor: AppTheme.primaryTeal,
+                  activeColor: AppTheme.primaryBrown,
                   onChanged: (val) {
                     setState(() {
                       _understanding = val.round();
@@ -446,7 +446,7 @@ class _RefleksiScreenState extends State<RefleksiScreen> {
                     else _understoodTopics.remove(topic);
                   });
                 },
-                selectedColor: AppTheme.primaryTeal,
+                selectedColor: AppTheme.primaryBrown,
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : (isDark ? Colors.white : AppTheme.textDark),
                   fontSize: 12,

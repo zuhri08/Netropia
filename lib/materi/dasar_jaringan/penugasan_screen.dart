@@ -68,7 +68,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
@@ -112,7 +112,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
-          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -188,7 +188,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               Text(
                 '$_completedSteps/${_steps.length} langkah',
                 style: const TextStyle(
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -202,7 +202,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               value: _progress,
               minHeight: 8,
               backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryTeal),
+              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryBrown),
             ),
           ),
         ],
@@ -276,10 +276,10 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: AppTheme.tealTint,
+              color: AppTheme.brownTint,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: AppTheme.primaryTeal, size: 20),
+            child: Icon(icon, color: AppTheme.primaryBrown, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -340,7 +340,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
                   Icon(
                     checked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                     size: 20,
-                    color: checked ? AppTheme.primaryTeal : AppTheme.textMuted,
+                    color: checked ? AppTheme.primaryBrown : AppTheme.textMuted,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -392,7 +392,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             decoration: InputDecoration(
               hintText: 'Tuliskan jawaban di sini...',
               filled: true,
-              fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+              fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
                 borderSide: BorderSide.none,
@@ -469,7 +469,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       child: ElevatedButton(
         onPressed: (_isCompleted || _isSubmitting) ? null : _submitAssignment,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppTheme.primaryTeal,
+          backgroundColor: AppTheme.primaryBrown,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),

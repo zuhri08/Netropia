@@ -162,7 +162,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             const SizedBox(height: 16),
             const Text(
               'Scan QR Code Presensi',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
             ),
             const SizedBox(height: 6),
             const Text(
@@ -174,11 +174,11 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppTheme.tealTint,
+                color: AppTheme.brownTint,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.3)),
+                border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.3)),
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, size: 70, color: AppTheme.primaryTeal),
+              child: const Icon(Icons.qr_code_scanner_rounded, size: 70, color: AppTheme.primaryBrown),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -186,7 +186,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 hintText: 'Masukkan 6 Digit Kode QR (Contoh: ABC123)',
-                prefixIcon: const Icon(Icons.qr_code_2_rounded, color: AppTheme.primaryTeal),
+                prefixIcon: const Icon(Icons.qr_code_2_rounded, color: AppTheme.primaryBrown),
                 filled: true,
                 fillColor: AppTheme.surfaceCream,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
@@ -208,7 +208,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                 icon: const Icon(Icons.check_circle_rounded),
                 label: const Text('Gunakan Kode QR Ini', style: TextStyle(fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryTeal,
+                  backgroundColor: AppTheme.primaryBrown,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -237,7 +237,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: const Text('Absensi Siswa', style: TextStyle(fontWeight: FontWeight.bold)),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
@@ -250,9 +250,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ],
           ),
           body: isLoading
-              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryTeal))
+              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryBrown))
               : RefreshIndicator(
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   onRefresh: loadAttendanceData,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -266,7 +266,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+                              colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -350,7 +350,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               onPressed: _showQrScannerModal,
                               icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
                               label: const Text('Scan QR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryTeal),
+                              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryBrown),
                             ),
                           ],
                         ),
@@ -362,7 +362,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           decoration: InputDecoration(
                             hintText: 'Contoh: TKJ1025',
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primaryTeal),
+                              icon: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primaryBrown),
                               onPressed: _showQrScannerModal,
                             ),
                             filled: true,
@@ -380,7 +380,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           child: ElevatedButton(
                             onPressed: isSubmitting ? null : submitAttendance,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.primaryTeal,
+                              backgroundColor: AppTheme.primaryBrown,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),

@@ -217,7 +217,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryTeal,
+              backgroundColor: AppTheme.primaryBrown,
               foregroundColor: Colors.white,
             ),
             onPressed: () {
@@ -380,7 +380,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppTheme.primaryTeal,
+      backgroundColor: AppTheme.primaryBrown,
       foregroundColor: Colors.white,
       elevation: 0,
       title: Row(
@@ -459,13 +459,13 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   Widget _buildHistoryDrawer(bool isDark) {
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.78,
-      backgroundColor: isDark ? const Color(0xFF162522) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF241C17) : Colors.white,
       child: SafeArea(
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              color: AppTheme.primaryTeal,
+              color: AppTheme.primaryBrown,
               child: Row(
                 children: [
                   const Icon(Icons.history_rounded, color: Colors.white),
@@ -508,10 +508,10 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
                         return ListTile(
                           selected: isActive,
-                          selectedTileColor: AppTheme.tealTint,
+                          selectedTileColor: AppTheme.brownTint,
                           leading: Icon(
                             isActive ? Icons.chat_rounded : Icons.chat_bubble_outline_rounded,
-                            color: isActive ? AppTheme.primaryTeal : AppTheme.textMuted,
+                            color: isActive ? AppTheme.primaryBrown : AppTheme.textMuted,
                             size: 20,
                           ),
                           title: Text(
@@ -579,7 +579,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         : (isDark ? Colors.white : AppTheme.textDark);
 
     final bubbleColor = isUser
-        ? AppTheme.primaryTeal
+        ? AppTheme.primaryBrown
         : (isDark ? Theme.of(context).cardColor : Colors.white);
 
     return Align(
@@ -661,7 +661,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   }
 
   MarkdownStyleSheet _buildMarkdownStyle(Color textColor, bool isDark) {
-    final codeBackground = isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream;
+    final codeBackground = isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream;
     return MarkdownStyleSheet(
       p: TextStyle(color: textColor, fontSize: 13.5, height: 1.5),
       h1: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
@@ -669,7 +669,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       strong: TextStyle(color: textColor, fontWeight: FontWeight.bold),
       code: TextStyle(color: textColor, fontSize: 12.5, fontFamily: 'monospace', backgroundColor: codeBackground),
       codeblockDecoration: BoxDecoration(color: codeBackground, borderRadius: BorderRadius.circular(8)),
-      a: const TextStyle(color: AppTheme.primaryTeal, decoration: TextDecoration.underline),
+      a: const TextStyle(color: AppTheme.primaryBrown, decoration: TextDecoration.underline),
     );
   }
 
@@ -693,7 +693,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
               height: 14,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: AppTheme.primaryTeal,
+                color: AppTheme.primaryBrown,
               ),
             ),
             SizedBox(width: 12),
@@ -737,7 +737,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                   avatar: const Icon(
                     Icons.auto_awesome_rounded,
                     size: 14,
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                   ),
                   label: Text(
                     prompt,
@@ -782,7 +782,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
                 hintText: 'Tanyakan tentang materi TKJ...',
                 hintStyle: const TextStyle(fontSize: 13.5, color: AppTheme.textMuted),
                 filled: true,
-                fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
@@ -795,7 +795,7 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           const SizedBox(width: 10),
           Container(
             decoration: const BoxDecoration(
-              color: AppTheme.primaryTeal,
+              color: AppTheme.primaryBrown,
               shape: BoxShape.circle,
             ),
             child: IconButton(

@@ -189,9 +189,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         decoration: InputDecoration(
           hintText: 'Contoh: 0051234567',
           counterText: '',
-          prefixIcon: const Icon(Icons.badge_outlined, color: AppTheme.primaryTeal, size: 20),
+          prefixIcon: const Icon(Icons.badge_outlined, color: AppTheme.primaryBrown, size: 20),
           filled: true,
-          fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+          fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
         ),
       ),
@@ -204,9 +204,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         dropdownColor: Theme.of(context).cardColor,
         decoration: InputDecoration(
           hintText: 'Pilih Kelas',
-          prefixIcon: const Icon(Icons.class_outlined, color: AppTheme.primaryTeal, size: 20),
+          prefixIcon: const Icon(Icons.class_outlined, color: AppTheme.primaryBrown, size: 20),
           filled: true,
-          fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+          fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
         ),
         items: classOptions
@@ -238,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text('Daftar Akun Baru', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -266,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryTeal,
+                          color: AppTheme.primaryBrown,
                         ),
                       ),
                     ),
@@ -283,7 +283,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Container(
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        color: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
@@ -300,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRole == 'siswa'
-                                      ? AppTheme.primaryTeal
+                                      ? AppTheme.primaryBrown
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(11),
                                 ),
@@ -342,7 +342,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRole == 'guru'
-                                      ? AppTheme.primaryTeal
+                                      ? AppTheme.primaryBrown
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(11),
                                 ),
@@ -385,9 +385,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan nama lengkap',
-                        prefixIcon: const Icon(Icons.person_outline_rounded, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.person_outline_rounded, color: AppTheme.primaryBrown, size: 20),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
@@ -405,9 +405,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan email',
-                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryBrown, size: 20),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
@@ -422,13 +422,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Minimal 6 karakter',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryBrown, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.textMuted, size: 20),
                           onPressed: () => setState(() => obscurePassword = !obscurePassword),
                         ),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
@@ -443,13 +443,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Ulangi password',
-                        prefixIcon: const Icon(Icons.lock_clock_outlined, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.lock_clock_outlined, color: AppTheme.primaryBrown, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.textMuted, size: 20),
                           onPressed: () => setState(() => obscureConfirmPassword = !obscureConfirmPassword),
                         ),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                       ),
                     ),
@@ -462,7 +462,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: ElevatedButton.icon(
                         onPressed: isLoading ? null : register,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryTeal,
+                          backgroundColor: AppTheme.primaryBrown,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

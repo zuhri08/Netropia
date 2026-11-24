@@ -75,8 +75,8 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppTheme.primaryTeal,
-              AppTheme.darkTeal,
+              AppTheme.primaryBrown,
+              AppTheme.darkBrown,
             ],
           ),
         ),

@@ -38,7 +38,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'K3LH',
       'subtitle': 'Keselamatan & Kesehatan Kerja',
       'icon': Icons.health_and_safety_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const K3Screen(),
     },
     {
@@ -46,7 +46,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Komponen Komputer',
       'subtitle': 'Hardware & Arsitektur Komputer',
       'icon': Icons.memory_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const KomponenKomputerScreen(),
     },
     {
@@ -54,7 +54,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Perangkat Jaringan',
       'subtitle': 'Router, Switch, Access Point',
       'icon': Icons.router_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const PerangkatJaringanScreen(),
     },
     {
@@ -62,7 +62,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Dasar Jaringan',
       'subtitle': 'Konsep LAN, Topologi, Protokol',
       'icon': Icons.account_tree_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const DasarJaringanScreen(),
     },
     {
@@ -70,7 +70,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'IP Address',
       'subtitle': 'Pengalamatan IPv4, IPv6 & Subnetting',
       'icon': Icons.language_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const IpAddressScreen(),
     },
     {
@@ -78,7 +78,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       'title': 'Kabel Jaringan',
       'subtitle': 'UTP, STP, Crimping & Fiber Optic',
       'icon': Icons.cable_rounded,
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
       'screen': const KabelJaringanScreen(),
     },
   ];
@@ -231,7 +231,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               'Progress Belajar',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
@@ -282,7 +282,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                               Text(
                                 'Streak $streak',
                                 style: const TextStyle(
-                                  color: AppTheme.darkTeal,
+                                  color: AppTheme.darkBrown,
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -335,9 +335,9 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             ],
           ),
           body: _isLoading
-              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryTeal))
+              ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryBrown))
               : RefreshIndicator(
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   onRefresh: refreshData,
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -367,14 +367,14 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryTeal.withOpacity(0.22),
+            color: AppTheme.primaryBrown.withOpacity(0.22),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -472,7 +472,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedFeaturesCount',
             subtitle: 'dari total 42 fitur',
             icon: Icons.task_alt_rounded,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
           ),
         ),
         const SizedBox(width: 12),
@@ -483,7 +483,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedModulesCount',
             subtitle: 'dari total 6 modul',
             icon: Icons.check_circle_rounded,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
           ),
         ),
       ],
@@ -556,14 +556,14 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       height: 46,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
+        color: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
         borderRadius: BorderRadius.circular(14),
       ),
       child: TabBar(
         controller: _tabController,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: AppTheme.primaryTeal,
+          color: AppTheme.primaryBrown,
           borderRadius: BorderRadius.circular(11),
         ),
         labelColor: Colors.white,
@@ -620,10 +620,10 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: AppTheme.tealTint,
+                    color: AppTheme.brownTint,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.book_rounded, color: AppTheme.primaryTeal, size: 22),
+                  child: const Icon(Icons.book_rounded, color: AppTheme.primaryBrown, size: 22),
                 ),
                 title: Text(
                   mod['title'] as String,
@@ -643,7 +643,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                         value: p / 100.0,
                         minHeight: 6,
                         backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBrown),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -683,12 +683,12 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: isDone
-                                  ? AppTheme.tealTint
+                                  ? AppTheme.brownTint
                                   : Theme.of(context).scaffoldBackgroundColor,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isDone
-                                    ? AppTheme.primaryTeal.withOpacity(0.3)
+                                    ? AppTheme.primaryBrown.withOpacity(0.3)
                                     : AppTheme.borderCream,
                               ),
                             ),
@@ -698,7 +698,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                                 Icon(
                                   isDone ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
                                   size: 14,
-                                  color: isDone ? AppTheme.primaryTeal : AppTheme.textMuted,
+                                  color: isDone ? AppTheme.primaryBrown : AppTheme.textMuted,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -707,7 +707,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                                     fontSize: 11,
                                     fontWeight: isDone ? FontWeight.bold : FontWeight.normal,
                                     color: isDone
-                                        ? AppTheme.primaryTeal
+                                        ? AppTheme.primaryBrown
                                         : AppTheme.textMuted,
                                   ),
                                 ),
@@ -764,10 +764,10 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.check_circle_rounded, color: AppTheme.primaryTeal, size: 22),
+                child: const Icon(Icons.check_circle_rounded, color: AppTheme.primaryBrown, size: 22),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -800,7 +800,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
   Widget _buildBadgesList(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final badges = [
-      {'title': 'Network Beginner', 'desc': 'Selesaikan modul K3LH', 'unlocked': _overallProgress >= 15, 'icon': Icons.lan_rounded, 'color': AppTheme.primaryTeal},
+      {'title': 'Network Beginner', 'desc': 'Selesaikan modul K3LH', 'unlocked': _overallProgress >= 15, 'icon': Icons.lan_rounded, 'color': AppTheme.primaryBrown},
       {'title': 'First Lesson', 'desc': 'Selesaikan Pre Test pertama', 'unlocked': _completedFeaturesCount >= 1, 'icon': Icons.school_rounded, 'color': Colors.green},
       {'title': 'Subnet Master', 'desc': 'Selesaikan modul IP Address', 'unlocked': (_moduleProgressMap['ip_address'] ?? 0) == 100, 'icon': Icons.calculate_rounded, 'color': AppTheme.accentAmber},
       {'title': 'Lab Explorer', 'desc': 'Gunakan 3D Simulator', 'unlocked': true, 'icon': Icons.science_rounded, 'color': Colors.purple},
@@ -884,12 +884,12 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: isUser
-                ? AppTheme.tealTint
+                ? AppTheme.brownTint
                 : Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isUser
-                  ? AppTheme.primaryTeal
+                  ? AppTheme.primaryBrown
                   : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
             ),
           ),

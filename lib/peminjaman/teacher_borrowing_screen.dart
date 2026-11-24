@@ -105,7 +105,7 @@ class _LoanCard extends StatelessWidget {
       case 'menunggu':
         return Colors.orange;
       case 'disetujui':
-        return AppTheme.primaryTeal;
+        return AppTheme.primaryBrown;
       case 'dipinjam':
         return Colors.green;
       case 'dikembalikan':
@@ -163,12 +163,12 @@ class _LoanCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.tealTint,
+                    color: AppTheme.brownTint,
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
                     Icons.inventory_2_rounded,
-                    color: AppTheme.primaryTeal,
+                    color: AppTheme.primaryBrown,
                     size: 28,
                   ),
                 ),

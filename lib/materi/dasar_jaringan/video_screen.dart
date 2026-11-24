@@ -22,7 +22,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Pengertian Jaringan Komputer',
       'deskripsi': 'Memahami pengertian dan konsep dasar jaringan komputer.',
       'videoId': 'xT58k6AB7gk',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '02',
@@ -30,7 +30,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Tujuan dan Manfaat Jaringan',
       'deskripsi': 'Mengenal tujuan serta manfaat jaringan komputer.',
       'videoId': 'KLrqNfSfXzo',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '03',
@@ -38,7 +38,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Cara Kerja Jaringan',
       'deskripsi': 'Memahami bagaimana data dapat dikirim melalui jaringan.',
       'videoId': 'G0U632DDqqU',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '04',
@@ -46,7 +46,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Jenis Jaringan',
       'deskripsi': 'Mengenal berbagai jenis jaringan berdasarkan cakupannya.',
       'videoId': 'G0U632DDqqU',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '05',
@@ -54,7 +54,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Topologi Jaringan',
       'deskripsi': 'Mengenal bentuk dan susunan perangkat dalam jaringan.',
       'videoId': '7Ut4u8qVwRU',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '06',
@@ -62,7 +62,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Protokol Jaringan',
       'deskripsi': 'Memahami fungsi protokol dalam komunikasi jaringan.',
       'videoId': 'jtqp4tnA5bE',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '07',
@@ -70,7 +70,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Keamanan Jaringan',
       'deskripsi': 'Mengenal dasar-dasar keamanan dalam penggunaan jaringan.',
       'videoId': 'zlVtbPXDDA4',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
     {
       'number': '08',
@@ -78,7 +78,7 @@ class _VideoScreenState extends State<VideoScreen> {
       'judul': 'Penerapan Jaringan',
       'deskripsi': 'Melihat contoh penerapan jaringan dalam kehidupan sehari-hari.',
       'videoId': 'D30i_hmXZK0',
-      'color': AppTheme.primaryTeal,
+      'color': AppTheme.primaryBrown,
     },
   ];
 
@@ -131,7 +131,7 @@ class _VideoScreenState extends State<VideoScreen> {
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
             centerTitle: false,
@@ -177,15 +177,15 @@ class _VideoScreenState extends State<VideoScreen> {
         borderRadius: BorderRadius.circular(20),
         gradient: const LinearGradient(
           colors: [
-            AppTheme.primaryTeal,
-            AppTheme.darkTeal,
+            AppTheme.primaryBrown,
+            AppTheme.darkBrown,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primaryTeal.withOpacity(0.22),
+            color: AppTheme.primaryBrown.withOpacity(0.22),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -295,14 +295,14 @@ class _VideoScreenState extends State<VideoScreen> {
                 width: 50,
                 height: 50,
                 decoration: BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
                   child: Text(
                     video['number'],
                     style: const TextStyle(
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryBrown,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -317,7 +317,7 @@ class _VideoScreenState extends State<VideoScreen> {
                     Text(
                       video['materi'],
                       style: const TextStyle(
-                        color: AppTheme.primaryTeal,
+                        color: AppTheme.primaryBrown,
                         fontSize: 10.5,
                         fontWeight: FontWeight.bold,
                       ),
@@ -349,12 +349,12 @@ class _VideoScreenState extends State<VideoScreen> {
                 width: 36,
                 height: 36,
                 decoration: const BoxDecoration(
-                  color: AppTheme.tealTint,
+                  color: AppTheme.brownTint,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.play_arrow_rounded,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   size: 20,
                 ),
               ),
@@ -410,7 +410,7 @@ class _VideoScreenState extends State<VideoScreen> {
                   'judul': data['judul'] ?? 'Video',
                   'deskripsi': data['deskripsi'] ?? '',
                   'videoId': data['videoId'] ?? '',
-                  'color': AppTheme.primaryTeal,
+                  'color': AppTheme.primaryBrown,
                 }, isDark),
               );
             }),

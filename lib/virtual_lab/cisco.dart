@@ -690,18 +690,6 @@ class _SimulatorPageState extends State<SimulatorPage> {
   /// CABLE SELECTION
   /// =============================================================
 
-  void _selectCable(CableType cable) {
-    setState(() {
-      selectedCable = cable;
-      connectMode = false;
-      sourceDeviceId = null;
-    });
-
-    _snack(
-      '${cable.label} dipilih. Tap perangkat sumber.',
-    );
-  }
-
   void _startConnect() {
     if (selectedCable == null) {
       _openCablePicker();
@@ -968,8 +956,6 @@ class _SimulatorPageState extends State<SimulatorPage> {
       selectedCable!,
     );
   }
-
-  String? _pendingSourcePortId;
 
   void _connectDevices(
       NetworkDevice source,

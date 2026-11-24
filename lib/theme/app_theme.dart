@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // New Redesign Palette from PDF (Deep Teal & Warm Cream System)
-  static const Color primaryTeal = Color(0xFF1F5C56);
-  static const Color darkTeal = Color(0xFF0E3B37);
-  static const Color lightTeal = Color(0xFF2F7F77);
-  static const Color tealTint = Color(0xFFE3ECE9);
-  
-  static const Color backgroundCream = Color(0xFFF6F3EC);
-  static const Color surfaceCard = Colors.white;
-  static const Color surfaceCream = Color(0xFFEBE7DD);
-  static const Color borderCream = Color(0xFFDDD8CC);
-  
-  static const Color accentAmber = Color(0xFFF2A93B);
-  static const Color accentRed = Color(0xFFBE3A2D);
+  static const Color primaryBrown = Color(0xFFAD8B73);
+  static const Color secondaryBeige = Color(0xFFCEAB93);
+  static const Color accentTan = Color(0xFFE3CAA5);
+  static const Color backgroundCream = Color(0xFFFFFBE9);
+  // Warna baru: cokelat tua untuk bar navigasi bawah & aksen gelap.
+  static const Color deepEspresso = Color(0xFF4A3428);
 
-  static const Color textDark = Color(0xFF14231F);
-  static const Color textMuted = Color(0xFF7F9089);
-
-  // Legacy fallback aliases for compatibility
-  static const Color primaryBrown = primaryTeal;
-  static const Color secondaryBeige = lightTeal;
-  static const Color accentTan = accentAmber;
+  // Kompatibilitas warna tema tambahan
+  static const Color darkBrown = Color(0xFF8E6F5B);
+  static const Color brownTint = Color(0xFFF5EBE6);
+  static const Color textDark = Color(0xFF2C3E50);
+  static const Color textMuted = Color(0xFF7F8C8D);
+  static const Color surfaceCream = Color(0xFFFFFBE9);
+  static const Color borderCream = Color(0xFFE9DDD3);
+  static const Color accentRed = Color(0xFFC0392B);
+  static const Color accentAmber = Color(0xFFD35400);
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -29,81 +24,50 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: backgroundCream,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryTeal,
-      primary: primaryTeal,
-      secondary: lightTeal,
-      tertiary: accentAmber,
-      error: accentRed,
-      surface: surfaceCard,
+      seedColor: primaryBrown,
+      primary: primaryBrown,
+      secondary: secondaryBeige,
+      tertiary: accentTan,
       brightness: Brightness.light,
     ),
-    cardColor: surfaceCard,
-    cardTheme: CardThemeData(
-      color: surfaceCard,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: borderCream, width: 1),
-      ),
-    ),
+    cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
-      backgroundColor: primaryTeal,
+      backgroundColor: primaryBrown,
       foregroundColor: Colors.white,
-      scrolledUnderElevation: 0,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      hintStyle: const TextStyle(color: textMuted, fontSize: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: borderCream, width: 1),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: borderCream, width: 1),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: primaryTeal, width: 2),
+        borderSide: const BorderSide(color: primaryBrown, width: 2),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryTeal,
+        backgroundColor: primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-        ),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: primaryTeal,
-        side: const BorderSide(color: primaryTeal, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
         ),
       ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
-      selectedItemColor: primaryTeal,
-      unselectedItemColor: textMuted,
+      backgroundColor: deepEspresso,
+      selectedItemColor: Colors.white,
+      unselectedItemColor: accentTan,
       type: BottomNavigationBarType.fixed,
       elevation: 0,
     ),
@@ -113,37 +77,25 @@ class AppTheme {
     useMaterial3: true,
     fontFamily: 'Roboto',
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF0F1A18),
+    scaffoldBackgroundColor: const Color(0xFF121212),
     colorScheme: ColorScheme.fromSeed(
-      seedColor: lightTeal,
-      primary: lightTeal,
-      secondary: primaryTeal,
-      tertiary: accentAmber,
-      error: accentRed,
-      surface: const Color(0xFF162522),
+      seedColor: secondaryBeige,
+      primary: secondaryBeige,
+      secondary: primaryBrown,
+      tertiary: accentTan,
       brightness: Brightness.dark,
     ),
-    cardColor: const Color(0xFF162522),
-    cardTheme: CardThemeData(
-      color: const Color(0xFF162522),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.white.withOpacity(0.08), width: 1),
-      ),
-    ),
+    cardColor: const Color(0xFF1E1E1E),
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
-      backgroundColor: Color(0xFF162522),
+      backgroundColor: Color(0xFF1E1E1E),
       foregroundColor: Colors.white,
-      scrolledUnderElevation: 0,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF1F322E),
+      fillColor: const Color(0xFF2C2C2C),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      hintStyle: const TextStyle(color: textMuted, fontSize: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
@@ -154,41 +106,22 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: lightTeal, width: 2),
+        borderSide: const BorderSide(color: secondaryBeige, width: 2),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: lightTeal,
+        backgroundColor: primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-        ),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-        ),
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: lightTeal,
-        side: const BorderSide(color: lightTeal, width: 1.5),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
         ),
       ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF162522),
-      selectedItemColor: lightTeal,
+      backgroundColor: Color(0xFF1E1E1E),
+      selectedItemColor: secondaryBeige,
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
       elevation: 0,

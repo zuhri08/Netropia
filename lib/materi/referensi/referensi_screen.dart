@@ -80,7 +80,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         title: const Text('Referensi', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -110,7 +110,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -179,7 +179,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
         decoration: InputDecoration(
           hintText: 'Cari sumber referensi...',
           hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 13),
-          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryTeal),
+          prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryBrown),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
                   onPressed: () {
@@ -226,8 +226,8 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
-            selectedColor: AppTheme.primaryTeal,
-            backgroundColor: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
+            selectedColor: AppTheme.primaryBrown,
+            backgroundColor: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -264,13 +264,13 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppTheme.tealTint,
+                        color: AppTheme.brownTint,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         item.kategori,
                         style: const TextStyle(
-                          color: AppTheme.primaryTeal,
+                          color: AppTheme.primaryBrown,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -309,7 +309,7 @@ class _ReferensiScreenState extends State<ReferensiScreen> {
                       child: ElevatedButton(
                         onPressed: () => _openWebsite(item.url),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryTeal,
+                          backgroundColor: AppTheme.primaryBrown,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 14),
                           shape: RoundedRectangleBorder(

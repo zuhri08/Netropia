@@ -75,7 +75,7 @@ class _CustomMaterialReaderScreenState extends State<CustomMaterialReaderScreen>
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Bacaan Materi', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -110,10 +110,10 @@ class _CustomMaterialReaderScreenState extends State<CustomMaterialReaderScreen>
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealTint,
+                      color: AppTheme.brownTint,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.person_rounded, color: AppTheme.primaryTeal, size: 22),
+                    child: const Icon(Icons.person_rounded, color: AppTheme.primaryBrown, size: 22),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -143,7 +143,7 @@ class _CustomMaterialReaderScreenState extends State<CustomMaterialReaderScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: AppTheme.tealTint,
+                color: AppTheme.brownTint,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
@@ -151,7 +151,7 @@ class _CustomMaterialReaderScreenState extends State<CustomMaterialReaderScreen>
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                   letterSpacing: 0.8,
                 ),
               ),

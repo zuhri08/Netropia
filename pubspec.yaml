@@ -29,6 +29,7 @@ dependencies:
   flutter_markdown: ^0.7.7+1
   flutter_local_notifications: ^17.2.1
   http: ^1.2.0
+  pointer_interceptor: ^0.10.1
 
 dev_dependencies:
   flutter_test:

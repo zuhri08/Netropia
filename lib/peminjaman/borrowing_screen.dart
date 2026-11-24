@@ -122,194 +122,6 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
     super.dispose();
   }
 
-  Widget _buildMyLoansSection(bool isDark) {
-    final user = _auth.currentUser;
-    if (user == null) return const SizedBox.shrink();
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('loans')
-          .where('siswaId', isEqualTo: user.uid)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        final docs = snapshot.data!.docs;
-
-        return Container(
-          margin: const EdgeInsets.only(bottom: 18),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const Text(
-                    'Riwayat & Status Peminjaman Saya',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppTheme.tealTint,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${docs.length} Pengajuan',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryTeal,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...docs.map((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                final namaItem = data['namaItem']?.toString() ?? 'Alat';
-                final jumlah = data['jumlah'] ?? 1;
-                final status = data['status']?.toString() ?? 'menunggu';
-                final tglKembali = data['tanggalKembali'];
-
-                String tglStr = '-';
-                if (tglKembali is Timestamp) {
-                  final dt = tglKembali.toDate();
-                  tglStr = '${dt.day}/${dt.month}/${dt.year}';
-                }
-
-                Color statusColor;
-                String statusText;
-
-                switch (status) {
-                  case 'menunggu':
-                    statusColor = AppTheme.accentAmber;
-                    statusText = 'Menunggu';
-                    break;
-                  case 'disetujui':
-                    statusColor = AppTheme.primaryTeal;
-                    statusText = 'Disetujui';
-                    break;
-                  case 'dipinjam':
-                    statusColor = Colors.green;
-                    statusText = 'Dipinjam';
-                    break;
-                  case 'dikembalikan':
-                    statusColor = Colors.grey;
-                    statusText = 'Dikembalikan';
-                    break;
-                  case 'ditolak':
-                  default:
-                    statusColor = AppTheme.accentRed;
-                    statusText = 'Ditolak Guru';
-                    break;
-                }
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: status == 'ditolak'
-                        ? AppTheme.accentRed.withValues(alpha: 0.05)
-                        : (isDark ? Colors.white.withValues(alpha: 0.04) : AppTheme.surfaceCream),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: status == 'ditolak'
-                          ? AppTheme.accentRed.withValues(alpha: 0.3)
-                          : AppTheme.borderCream,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '$namaItem (${jumlah}x)',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13.5,
-                                    color: isDark ? Colors.white : AppTheme.textDark,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  'Batas Kembali: $tglStr',
-                                  style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              statusText,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: statusColor,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (status == 'ditolak') ...[
-                        const SizedBox(height: 8),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppTheme.accentRed.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.cancel_outlined, color: AppTheme.accentRed, size: 16),
-                              SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  'Pengajuan peminjaman alat ini telah ditolak oleh Guru.',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.accentRed,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
@@ -319,14 +131,14 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Peminjaman', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryTeal))
+          ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryBrown))
           : RefreshIndicator(
-              color: AppTheme.primaryTeal,
+              color: AppTheme.primaryBrown,
               onRefresh: _loadData,
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 18, 18, 50),
@@ -337,7 +149,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                     padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+                        colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
                       ),
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -369,8 +181,57 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
 
                   const SizedBox(height: 18),
 
-                  // Barang Sedang Dipinjam & Status Peminjaman
-                  _buildMyLoansSection(isDark),
+                  // Barang Sedang Dipinjam
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardColor,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('Barang Sedang Dipinjam', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppTheme.brownTint,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Text('1 Barang', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('APAR (1x)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: isDark ? Colors.white : AppTheme.textDark)),
+                                  const SizedBox(height: 2),
+                                  const Text('Batas Kembali: 3 Okt 2026', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentAmber.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Text('Menunggu', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold, color: AppTheme.accentAmber)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
                   const SizedBox(height: 18),
 
@@ -380,7 +241,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                     style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                     decoration: InputDecoration(
                       hintText: 'Cari perangkat...',
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryTeal),
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.primaryBrown),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: AppTheme.borderCream)),
@@ -404,8 +265,8 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                           selected: selected,
                           onSelected: (_) => setState(() => _selectedCategory = cat),
                           labelStyle: TextStyle(color: selected ? Colors.white : (isDark ? Colors.white : AppTheme.textDark), fontSize: 11, fontWeight: FontWeight.bold),
-                          selectedColor: AppTheme.primaryTeal,
-                          backgroundColor: isDark ? const Color(0xFF162522) : AppTheme.surfaceCream,
+                          selectedColor: AppTheme.primaryBrown,
+                          backgroundColor: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         );
                       },
@@ -448,8 +309,8 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                                 Container(
                                   width: 44,
                                   height: 44,
-                                  decoration: BoxDecoration(color: AppTheme.tealTint, borderRadius: BorderRadius.circular(12)),
-                                  child: const Icon(Icons.inventory_2_rounded, color: AppTheme.primaryTeal, size: 22),
+                                  decoration: BoxDecoration(color: AppTheme.brownTint, borderRadius: BorderRadius.circular(12)),
+                                  child: const Icon(Icons.inventory_2_rounded, color: AppTheme.primaryBrown, size: 22),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -502,7 +363,7 @@ class _BorrowingScreenState extends State<BorrowingScreen> {
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryTeal,
+                                  backgroundColor: AppTheme.primaryBrown,
                                   foregroundColor: Colors.white,
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 ),

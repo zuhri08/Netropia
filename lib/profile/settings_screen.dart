@@ -50,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppTheme.primaryTeal,
+              primary: AppTheme.primaryBrown,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
@@ -177,7 +177,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: const Text('🇮🇩', style: TextStyle(fontSize: 22)),
               title: const Text('Bahasa Indonesia'),
               trailing: localizationService.currentLanguage == 'id'
-                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryTeal)
+                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryBrown)
                   : null,
               onTap: () async {
                 await localizationService.setLanguage('id');
@@ -189,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: const Text('🇬🇧', style: TextStyle(fontSize: 22)),
               title: const Text('English'),
               trailing: localizationService.currentLanguage == 'en'
-                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryTeal)
+                  ? const Icon(Icons.check_rounded, color: AppTheme.primaryBrown)
                   : null,
               onTap: () async {
                 await localizationService.setLanguage('en');
@@ -296,7 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: AppBar(
             title: const Text('Pengaturan', style: TextStyle(fontWeight: FontWeight.bold)),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -342,7 +342,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         'Dark Mode',
                         trailing: Switch(
                           value: themeManager.isDarkMode,
-                          activeColor: AppTheme.primaryTeal,
+                          activeColor: AppTheme.primaryBrown,
                           onChanged: (val) => themeManager.toggleTheme(val),
                         ),
                       );
@@ -371,7 +371,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: _reminderTime,
                     trailing: Switch(
                       value: _isReminderEnabled,
-                      activeColor: AppTheme.primaryTeal,
+                      activeColor: AppTheme.primaryBrown,
                       onChanged: (val) async {
                         await _settingsService.setReminderEnabled(val);
                         setState(() => _isReminderEnabled = val);
@@ -453,7 +453,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSettingsItem(IconData icon, String title, {String? subtitle, Widget? trailing, Color? titleColor, VoidCallback? onTap}) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: titleColor ?? AppTheme.primaryTeal, size: 22),
+      leading: Icon(icon, color: titleColor ?? AppTheme.primaryBrown, size: 22),
       title: Text(
         title,
         style: TextStyle(

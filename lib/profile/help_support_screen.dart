@@ -105,7 +105,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               children: [
                 Icon(
                   Icons.feedback_rounded,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                 ),
                 SizedBox(width: 8),
                 Text('Kirim Masukan'),
@@ -184,7 +184,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         }
                       },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryTeal,
+                  backgroundColor: AppTheme.primaryBrown,
                   foregroundColor: Colors.white,
                 ),
                 child: isSending
@@ -226,7 +226,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
               'Bantuan',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: AppTheme.primaryTeal,
+            backgroundColor: AppTheme.primaryBrown,
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -241,7 +241,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [AppTheme.primaryTeal, AppTheme.darkTeal],
+                      colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -296,7 +296,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     hintText: 'Cari pertanyaan...',
                     prefixIcon: const Icon(
                       Icons.search_rounded,
-                      color: AppTheme.primaryTeal,
+                      color: AppTheme.primaryBrown,
                     ),
                     filled: true,
                     fillColor: Theme.of(context).cardColor,
@@ -340,13 +340,13 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: const BoxDecoration(
-                          color: AppTheme.tealTint,
+                          color: AppTheme.brownTint,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.support_agent_rounded,
                           size: 32,
-                          color: AppTheme.primaryTeal,
+                          color: AppTheme.primaryBrown,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -376,7 +376,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                           icon: const Icon(Icons.send_rounded, size: 18),
                           label: const Text('Kirim Masukan'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primaryTeal,
+                            backgroundColor: AppTheme.primaryBrown,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -414,7 +414,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             color: isDark ? Colors.white : AppTheme.textDark,
           ),
         ),
-        iconColor: AppTheme.primaryTeal,
+        iconColor: AppTheme.primaryBrown,
         childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         children: [
           Text(

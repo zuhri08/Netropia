@@ -15,7 +15,7 @@ class PreTestScreen extends StatefulWidget {
     super.key,
     this.materiId = 'dasar_jaringan',
     this.materiTitle = 'Dasar Jaringan',
-    this.themeColor = AppTheme.primaryTeal,
+    this.themeColor = AppTheme.primaryBrown,
   });
 
   @override
@@ -273,7 +273,7 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         title: Text(
@@ -332,13 +332,13 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.tealTint,
+                      color: AppTheme.brownTint,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       widget.materiTitle.toUpperCase(),
                       style: const TextStyle(
-                        color: AppTheme.primaryTeal,
+                        color: AppTheme.primaryBrown,
                         fontSize: 10.5,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.0,
@@ -371,11 +371,11 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
                         margin: const EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppTheme.tealTint
+                              ? AppTheme.brownTint
                               : Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: isSelected ? AppTheme.primaryTeal : AppTheme.borderCream,
+                            color: isSelected ? AppTheme.primaryBrown : AppTheme.borderCream,
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
@@ -392,7 +392,7 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
                                   height: 32,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppTheme.primaryTeal : AppTheme.surfaceCream,
+                                    color: isSelected ? AppTheme.primaryBrown : AppTheme.surfaceCream,
                                     shape: BoxShape.circle,
                                   ),
                                   child: Text(
@@ -411,7 +411,7 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
                                     child: Text(
                                       options[index],
                                       style: TextStyle(
-                                        color: isSelected ? AppTheme.primaryTeal : (isDark ? Colors.white : AppTheme.textDark),
+                                        color: isSelected ? AppTheme.primaryBrown : (isDark ? Colors.white : AppTheme.textDark),
                                         fontSize: 13.5,
                                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                                       ),
@@ -441,7 +441,7 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
               child: ElevatedButton(
                 onPressed: _nextQuestion,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryTeal,
+                  backgroundColor: AppTheme.primaryBrown,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -488,7 +488,7 @@ class PreTestResultScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text('Hasil Pre-Test - $materiTitle', style: const TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: AppTheme.primaryTeal,
+        backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
       ),
@@ -508,7 +508,7 @@ class PreTestResultScreen extends StatelessWidget {
                 children: [
                   Text(
                     '$score',
-                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                    style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
                   ),
                   const Text('Skor Akhir', style: TextStyle(color: AppTheme.textMuted, fontSize: 12)),
                   const SizedBox(height: 20),

@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(22),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.primaryTeal.withOpacity(0.18),
+                        color: AppTheme.primaryBrown.withOpacity(0.18),
                         blurRadius: 18,
                         offset: const Offset(0, 6),
                       ),
@@ -253,7 +253,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
-                  color: AppTheme.primaryTeal,
+                  color: AppTheme.primaryBrown,
                 ),
               ),
               const SizedBox(height: 2),
@@ -291,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Container(
                       padding: const EdgeInsets.all(3),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        color: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRoleMode == 'siswa'
-                                      ? AppTheme.primaryTeal
+                                      ? AppTheme.primaryBrown
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(11),
                                 ),
@@ -350,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                                 decoration: BoxDecoration(
                                   color: selectedRoleMode == 'guru'
-                                      ? AppTheme.primaryTeal
+                                      ? AppTheme.primaryBrown
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(11),
                                 ),
@@ -401,9 +401,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan email',
-                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primaryBrown, size: 20),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
@@ -428,7 +428,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark),
                       decoration: InputDecoration(
                         hintText: 'Masukkan password',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryTeal, size: 20),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppTheme.primaryBrown, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(
                             obscurePassword
@@ -444,7 +444,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
                         filled: true,
-                        fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
+                        fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14),
                           borderSide: BorderSide.none,
@@ -466,7 +466,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           'Lupa Password?',
                           style: TextStyle(
-                            color: AppTheme.primaryTeal,
+                            color: AppTheme.primaryBrown,
                             fontWeight: FontWeight.bold,
                             fontSize: 12.5,
                           ),
@@ -483,7 +483,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           height: 22,
                           child: Checkbox(
                             value: rememberMe,
-                            activeColor: AppTheme.primaryTeal,
+                            activeColor: AppTheme.primaryBrown,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
@@ -510,7 +510,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: ElevatedButton.icon(
                         onPressed: isLoading ? null : login,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryTeal,
+                          backgroundColor: AppTheme.primaryBrown,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -562,7 +562,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Daftar sekarang',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryTeal,
+                        color: AppTheme.primaryBrown,
                         fontSize: 13,
                       ),
                     ),
