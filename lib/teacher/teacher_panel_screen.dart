@@ -80,6 +80,12 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
     'X TKJ 1',
     'X TKJ 2',
     'X TKJ 3',
+    'XI TKJ 1',
+    'XI TKJ 2',
+    'XI TKJ 3',
+    'XII TKJ 1',
+    'XII TKJ 2',
+    'XII TKJ 3',
   ];
 
   bool _isSubmitting = false;
@@ -1660,7 +1666,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
         margin: const pw.EdgeInsets.all(24),
         build: (pw.Context context) {
           return pw.Column(
-            cross: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // HEADER KOP LAPORAN
               pw.Container(
@@ -1673,7 +1679,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text(
                           'REKAPITULASI NILAI & CAPAIAN HASIL BELAJAR SISWA',
@@ -1687,7 +1693,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                       ],
                     ),
                     pw.Column(
-                      cross: pw.CrossAxisAlignment.end,
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
                       children: [
                         pw.Text('Kelas: $_selectedGradebookClass', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
                         pw.Text('Cetak: $dateStr', style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.white)),

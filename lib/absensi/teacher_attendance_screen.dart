@@ -34,6 +34,12 @@ class _TeacherAttendanceScreenState
     'X TKJ 1',
     'X TKJ 2',
     'X TKJ 3',
+    'XI TKJ 1',
+    'XI TKJ 2',
+    'XI TKJ 3',
+    'XII TKJ 1',
+    'XII TKJ 2',
+    'XII TKJ 3',
   ];
 
   String? _selectedClass;
@@ -731,9 +737,6 @@ class _TeacherAttendanceScreenState
           // QR CODE
           _buildQrCode(),
 
-          // DAFTAR KEHADIRAN SISWA REALTIME
-          _buildActiveSessionStudents(),
-
           const SizedBox(height: 24),
 
           // TUTUP ABSENSI
@@ -767,170 +770,6 @@ class _TeacherAttendanceScreenState
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActiveSessionStudents() {
-    if (_activeSessionId == null) return const SizedBox();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 24),
-        const Row(
-          children: [
-            Icon(Icons.people_alt_rounded, color: AppTheme.primaryTeal),
-            SizedBox(width: 8),
-            Text(
-              'Daftar Kehadiran Siswa Realtime',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Daftar siswa yang telah berhasil melakukan presensi pada sesi ini.',
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        StreamBuilder<QuerySnapshot>(
-          stream: _firestore
-              .collection('attendance_records')
-              .where('sessionId', isEqualTo: _activeSessionId)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final docs = snapshot.data?.docs ?? [];
-            if (docs.isEmpty) {
-              return Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Belum ada siswa yang melakukan presensi pada sesi ini.',
-                    style: TextStyle(color: Colors.grey, fontSize: 13),
-                  ),
-                ),
-              );
-            }
-
-            return Column(
-              children: docs.map((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                final namaSiswa = data['nama']?.toString() ?? 'Siswa';
-                final nisnSiswa = data['nisn']?.toString() ?? '-';
-                final kelasSiswa = data['kelas']?.toString() ?? '-';
-                final formatWaktu = data['formatWaktuLengkap']?.toString();
-                final waktuVal = data['waktu'];
-
-                String fullTimeStr = formatWaktu ?? '';
-                if (fullTimeStr.isEmpty && waktuVal is Timestamp) {
-                  final dt = waktuVal.toDate();
-                  final days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-                  final months = [
-                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-                  ];
-                  final hari = days[dt.weekday - 1];
-                  final tgl = dt.day;
-                  final bln = months[dt.month - 1];
-                  final thn = dt.year;
-                  final jam = dt.hour.toString().padLeft(2, '0');
-                  final mnt = dt.minute.toString().padLeft(2, '0');
-                  final det = dt.second.toString().padLeft(2, '0');
-                  fullTimeStr = '$hari, $tgl $bln $thn - $jam:$mnt:$det WIB';
-                }
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: AppTheme.brownTint,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.person_rounded, color: AppTheme.primaryTeal, size: 22),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              namaSiswa,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.5,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'NISN: $nisnSiswa • Kelas: $kelasSiswa',
-                              style: const TextStyle(fontSize: 11.5, color: Colors.grey),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time_rounded, size: 13, color: AppTheme.primaryTeal),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    fullTimeStr.isEmpty ? 'Baru saja' : fullTimeStr,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryTeal,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'HADIR',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
-      ],
     );
   }
 

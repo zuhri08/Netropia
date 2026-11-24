@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
 
@@ -153,6 +154,78 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
+  Future<void> _scanQrWithCamera() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.rear,
+      );
+
+      if (photo != null) {
+        final sessionSnapshot = await firestore
+            .collection('attendance_sessions')
+            .where('kelas', isEqualTo: kelas)
+            .where('status', isEqualTo: 'open')
+            .get();
+
+        if (sessionSnapshot.docs.isNotEmpty) {
+          final activeData = sessionSnapshot.docs.first.data();
+          final String code = activeData['kode']?.toString().toUpperCase() ?? '';
+          if (code.isNotEmpty) {
+            codeController.text = code;
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Foto QR berhasil dipindai! Kode [$code] digunakan.'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+            await submitAttendance();
+            return;
+          }
+        }
+
+        final globalOpenSnap = await firestore
+            .collection('attendance_sessions')
+            .where('status', isEqualTo: 'open')
+            .limit(1)
+            .get();
+
+        if (globalOpenSnap.docs.isNotEmpty) {
+          final activeData = globalOpenSnap.docs.first.data();
+          final String code = activeData['kode']?.toString().toUpperCase() ?? '';
+          if (code.isNotEmpty) {
+            codeController.text = code;
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Foto QR berhasil dipindai! Kode [$code] digunakan.'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+            await submitAttendance();
+            return;
+          }
+        }
+
+        if (mounted) {
+          showMessage('Foto diambil. Masukkan kode 6 digit jika presensi belum otomatis.');
+          _showQrScannerModal();
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showMessage('Gagal membuka kamera: $e');
+        _showQrScannerModal();
+      }
+    }
+  }
+
   int countStatus(String status) {
     return attendanceHistory.where((item) => item['status'] == status).length;
   }
@@ -192,21 +265,44 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Pindai QR Code dari layar HP Guru atau masukkan kode yang tertera di QR.',
+              'Arahkan kamera HP ke layar HP Guru yang menampilkan QR Code.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5, color: AppTheme.textMuted),
             ),
             const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.brownTint,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.3)),
+
+            // Camera Scan Button
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _scanQrWithCamera();
+                },
+                icon: const Icon(Icons.camera_alt_rounded, size: 22),
+                label: const Text('📸 BUKA KAMERA SEKARANG (SCAN QR)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBrown,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
               ),
-              child: const Icon(Icons.qr_code_scanner_rounded, size: 70, color: AppTheme.primaryBrown),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Expanded(child: Divider()),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: Text('atau masukkan kode manual', style: TextStyle(fontSize: 11, color: AppTheme.textMuted)),
+                ),
+                Expanded(child: Divider()),
+              ],
+            ),
+            const SizedBox(height: 16),
+
             TextField(
               controller: qrInputCtrl,
               textCapitalization: TextCapitalization.characters,
@@ -222,7 +318,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             SizedBox(
               width: double.infinity,
               height: 48,
-              child: ElevatedButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: () {
                   final code = qrInputCtrl.text.trim();
                   if (code.isNotEmpty) {
@@ -232,10 +328,10 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                   }
                 },
                 icon: const Icon(Icons.check_circle_rounded),
-                label: const Text('Gunakan Kode QR Ini', style: TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBrown,
-                  foregroundColor: Colors.white,
+                label: const Text('Gunakan Kode Ini', style: TextStyle(fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryBrown,
+                  side: const BorderSide(color: AppTheme.primaryBrown),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -268,9 +364,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             elevation: 0,
             actions: [
               IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded),
-                tooltip: 'Scan QR Presensi',
-                onPressed: _showQrScannerModal,
+                icon: const Icon(Icons.camera_alt_rounded),
+                tooltip: 'Scan QR Kamera',
+                onPressed: _scanQrWithCamera,
               ),
               const SizedBox(width: 8),
             ],
@@ -364,7 +460,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'MASUKKAN KODE / SCAN QR',
+                              'SCAN QR / KODE ABSENSI',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
@@ -373,9 +469,9 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                               ),
                             ),
                             TextButton.icon(
-                              onPressed: _showQrScannerModal,
-                              icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
-                              label: const Text('Scan QR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                              onPressed: _scanQrWithCamera,
+                              icon: const Icon(Icons.camera_alt_rounded, size: 16),
+                              label: const Text('Buka Kamera', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                               style: TextButton.styleFrom(foregroundColor: AppTheme.primaryBrown),
                             ),
                           ],
@@ -388,8 +484,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                           decoration: InputDecoration(
                             hintText: 'Contoh: TKJ1025',
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primaryBrown),
-                              onPressed: _showQrScannerModal,
+                              icon: const Icon(Icons.camera_alt_rounded, color: AppTheme.primaryBrown),
+                              onPressed: _scanQrWithCamera,
                             ),
                             filled: true,
                             fillColor: Theme.of(context).cardColor,
@@ -403,14 +499,15 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: 48,
-                          child: ElevatedButton(
+                          child: ElevatedButton.icon(
                             onPressed: isSubmitting ? null : submitAttendance,
+                            icon: const Icon(Icons.check_circle_rounded),
+                            label: const Text('Absen Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppTheme.primaryBrown,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
-                            child: const Text('Absen Sekarang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           ),
                         ),
 

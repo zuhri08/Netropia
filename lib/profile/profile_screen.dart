@@ -9,7 +9,7 @@ import '../progres/progres_screen.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   final String username;
   final String role;
 
@@ -20,109 +20,44 @@ class ProfileScreen extends StatefulWidget {
   });
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  Future<void> _refreshProfile() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.reload();
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (_) {}
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Profil')),
-        body: const Center(child: Text('Silakan login terlebih dahulu.')),
-      );
-    }
-
     return ListenableBuilder(
       listenable: localizationService,
       builder: (context, child) {
+        final user = FirebaseAuth.instance.currentUser;
+        final email = user?.email ?? "No Email";
+
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          body: StreamBuilder<DocumentSnapshot>(
-            stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
-            builder: (context, snapshot) {
-              final userData = snapshot.data?.data() as Map<String, dynamic>? ?? {};
-              
-              final String nameFromDb = userData['nama']?.toString() ?? '';
-              final String displayName = nameFromDb.isNotEmpty
-                  ? nameFromDb
-                  : (user.displayName?.isNotEmpty == true ? user.displayName! : widget.username);
-
-              final String roleFromDb = userData['role']?.toString() ?? '';
-              final String displayRole = roleFromDb.isNotEmpty ? roleFromDb : widget.role;
-
-              final String displayEmail = user.email ?? "No Email";
-              final String? photoUrl = (userData['photoUrl']?.toString().isNotEmpty == true)
-                  ? userData['photoUrl']?.toString()
-                  : user.photoURL;
-
-              final String kelas = userData['kelas']?.toString() ?? '';
-              final String nisn = userData['nisn']?.toString() ?? '';
-
-              return RefreshIndicator(
-                color: AppTheme.primaryTeal,
-                onRefresh: _refreshProfile,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildHeader(context, email),
+                Padding(
+                  padding: const EdgeInsets.all(18),
                   child: Column(
                     children: [
-                      _buildHeader(
-                        context: context,
-                        displayName: displayName,
-                        email: displayEmail,
-                        role: displayRole,
-                        photoUrl: photoUrl,
-                        kelas: kelas,
-                        nisn: nisn,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          children: [
-                            _buildStatsSection(context, userData),
-                            const SizedBox(height: 22),
-                            _buildTeacherAwardsSection(context, userData),
-                            _buildAchievementsSection(context),
-                            const SizedBox(height: 24),
-                            _buildMenuSection(context, displayName, displayRole),
-                            const SizedBox(height: 100),
-                          ],
-                        ),
-                      ),
+                      _buildStatsSection(context),
+                      const SizedBox(height: 22),
+                      _buildTeacherAwardsSection(context),
+                      _buildAchievementsSection(context),
+                      const SizedBox(height: 24),
+                      _buildMenuSection(context),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
-              );
-            },
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildHeader({
-    required BuildContext context,
-    required String displayName,
-    required String email,
-    required String role,
-    required String? photoUrl,
-    required String kelas,
-    required String nisn,
-  }) {
+  Widget _buildHeader(BuildContext context, String email) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Container(
       width: double.infinity,
@@ -130,8 +65,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF162522), const Color(0xFF0E1A17)]
-              : [AppTheme.primaryTeal, AppTheme.darkTeal],
+              ? [const Color(0xFF241C17), const Color(0xFF18120F)]
+              : [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -150,13 +85,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   color: Colors.white24,
                   shape: BoxShape.circle,
                 ),
-                child: CircleAvatar(
-                  radius: 45,
-                  backgroundColor: Colors.white,
-                  backgroundImage: photoUrl != null && photoUrl.isNotEmpty ? NetworkImage(photoUrl) : null,
-                  child: (photoUrl == null || photoUrl.isEmpty)
-                      ? const Icon(Icons.person_rounded, size: 55, color: AppTheme.primaryTeal)
-                      : null,
+                child: Builder(
+                  builder: (context) {
+                    final String? photoUrl = user?.photoURL;
+                    return CircleAvatar(
+                      radius: 45,
+                      backgroundColor: Colors.white,
+                      backgroundImage: photoUrl != null ? NetworkImage(photoUrl) : null,
+                      child: photoUrl == null
+                          ? const Icon(Icons.person_rounded, size: 55, color: AppTheme.primaryBrown)
+                          : null,
+                    );
+                  },
                 ),
               ),
               Positioned(
@@ -175,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            displayName,
+            username,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -185,26 +125,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             email,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.75),
+              color: Colors.white.withOpacity(0.75),
               fontSize: 13.5,
             ),
           ),
-          if (kelas.isNotEmpty || nisn.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${nisn.isNotEmpty ? "$nisn · " : ""}$kelas',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -223,13 +152,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EditProfileScreen(username: displayName, role: role),
+                  builder: (context) => EditProfileScreen(username: username, role: role),
                 ),
-              ).then((_) => _refreshProfile());
+              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor: AppTheme.primaryTeal,
+              foregroundColor: AppTheme.darkBrown,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
@@ -244,30 +173,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildStatsSection(BuildContext context, Map<String, dynamic> userData) {
+  Widget _buildStatsSection(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final int xp = userData['xp'] ?? 850;
-    final int completedLessons = userData['completedLessonsCount'] ?? 12;
-
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildStatItem('Materi', '$completedLessons'),
+          _buildStatItem('Materi', '12'),
           _buildStatDivider(isDark),
           _buildStatItem('Lab', '8'),
           _buildStatDivider(isDark),
           _buildStatItem('Jam', '14h'),
           _buildStatDivider(isDark),
-          _buildStatItem('XP', '$xp'),
+          _buildStatItem('XP', '850'),
         ],
       ),
     );
@@ -281,7 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryTeal,
+            color: AppTheme.primaryBrown,
           ),
         ),
         const SizedBox(height: 2),
@@ -322,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           scrollDirection: Axis.horizontal,
           child: Row(
             children: [
-              _buildBadge(context, "Network Beginner", Icons.lan_rounded, AppTheme.primaryTeal, true),
+              _buildBadge(context, "Network Beginner", Icons.lan_rounded, AppTheme.primaryBrown, true),
               _buildBadge(context, "First Lesson", Icons.school_rounded, Colors.green, true),
               _buildBadge(context, "Subnet Master", Icons.calculate_rounded, AppTheme.accentAmber, false),
               _buildBadge(context, "Lab Explorer", Icons.science_rounded, Colors.purple, true),
@@ -342,11 +268,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: unlocked
-            ? AppTheme.tealTint
-            : (isDark ? const Color(0xFF162522) : AppTheme.surfaceCream),
+            ? AppTheme.brownTint
+            : (isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: unlocked ? color.withValues(alpha: 0.3) : AppTheme.borderCream,
+          color: unlocked ? color.withOpacity(0.3) : AppTheme.borderCream,
         ),
       ),
       child: Column(
@@ -367,23 +293,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuSection(BuildContext context, String displayName, String displayRole) {
+  Widget _buildMenuSection(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
         ),
       ),
       child: Column(
         children: [
           _buildMenuItem(context, Icons.person_outline_rounded, localizationService.translate('edit_profile'), () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => EditProfileScreen(username: displayName, role: displayRole)),
-            ).then((_) => _refreshProfile());
+            Navigator.push(context, MaterialPageRoute(builder: (context) => EditProfileScreen(username: username, role: role)));
           }),
           const Divider(height: 1, indent: 50),
           _buildMenuItem(context, Icons.trending_up_rounded, localizationService.translate('learning_progress'), () {
@@ -409,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildMenuItem(BuildContext context, IconData icon, String title, VoidCallback onTap) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return ListTile(
-      leading: Icon(icon, color: AppTheme.primaryTeal, size: 22),
+      leading: Icon(icon, color: AppTheme.primaryBrown, size: 22),
       title: Text(
         title,
         style: TextStyle(
@@ -423,71 +346,82 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTeacherAwardsSection(BuildContext context, Map<String, dynamic> userData) {
-    final awards = (userData['awards'] as List<dynamic>?) ?? [];
-    if (awards.isEmpty) return const SizedBox();
+  Widget _buildTeacherAwardsSection(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return const SizedBox();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 10),
-          child: Text(
-            'Apresiasi & Bintang Dari Guru ⭐',
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFFBEB),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFFFDE68A)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: awards.map((award) {
-              final badge = award['badge']?.toString() ?? '⭐ Bintang Apresiasi';
-              final guruName = award['guruName']?.toString() ?? 'Guru';
-              final catatan = award['catatan']?.toString() ?? '';
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance.collection('users').doc(user.uid).snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
+        final data = snapshot.data?.data() as Map<String, dynamic>?;
+        final awards = (data?['awards'] as List<dynamic>?) ?? [];
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.star_rounded, color: AppTheme.accentAmber, size: 26),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            badge,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: AppTheme.textDark),
+        if (awards.isEmpty) return const SizedBox();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 4, bottom: 10),
+              child: Text(
+                'Apresiasi & Bintang Dari Guru ⭐',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFFBEB),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0xFFFDE68A)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: awards.map((award) {
+                  final badge = award['badge']?.toString() ?? '⭐ Bintang Apresiasi';
+                  final guruName = award['guruName']?.toString() ?? 'Guru';
+                  final catatan = award['catatan']?.toString() ?? '';
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.star_rounded, color: AppTheme.accentAmber, size: 26),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                badge,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.5, color: AppTheme.textDark),
+                              ),
+                              Text(
+                                'Diberikan oleh: $guruName',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                              ),
+                              if (catatan.isNotEmpty) ...[
+                                const SizedBox(height: 3),
+                                Text(
+                                  '"$catatan"',
+                                  style: const TextStyle(fontSize: 11.5, fontStyle: FontStyle.italic, color: AppTheme.textDark),
+                                ),
+                              ],
+                            ],
                           ),
-                          Text(
-                            'Diberikan oleh: $guruName',
-                            style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
-                          ),
-                          if (catatan.isNotEmpty) ...[
-                            const SizedBox(height: 3),
-                            Text(
-                              '"$catatan"',
-                              style: const TextStyle(fontSize: 11.5, fontStyle: FontStyle.italic, color: AppTheme.textDark),
-                            ),
-                          ],
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        const SizedBox(height: 22),
-      ],
+                  );
+                }).toList(),
+              ),
+            ),
+            const SizedBox(height: 22),
+          ],
+        );
+      },
     );
   }
 }
