@@ -714,21 +714,110 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               isEn ? 'Teacher Management Panel' : 'Panel Kelola Guru',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            bottom: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.white,
-              indicatorWeight: 3,
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white70,
-              isScrollable: true,
-              tabs: [
-                Tab(icon: const Icon(Icons.assignment_add), text: isEn ? 'Assignments' : 'Tugas'),
-                Tab(icon: const Icon(Icons.quiz_rounded), text: isEn ? 'Quizzes' : 'Soal Kuis'),
-                Tab(icon: const Icon(Icons.note_add_rounded), text: isEn ? 'Text Material' : 'Materi Teks'),
-                Tab(icon: const Icon(Icons.video_call_rounded), text: isEn ? 'Videos & Ref' : 'Video & Referensi'),
-                Tab(icon: const Icon(Icons.campaign_rounded), text: isEn ? 'Announcements' : 'Pengumuman'),
-                Tab(icon: const Icon(Icons.assessment_rounded), text: isEn ? 'Gradebook & Feedback' : 'Rekap & Feedback'),
-              ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(56),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  indicator: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  labelColor: AppTheme.primaryBrown,
+                  unselectedLabelColor: Colors.white70,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  dividerColor: Colors.transparent,
+                  padding: const EdgeInsets.all(4),
+                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
+                  tabs: [
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.assignment_add, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Assignments' : 'Tugas'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.quiz_rounded, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Quizzes' : 'Soal Kuis'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.note_add_rounded, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Text Material' : 'Materi Teks'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.video_call_rounded, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Videos & Ref' : 'Video & Referensi'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.campaign_rounded, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Announcements' : 'Pengumuman'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.assessment_rounded, size: 18),
+                            const SizedBox(width: 6),
+                            Text(isEn ? 'Gradebook' : 'Rekap & Feedback'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
           body: TabBarView(
