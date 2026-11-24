@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../theme/app_theme.dart';
 
 class ProjectWorkScreen extends StatefulWidget {
   final String projectTitle;
@@ -14,6 +19,11 @@ class ProjectWorkScreen extends StatefulWidget {
 
 class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
   int currentStep = 0;
+  bool _isSubmitting = false;
+
+  XFile? _pickedFile;
+  String? _base64File;
+  String? _fileName;
 
   final List<bool> practiceChecklist = [
     false,
@@ -56,10 +66,62 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
       icon: Icons.network_check_rounded,
     ),
     ProjectStep(
-      title: 'Membuat Refleksi',
+      title: 'Membuat Refleksi & Unggah Foto',
       icon: Icons.auto_awesome_rounded,
     ),
   ];
+
+  Future<void> _pickProjectFile() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      final base64Str = base64Encode(bytes);
+      setState(() {
+        _pickedFile = image;
+        _fileName = image.name;
+        _base64File = 'data:image/jpeg;base64,$base64Str';
+      });
+    }
+  }
+
+  Future<void> _submitProjectToFirestore() async {
+    setState(() => _isSubmitting = true);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+        final userData = userDoc.data() ?? {};
+        final namaSiswa = userData['nama']?.toString() ?? 'Siswa';
+        final kelasSiswa = userData['kelas']?.toString() ?? 'X TKJ 1';
+
+        final docRef = FirebaseFirestore.instance.collection('project_submissions').doc();
+
+        await docRef.set({
+          'id': docRef.id,
+          'projectTitle': widget.projectTitle,
+          'topologi': selectedTopology,
+          'siswaId': user.uid,
+          'siswaName': namaSiswa,
+          'kelas': kelasSiswa,
+          'problem': problemController.text.trim(),
+          'planning': planningController.text.trim(),
+          'testing': testingController.text.trim(),
+          'reflection': reflectionController.text.trim(),
+          'fileUrl': _base64File,
+          'fileName': _fileName,
+          'nilai': null,
+          'catatanGuru': null,
+          'submittedAt': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      debugPrint('Error submitting project: $e');
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -73,36 +135,30 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
   @override
   Widget build(BuildContext context) {
     final progress = (currentStep + 1) / steps.length;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.primaryTeal,
+        foregroundColor: Colors.white,
         elevation: 0,
-        surfaceTintColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: Color(0xFF263238),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text(
           'Pengerjaan Project',
           style: TextStyle(
-            color: Color(0xFF263238),
+            color: Colors.white,
             fontSize: 18,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
       body: Column(
         children: [
-          _buildProgressHeader(progress),
+          _buildProgressHeader(progress, isDark),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-              child: _buildCurrentStep(),
+              child: _buildCurrentStep(isDark),
             ),
           ),
           _buildBottomNavigation(),
@@ -111,9 +167,9 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
     );
   }
 
-  Widget _buildProgressHeader(double progress) {
+  Widget _buildProgressHeader(double progress, bool isDark) {
     return Container(
-      color: Colors.white,
+      color: Theme.of(context).cardColor,
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,10 +179,10 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
               Expanded(
                 child: Text(
                   widget.projectTitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF263238),
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : AppTheme.textDark,
                   ),
                 ),
               ),
@@ -134,8 +190,8 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 '${currentStep + 1}/${steps.length}',
                 style: const TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFFAD8B73),
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryTeal,
                 ),
               ),
             ],
@@ -146,10 +202,8 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 7,
-              backgroundColor: const Color(0xFFE5EAF0),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                Color(0xFFAD8B73),
-              ),
+              backgroundColor: AppTheme.borderCream,
+              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryTeal),
             ),
           ),
           const SizedBox(height: 8),
@@ -157,7 +211,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
             'Tahap ${currentStep + 1}: ${steps[currentStep].title}',
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF607080),
+              color: AppTheme.textMuted,
             ),
           ),
         ],
@@ -165,24 +219,24 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
     );
   }
 
-  Widget _buildCurrentStep() {
+  Widget _buildCurrentStep(bool isDark) {
     switch (currentStep) {
       case 0:
-        return _buildProblemStep();
+        return _buildProblemStep(isDark);
       case 1:
-        return _buildPlanningStep();
+        return _buildPlanningStep(isDark);
       case 2:
-        return _buildPracticeStep();
+        return _buildPracticeStep(isDark);
       case 3:
-        return _buildTestingStep();
+        return _buildTestingStep(isDark);
       case 4:
-        return _buildReflectionStep();
+        return _buildReflectionStep(isDark);
       default:
         return const SizedBox();
     }
   }
 
-  Widget _buildProblemStep() {
+  Widget _buildProblemStep(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -201,23 +255,9 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 'membangun LAN sederhana agar komputer dapat saling '
                 'berkomunikasi.',
             style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Color(0xFF54616D),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Pertanyaan Pemantik',
-          icon: Icons.help_outline_rounded,
-          child: const Text(
-            'Apa saja perangkat dan kebutuhan yang diperlukan '
-                'untuk membangun LAN sederhana?',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Color(0xFF54616D),
+              fontSize: 13.5,
+              height: 1.5,
+              color: AppTheme.textMuted,
             ),
           ),
         ),
@@ -226,13 +266,14 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           title: 'Tuliskan pemahamanmu',
           controller: problemController,
           hintText: 'Tuliskan apa yang kamu pahami dari masalah di atas...',
-          maxLines: 5,
+          maxLines: 4,
+          isDark: isDark,
         ),
       ],
     );
   }
 
-  Widget _buildPlanningStep() {
+  Widget _buildPlanningStep(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -244,9 +285,10 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
         const SizedBox(height: 16),
         _buildSectionCard(
           title: 'Pilih Topologi Jaringan',
+          isDark: isDark,
           child: DropdownButtonFormField<String>(
             value: selectedTopology,
-            decoration: _inputDecoration(),
+            decoration: _inputDecoration(isDark),
             items: topologies.map((topology) {
               return DropdownMenuItem(
                 value: topology,
@@ -263,43 +305,18 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Alat dan Bahan',
-          icon: Icons.inventory_2_outlined,
-          child: const Column(
-            children: [
-              _MaterialRow(
-                icon: Icons.computer_rounded,
-                text: 'Komputer / PC',
-              ),
-              _MaterialRow(
-                icon: Icons.hub_rounded,
-                text: 'Switch',
-              ),
-              _MaterialRow(
-                icon: Icons.cable_rounded,
-                text: 'Kabel UTP',
-              ),
-              _MaterialRow(
-                icon: Icons.settings_ethernet_rounded,
-                text: 'Konektor RJ45',
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
         _buildInputCard(
           title: 'Rancangan Jaringan',
           controller: planningController,
-          hintText:
-          'Tuliskan rancangan jaringan yang akan kamu gunakan...',
-          maxLines: 6,
+          hintText: 'Tuliskan rancangan jaringan yang akan kamu gunakan...',
+          maxLines: 5,
+          isDark: isDark,
         ),
       ],
     );
   }
 
-  Widget _buildPracticeStep() {
+  Widget _buildPracticeStep(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -314,53 +331,20 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           icon: Icons.checklist_rounded,
           child: Column(
             children: [
-              _buildChecklistItem(
-                0,
-                'Menyiapkan komputer',
-              ),
-              _buildChecklistItem(
-                1,
-                'Menyiapkan switch',
-              ),
-              _buildChecklistItem(
-                2,
-                'Menyiapkan kabel UTP',
-              ),
-              _buildChecklistItem(
-                3,
-                'Menghubungkan komputer ke switch',
-              ),
-              _buildChecklistItem(
-                4,
-                'Mengatur IP Address',
-              ),
-              _buildChecklistItem(
-                5,
-                'Memastikan koneksi jaringan',
-              ),
+              _buildChecklistItem(0, 'Menyiapkan komputer'),
+              _buildChecklistItem(1, 'Menyiapkan switch'),
+              _buildChecklistItem(2, 'Menyiapkan kabel UTP'),
+              _buildChecklistItem(3, 'Menghubungkan komputer ke switch'),
+              _buildChecklistItem(4, 'Mengatur IP Address'),
+              _buildChecklistItem(5, 'Memastikan koneksi jaringan'),
             ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Catatan Praktik',
-          icon: Icons.notes_rounded,
-          child: const Text(
-            'Lakukan praktik sesuai prosedur keselamatan kerja. '
-                'Pastikan setiap perangkat terhubung dengan benar '
-                'sebelum melakukan pengujian.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Color(0xFF54616D),
-            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTestingStep() {
+  Widget _buildTestingStep(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -370,91 +354,96 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           subtitle: 'Periksa apakah jaringan yang dibuat sudah berjalan.',
         ),
         const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Pengujian',
-          icon: Icons.rule_rounded,
-          child: const Column(
-            children: [
-              _TestItem(
-                title: 'PC 1 → PC 2',
-                description: 'Periksa koneksi menggunakan ping.',
-              ),
-              _TestItem(
-                title: 'PC 2 → PC 3',
-                description: 'Pastikan perangkat dapat berkomunikasi.',
-              ),
-              _TestItem(
-                title: 'PC → Gateway',
-                description: 'Pastikan konfigurasi IP sudah benar.',
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
         _buildInputCard(
-          title: 'Hasil Pengujian',
+          title: 'Hasil Pengujian & Kendala',
           controller: testingController,
-          hintText:
-          'Tuliskan hasil pengujian, kendala yang ditemukan, '
-              'dan bagaimana kamu mengatasinya...',
-          maxLines: 6,
+          hintText: 'Tuliskan hasil pengujian, kendala yang ditemukan, dan solusimu...',
+          maxLines: 5,
+          isDark: isDark,
         ),
       ],
     );
   }
 
-  Widget _buildReflectionStep() {
+  Widget _buildReflectionStep(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildStepHeader(
           icon: Icons.auto_awesome_rounded,
-          title: 'Membuat Refleksi',
-          subtitle: 'Evaluasi pengalamanmu setelah menyelesaikan project.',
-        ),
-        const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Refleksi',
-          icon: Icons.psychology_outlined,
-          child: const Text(
-            'Jawab dengan jujur berdasarkan pengalamanmu selama '
-                'mengerjakan project.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Color(0xFF54616D),
-            ),
-          ),
+          title: 'Refleksi & Unggah Foto Bukti',
+          subtitle: 'Evaluasi pengalamanmu dan lampirkan foto dokumentasi project.',
         ),
         const SizedBox(height: 16),
         _buildInputCard(
-          title: 'Apa yang kamu pelajari?',
+          title: 'Apa yang kamu pelajari dari project ini?',
           controller: reflectionController,
-          hintText: 'Tuliskan pengetahuan atau keterampilan baru...',
+          hintText: 'Tuliskan pengetahuan atau keterampilan baru yang kamu dapatkan...',
           maxLines: 4,
+          isDark: isDark,
         ),
         const SizedBox(height: 16),
-        _buildInfoCard(
-          title: 'Pertanyaan Refleksi',
-          icon: Icons.question_answer_outlined,
-          child: const Column(
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _ReflectionQuestion(
-                number: '1',
-                text: 'Bagian mana yang paling mudah kamu kerjakan?',
-              ),
-              _ReflectionQuestion(
-                number: '2',
-                text: 'Bagian mana yang paling sulit?',
-              ),
-              _ReflectionQuestion(
-                number: '3',
-                text: 'Bagaimana kamu mengatasi kesulitan tersebut?',
-              ),
-              _ReflectionQuestion(
-                number: '4',
-                text: 'Apa yang akan kamu lakukan lebih baik pada project berikutnya?',
+              const Text('UNGGAH FOTO HASIL PROJECT / BUKTI:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted)),
+              const SizedBox(height: 10),
+              if (_base64File != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.tealTint,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.primaryTeal.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.image_rounded, color: AppTheme.primaryTeal, size: 24),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _fileName ?? 'foto_project.jpg',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : AppTheme.textDark,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18, color: AppTheme.accentRed),
+                        onPressed: () => setState(() {
+                          _pickedFile = null;
+                          _base64File = null;
+                          _fileName = null;
+                        }),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: OutlinedButton.icon(
+                  onPressed: _pickProjectFile,
+                  icon: const Icon(Icons.attach_file_rounded, size: 18),
+                  label: Text(_base64File == null ? 'Unggah Foto Bukti Project' : 'Ganti Foto Bukti'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primaryTeal,
+                    side: const BorderSide(color: AppTheme.primaryTeal),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
             ],
           ),
@@ -472,22 +461,22 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFEAF2FF),
+        color: AppTheme.tealTint,
         borderRadius: BorderRadius.circular(18),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 46,
-            height: 46,
+            width: 44,
+            height: 44,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.task_alt_rounded,
-              color: Color(0xFFAD8B73),
+              color: AppTheme.primaryTeal,
             ),
           ),
           const SizedBox(width: 14),
@@ -498,18 +487,18 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF263238),
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textDark,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.45,
-                    color: Color(0xFF607080),
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: AppTheme.textMuted,
                   ),
                 ),
               ],
@@ -529,10 +518,10 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFE6EAF0),
+          color: AppTheme.borderCream,
         ),
       ),
       child: Column(
@@ -544,13 +533,13 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEAF2FF),
+                  color: AppTheme.tealTint,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   icon,
                   size: 19,
-                  color: const Color(0xFFAD8B73),
+                  color: AppTheme.primaryTeal,
                 ),
               ),
               const SizedBox(width: 10),
@@ -559,8 +548,7 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                   title,
                   style: const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF263238),
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -576,15 +564,16 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
   Widget _buildSectionCard({
     required String title,
     required Widget child,
+    required bool isDark,
   }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFE6EAF0),
+          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
         ),
       ),
       child: Column(
@@ -592,10 +581,10 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF263238),
+              fontWeight: FontWeight.bold,
+              color: isDark ? Colors.white : AppTheme.textDark,
             ),
           ),
           const SizedBox(height: 12),
@@ -609,50 +598,38 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
     required String title,
     required TextEditingController controller,
     required String hintText,
+    required bool isDark,
     int maxLines = 4,
   }) {
     return _buildSectionCard(
       title: title,
+      isDark: isDark,
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         textInputAction: TextInputAction.newline,
-        decoration: _inputDecoration().copyWith(
+        style: TextStyle(color: isDark ? Colors.white : AppTheme.textDark, fontSize: 13),
+        decoration: _inputDecoration(isDark).copyWith(
           hintText: hintText,
         ),
       ),
     );
   }
 
-  InputDecoration _inputDecoration() {
+  InputDecoration _inputDecoration(bool isDark) {
     return InputDecoration(
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
+      fillColor: isDark ? const Color(0xFF1F322E) : AppTheme.surfaceCream,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 14,
         vertical: 14,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E5EB),
-        ),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xFFE0E5EB),
-        ),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(
-          color: Color(0xFFAD8B73),
-          width: 1.5,
-        ),
+        borderSide: BorderSide.none,
       ),
       hintStyle: const TextStyle(
-        color: Color(0xFF9AA5B1),
+        color: AppTheme.textMuted,
         fontSize: 13,
       ),
     );
@@ -667,12 +644,12 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
         });
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
           children: [
             Checkbox(
               value: practiceChecklist[index],
-              activeColor: const Color(0xFFAD8B73),
+              activeColor: AppTheme.primaryTeal,
               onChanged: (value) {
                 setState(() {
                   practiceChecklist[index] = value ?? false;
@@ -684,13 +661,8 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
-                  color: practiceChecklist[index]
-                      ? const Color(0xFF7A8794)
-                      : const Color(0xFF37474F),
-                  decoration: practiceChecklist[index]
-                      ? TextDecoration.lineThrough
-                      : TextDecoration.none,
+                  fontSize: 13,
+                  decoration: practiceChecklist[index] ? TextDecoration.lineThrough : TextDecoration.none,
                 ),
               ),
             ),
@@ -706,10 +678,10 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
+        color: Theme.of(context).cardColor,
+        border: const Border(
           top: BorderSide(
-            color: Colors.grey.shade200,
+            color: AppTheme.borderCream,
           ),
         ),
       ),
@@ -724,19 +696,18 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
                   });
                 },
                 style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 50),
+                  minimumSize: const Size(0, 48),
                   side: const BorderSide(
-                    color: Color(0xFFD5DCE5),
+                    color: AppTheme.borderCream,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
                   'Kembali',
                   style: TextStyle(
-                    color: Color(0xFF455A64),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -745,22 +716,24 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
           Expanded(
             flex: 2,
             child: ElevatedButton(
-              onPressed: _nextStep,
+              onPressed: _isSubmitting ? null : _nextStep,
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(0, 50),
-                backgroundColor: const Color(0xFFAD8B73),
+                minimumSize: const Size(0, 48),
+                backgroundColor: AppTheme.primaryTeal,
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: Text(
-                isLastStep ? 'Selesaikan Project' : 'Simpan & Lanjut',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              child: _isSubmitting
+                  ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : Text(
+                      isLastStep ? 'Selesaikan & Kumpulkan' : 'Simpan & Lanjut',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -784,28 +757,33 @@ class _ProjectWorkScreenState extends State<ProjectWorkScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Project Selesai'),
+          title: const Text('Kumpulkan Project?'),
           content: const Text(
-            'Kamu telah menyelesaikan seluruh tahapan project. '
-            'Jangan lupa periksa kembali hasil pekerjaan dan refleksimu.',
+            'Kamu akan mengumpulkan seluruh tahapan project beserta file/foto bukti ke Dasbor Guru.',
           ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Tutup'),
+              child: const Text('Batal'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
-                Navigator.pop(context, true);
+                await _submitProjectToFirestore();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Project berhasil dikumpulkan ke Dasbor Guru!'), behavior: SnackBarBehavior.floating),
+                  );
+                  Navigator.pop(context, true);
+                }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFAD8B73),
+                backgroundColor: AppTheme.primaryTeal,
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Selesai'),
+              child: const Text('Kumpulkan Ke Guru'),
             ),
           ],
         );
@@ -822,139 +800,4 @@ class ProjectStep {
     required this.title,
     required this.icon,
   });
-}
-
-class _MaterialRow extends StatelessWidget {
-  final IconData icon;
-  final String text;
-
-  const _MaterialRow({
-    required this.icon,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: const Color(0xFFAD8B73),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF54616D),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TestItem extends StatelessWidget {
-  final String title;
-  final String description;
-
-  const _TestItem({
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 9),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(
-            Icons.check_circle_outline_rounded,
-            color: Color(0xFFAD8B73),
-            size: 21,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF37474F),
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF78909C),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReflectionQuestion extends StatelessWidget {
-  final String number;
-  final String text;
-
-  const _ReflectionQuestion({
-    required this.number,
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 25,
-            height: 25,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEAF2FF),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              number,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFAD8B73),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 13,
-                height: 1.4,
-                color: Color(0xFF54616D),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class K3MateriScreen extends StatefulWidget {
   final int index;
@@ -14,8 +15,8 @@ class K3MateriScreen extends StatefulWidget {
 }
 
 class _K3MateriScreenState extends State<K3MateriScreen> {
-  static const Color _primary = Color(0xFFAD8B73);
-  static const Color _background = Color(0xFFF5F7FA);
+  static const Color _primary = AppTheme.primaryTeal;
+  static const Color _background = AppTheme.backgroundCream;
 
   late final PageController _pageController;
   int _currentPage = 0;
@@ -410,8 +411,8 @@ class _K3MateriScreenState extends State<K3MateriScreen> {
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF263238),
+        backgroundColor: AppTheme.primaryTeal,
+        foregroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'K3LH',
@@ -428,13 +429,13 @@ class _K3MateriScreenState extends State<K3MateriScreen> {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFF4EDE8),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(9),
             ),
             child: Text(
               '${(_currentPage + 1).toString().padLeft(2, '0')} / ${_pages.length.toString().padLeft(2, '0')}',
               style: const TextStyle(
-                color: _primary,
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),

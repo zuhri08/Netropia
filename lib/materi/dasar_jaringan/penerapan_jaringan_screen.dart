@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
 
 class PenerapanJaringanScreen extends StatelessWidget {
   final VoidCallback? onNext;
@@ -8,20 +9,20 @@ class PenerapanJaringanScreen extends StatelessWidget {
     this.onNext,
   });
 
-  static const Color primaryBlue = Color(0xFFAD8B73);
-  static const Color darkBlue = Color(0xFF123B7A);
-  static const Color lightBlue = Color(0xFFF5EBE6);
-  static const Color textDark = Color(0xFF263238);
-  static const Color textGrey = Color(0xFF607D8B);
-  static const Color borderGrey = Color(0xFFDCE3EA);
+  static const Color primaryBlue = AppTheme.primaryTeal;
+  static const Color darkBlue = AppTheme.darkTeal;
+  static const Color lightBlue = AppTheme.tealTint;
+  static const Color textDark = AppTheme.textDark;
+  static const Color textGrey = AppTheme.textMuted;
+  static const Color borderGrey = AppTheme.borderCream;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FB),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: textDark,
+        backgroundColor: AppTheme.primaryTeal,
+        foregroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -43,26 +44,19 @@ class PenerapanJaringanScreen extends StatelessWidget {
               vertical: 6,
             ),
             decoration: BoxDecoration(
-              color: lightBlue,
+              color: Colors.white.withOpacity(0.18),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Text(
-              '08 / 08',
+              '06 / 08',
               style: TextStyle(
-                color: primaryBlue,
+                color: Colors.white,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(3),
-          child: Container(
-            height: 3,
-            color: primaryBlue,
-          ),
-        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

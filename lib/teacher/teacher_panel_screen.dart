@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -431,74 +433,6 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
   }
 
   // =========================================================
-  // EXPORT LAPORAN PDF REKAP SISWA
-  // =========================================================
-  Future<void> _exportGradebookPdf(String selectedClass, List<QueryDocumentSnapshot> studentDocs) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(
-      pw.Page(
-        pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Header(
-                level: 0,
-                child: pw.Row(
-                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                  children: [
-                    pw.Text('REKAPITULASI DATA SISWA TKJ', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                    pw.Text('NETROPIA PLATFORM', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold, color: PdfColors.brown)),
-                  ],
-                ),
-              ),
-              pw.SizedBox(height: 10),
-              pw.Text('Kelas Target: $selectedClass', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
-              pw.Text('Tanggal Cetak: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}', style: const pw.TextStyle(fontSize: 10)),
-              pw.SizedBox(height: 16),
-              pw.TableHelper.fromTextArray(
-                headers: ['No', 'Nama Siswa', 'NISN', 'Kelas', 'Email'],
-                data: List.generate(studentDocs.length, (index) {
-                  final data = studentDocs[index].data() as Map<String, dynamic>;
-                  return [
-                    '${index + 1}',
-                    data['nama'] ?? 'Siswa',
-                    data['nisn'] ?? '-',
-                    data['kelas'] ?? selectedClass,
-                    data['email'] ?? '-',
-                  ];
-                }),
-                border: pw.TableBorder.all(),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-                headerDecoration: const pw.BoxDecoration(color: PdfColors.brown),
-                cellAlignment: pw.Alignment.centerLeft,
-              ),
-              pw.SizedBox(height: 30),
-              pw.Align(
-                alignment: pw.Alignment.centerRight,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  children: [
-                    pw.Text('Guru / Tenaga Pendidik TKJ,', style: const pw.TextStyle(fontSize: 11)),
-                    pw.SizedBox(height: 40),
-                    pw.Text('(_______________________)', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 11)),
-                  ],
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Rekap_Siswa_$selectedClass.pdf',
-    );
-  }
-
-  // =========================================================
   // GURU BERI APRESIASI / LENCANA KEPADA SISWA
   // =========================================================
   void _showAwardBadgeDialog(String siswaUid, String namaSiswa) {
@@ -651,6 +585,15 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                         final nilaiController = TextEditingController(text: nilai?.toString() ?? '');
                         final catatanController = TextEditingController(text: catatanGuru);
 
+                        final fileUrl = data['fileUrl']?.toString();
+                        Uint8List? imageBytes;
+                        if (fileUrl != null && fileUrl.contains('data:image')) {
+                          try {
+                            final base64String = fileUrl.split(',').last;
+                            imageBytes = base64Decode(base64String);
+                          } catch (_) {}
+                        }
+
                         return Card(
                           margin: const EdgeInsets.only(bottom: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -689,6 +632,20 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                                 ),
                                 const SizedBox(height: 8),
                                 Text('Jawaban Siswa:\n"$jawaban"', style: const TextStyle(fontSize: 13, height: 1.4)),
+                                if (imageBytes != null) ...[
+                                  const SizedBox(height: 10),
+                                  const Text('Foto Bukti Jawaban:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                                  const SizedBox(height: 6),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.memory(
+                                      imageBytes,
+                                      height: 160,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 12),
                                 Row(
                                   children: [
@@ -1594,10 +1551,22 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
   }
 
   // =========================================================
-  // TAB 6: REFLEKSI & FEEDBACK SISWA + EXPORT PDF
+  // TAB 6: REFLEKSI & FEEDBACK SISWA + EXPORT PDF + DETEKSI KECURANGAN
   // =========================================================
   Future<void> _exportGradebookToPdf(List<QueryDocumentSnapshot> students) async {
     final pdf = pw.Document();
+
+    final quizSnap = await _firestore
+        .collection('quiz_results')
+        .where('kelas', isEqualTo: _selectedGradebookClass)
+        .get();
+
+    final quizMap = <String, Map<String, dynamic>>{};
+    for (final doc in quizSnap.docs) {
+      final d = doc.data();
+      final uid = d['siswaId']?.toString() ?? doc.id;
+      quizMap[uid] = d;
+    }
 
     pdf.addPage(
       pw.Page(
@@ -1611,23 +1580,32 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text('REKAP NILAI & KEHADIRAN SISWA NETROPIA', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    pw.Text('REKAP NILAI & DETEKSI KECURANGAN SISWA NETROPIA', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
                     pw.Text('Kelas: $_selectedGradebookClass', style: const pw.TextStyle(fontSize: 11)),
                   ],
                 ),
               ),
               pw.SizedBox(height: 10),
               pw.Table.fromTextArray(
-                headers: ['No', 'Nama Siswa', 'Email', 'Kelas', 'Role'],
+                headers: ['No', 'Nama Siswa', 'Kelas', 'Nilai Kuis', 'Status Kejujuran'],
                 data: students.asMap().entries.map((entry) {
                   final idx = entry.key + 1;
                   final data = entry.value.data() as Map<String, dynamic>;
+                  final uid = entry.value.id;
+                  final qResult = quizMap[uid];
+
+                  final scoreStr = qResult != null ? '${qResult['score'] ?? 0}' : 'Belum Tes';
+                  final cheatCount = qResult != null ? (qResult['cheatViolations'] ?? 0) : 0;
+                  final statusStr = qResult == null
+                      ? '-'
+                      : (cheatCount > 0 ? 'Curang ($cheatCount x Pindah Tab)' : 'Jujur (0 Violations)');
+
                   return [
                     '$idx',
                     data['nama'] ?? '-',
-                    data['email'] ?? '-',
                     data['kelas'] ?? '-',
-                    (data['role'] ?? 'siswa').toString().toUpperCase(),
+                    scoreStr,
+                    statusStr,
                   ];
                 }).toList(),
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
@@ -1649,7 +1627,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
 
     await Printing.layoutPdf(
       onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Rekap_Siswa_$_selectedGradebookClass.pdf',
+      name: 'Rekap_Nilai_$_selectedGradebookClass.pdf',
     );
   }
 
@@ -1715,6 +1693,8 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               ),
             ),
           ),
+          _buildProjectSubmissionsSection(),
+          _buildQuizResultsSection(),
           const SizedBox(height: 20),
           const Text(
             'Refleksi & Evaluasi Siswa',
@@ -1890,6 +1870,399 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuizResultsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Icon(Icons.quiz_rounded, color: AppTheme.primaryTeal),
+            const SizedBox(width: 8),
+            const Text(
+              'Daftar Nilai Kuis & Deteksi Kecurangan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tinjau skor kuis siswa serta laporan deteksi kecurangan (pindah aplikasi/tab saat kuis).',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('quiz_results')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada hasil kuis yang dikumpulkan oleh siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final namaSiswa = data['namaSiswa'] ?? 'Siswa';
+                final kelas = data['kelas'] ?? '-';
+                final materiTitle = data['materiTitle'] ?? 'Kuis';
+                final testType = data['testType'] ?? 'Tes';
+                final score = data['score'] ?? 0;
+                final correct = data['correct'] ?? 0;
+                final total = data['totalQuestions'] ?? 25;
+                final cheatCount = data['cheatViolations'] ?? 0;
+                final isCheated = cheatCount > 0;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: score >= 75 ? Colors.green.shade100 : Colors.orange.shade100,
+                              child: Text(
+                                '$score',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: score >= 75 ? Colors.green.shade900 : Colors.orange.shade900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$namaSiswa ($kelas)',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '$testType: $materiTitle • Benar $correct dari $total',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isCheated ? AppTheme.accentRed.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                isCheated ? '⚠️ Curang ($cheatCount x)' : '✅ Jujur',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isCheated ? AppTheme.accentRed : Colors.green.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (isCheated) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentRed.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.accentRed.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: AppTheme.accentRed, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Peringatan: Siswa terdeteksi keluar dari layar ujian sebanyak $cheatCount kali saat tes!',
+                                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.accentRed),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProjectSubmissionsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Icon(Icons.rocket_launch_rounded, color: AppTheme.primaryTeal),
+            const SizedBox(width: 8),
+            const Text(
+              'Pengumpulan Project Praktik Siswa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tinjau hasil pengerjaan project, foto bukti, serta berikan penilaian & umpan balik.',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('project_submissions')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada pengumpulan project dari siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final subDocId = docs[index].id;
+                final siswaName = data['siswaName'] ?? 'Siswa';
+                final kelas = data['kelas'] ?? '-';
+                final projectTitle = data['projectTitle'] ?? 'Project';
+                final topologi = data['topologi'] ?? '-';
+                final problem = data['problem'] ?? '-';
+                final planning = data['planning'] ?? '-';
+                final testing = data['testing'] ?? '-';
+                final reflection = data['reflection'] ?? '-';
+                final fileUrl = data['fileUrl']?.toString();
+                final fileName = data['fileName']?.toString() ?? 'Foto Bukti';
+                final nilai = data['nilai'];
+                final catatanGuru = data['catatanGuru'] ?? '';
+
+                final nilaiController = TextEditingController(text: nilai?.toString() ?? '');
+                final catatanController = TextEditingController(text: catatanGuru);
+
+                Uint8List? imageBytes;
+                if (fileUrl != null && fileUrl.contains('data:image')) {
+                  try {
+                    final base64String = fileUrl.split(',').last;
+                    imageBytes = base64Decode(base64String);
+                  } catch (_) {}
+                }
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              backgroundColor: AppTheme.primaryTeal,
+                              child: Icon(Icons.rocket_launch_rounded, size: 18, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$siswaName ($kelas)',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Project: $projectTitle • Topologi: $topologi',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (nilai != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Nilai: $nilai/100',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade900, fontSize: 12),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const Divider(height: 20),
+                        if (problem.isNotEmpty && problem != '-') ...[
+                          Text('1. Pemahaman Masalah:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$problem"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (planning.isNotEmpty && planning != '-') ...[
+                          Text('2. Perencanaan:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$planning"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (testing.isNotEmpty && testing != '-') ...[
+                          Text('3. Hasil Pengujian:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$testing"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (reflection.isNotEmpty && reflection != '-') ...[
+                          Text('4. Refleksi Siswa:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$reflection"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // Image / Attachment Preview
+                        if (imageBytes != null) ...[
+                          const Text('Foto Bukti Praktik Project:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.memory(
+                              imageBytes,
+                              height: 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ] else if (fileUrl != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.tealTint,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.attach_file_rounded, color: AppTheme.primaryTeal, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text(fileName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              child: TextField(
+                                controller: nilaiController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nilai (0-100)',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: catatanController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Catatan Guru (Opsional)',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final gradeVal = int.tryParse(nilaiController.text.trim());
+                              final noteVal = catatanController.text.trim();
+
+                              await _firestore.collection('project_submissions').doc(subDocId).update({
+                                'nilai': gradeVal,
+                                'catatanGuru': noteVal,
+                              });
+
+                              if (mounted) {
+                                _showMessage('Nilai Project berhasil disimpan untuk $siswaName!');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryTeal,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.check_rounded, size: 16),
+                            label: const Text('Simpan Nilai Project'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
