@@ -101,6 +101,22 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
       final sessionData = sessionDoc.data();
       final sessionId = sessionDoc.id;
 
+      final now = DateTime.now();
+      final days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+      final months = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+
+      final hari = days[now.weekday - 1];
+      final tanggal = now.day;
+      final bulan = months[now.month - 1];
+      final tahun = now.year;
+      final jam = now.hour.toString().padLeft(2, '0');
+      final menit = now.minute.toString().padLeft(2, '0');
+      final detik = now.second.toString().padLeft(2, '0');
+      final formatWaktuLengkap = '$hari, $tanggal $bulan $tahun - $jam:$menit:$detik WIB';
+
       final recordId = '${sessionId}_${user.uid}';
       final recordRef = firestore.collection('attendance_records').doc(recordId);
 
@@ -111,7 +127,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         'nisn': nisn,
         'kelas': kelas,
         'mataPelajaran': sessionData['mataPelajaran'] ?? '',
+        'pertemuan': sessionData['pertemuan'] ?? '1',
+        'materi': sessionData['materi'] ?? '',
         'waktu': FieldValue.serverTimestamp(),
+        'hari': hari,
+        'tanggal': tanggal,
+        'bulan': bulan,
+        'tahun': tahun,
+        'jam': jam,
+        'menit': menit,
+        'detik': detik,
+        'formatWaktuLengkap': formatWaktuLengkap,
         'status': 'hadir',
       });
 

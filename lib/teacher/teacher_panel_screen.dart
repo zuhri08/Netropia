@@ -1647,6 +1647,9 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               ),
             ),
           ),
+          _buildProjectSubmissionsSection(),
+          _buildQuizResultsSection(),
+          _buildAttendanceRecordsSection(),
           const SizedBox(height: 20),
           const Text(
             'Refleksi & Evaluasi Siswa',
@@ -1822,6 +1825,519 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuizResultsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Icon(Icons.quiz_rounded, color: AppTheme.primaryBrown),
+            const SizedBox(width: 8),
+            const Text(
+              'Daftar Nilai Kuis & Deteksi Kecurangan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tinjau skor kuis siswa serta laporan deteksi kecurangan (pindah aplikasi/tab saat kuis).',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('quiz_results')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada hasil kuis yang dikumpulkan oleh siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final namaSiswa = data['namaSiswa'] ?? 'Siswa';
+                final kelas = data['kelas'] ?? '-';
+                final materiTitle = data['materiTitle'] ?? 'Kuis';
+                final testType = data['testType'] ?? 'Tes';
+                final score = data['score'] ?? 0;
+                final correct = data['correct'] ?? 0;
+                final total = data['totalQuestions'] ?? 25;
+                final cheatCount = data['cheatViolations'] ?? 0;
+                final isCheated = cheatCount > 0;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: score >= 75 ? Colors.green.shade100 : Colors.orange.shade100,
+                              child: Text(
+                                '$score',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: score >= 75 ? Colors.green.shade900 : Colors.orange.shade900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$namaSiswa ($kelas)',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '$testType: $materiTitle • Benar $correct dari $total',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isCheated ? AppTheme.accentRed.withValues(alpha: 0.12) : Colors.green.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                isCheated ? '⚠️ Curang ($cheatCount x)' : '✅ Jujur',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isCheated ? AppTheme.accentRed : Colors.green.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (isCheated) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentRed.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.accentRed.withValues(alpha: 0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: AppTheme.accentRed, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Peringatan: Siswa terdeteksi keluar dari layar ujian sebanyak $cheatCount kali saat tes!',
+                                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.accentRed),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProjectSubmissionsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Icon(Icons.rocket_launch_rounded, color: AppTheme.primaryBrown),
+            const SizedBox(width: 8),
+            const Text(
+              'Pengumpulan Project Praktik Siswa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tinjau hasil pengerjaan project, foto bukti, serta berikan penilaian & umpan balik.',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('project_submissions')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada pengumpulan project dari siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final subDocId = docs[index].id;
+                final siswaName = data['siswaName'] ?? 'Siswa';
+                final kelas = data['kelas'] ?? '-';
+                final projectTitle = data['projectTitle'] ?? 'Project';
+                final topologi = data['topologi'] ?? '-';
+                final problem = data['problem'] ?? '-';
+                final planning = data['planning'] ?? '-';
+                final testing = data['testing'] ?? '-';
+                final reflection = data['reflection'] ?? '-';
+                final fileUrl = data['fileUrl']?.toString();
+                final fileName = data['fileName']?.toString() ?? 'Foto Bukti';
+                final nilai = data['nilai'];
+                final catatanGuru = data['catatanGuru'] ?? '';
+
+                final nilaiController = TextEditingController(text: nilai?.toString() ?? '');
+                final catatanController = TextEditingController(text: catatanGuru);
+
+                Uint8List? imageBytes;
+                if (fileUrl != null && fileUrl.contains('data:image')) {
+                  try {
+                    final base64String = fileUrl.split(',').last;
+                    imageBytes = base64Decode(base64String);
+                  } catch (_) {}
+                }
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: AppTheme.primaryBrown,
+                              child: const Icon(Icons.rocket_launch_rounded, size: 18, color: Colors.white),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$siswaName ($kelas)',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Project: $projectTitle • Topologi: $topologi',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (nilai != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  'Nilai: $nilai/100',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade900, fontSize: 12),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const Divider(height: 20),
+                        if (problem.isNotEmpty && problem != '-') ...[
+                          Text('1. Pemahaman Masalah:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$problem"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (planning.isNotEmpty && planning != '-') ...[
+                          Text('2. Perencanaan:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$planning"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (testing.isNotEmpty && testing != '-') ...[
+                          Text('3. Hasil Pengujian:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$testing"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 8),
+                        ],
+                        if (reflection.isNotEmpty && reflection != '-') ...[
+                          Text('4. Refleksi Siswa:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                          Text('"$reflection"', style: const TextStyle(fontSize: 12.5)),
+                          const SizedBox(height: 12),
+                        ],
+
+                        // Image / Attachment Preview
+                        if (imageBytes != null) ...[
+                          Text('Foto Bukti Praktik Project:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.memory(
+                              imageBytes,
+                              height: 180,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ] else if (fileUrl != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.brownTint,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.attach_file_rounded, color: AppTheme.primaryBrown, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(child: Text(fileName, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold))),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+
+                        Row(
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              child: TextField(
+                                controller: nilaiController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nilai (0-100)',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: TextField(
+                                controller: catatanController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Catatan Guru (Opsional)',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final gradeVal = int.tryParse(nilaiController.text.trim());
+                              final noteVal = catatanController.text.trim();
+
+                              await _firestore.collection('project_submissions').doc(subDocId).update({
+                                'nilai': gradeVal,
+                                'catatanGuru': noteVal,
+                              });
+
+                              if (mounted) {
+                                _showMessage('Nilai Project berhasil disimpan untuk $siswaName!');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryBrown,
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: const Icon(Icons.check_rounded, size: 16),
+                            label: const Text('Simpan Nilai Project'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAttendanceRecordsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Icon(Icons.event_available_rounded, color: AppTheme.primaryBrown),
+            const SizedBox(width: 8),
+            const Text(
+              'Daftar Presensi Lengkap Siswa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Detail riwayat presensi siswa lengkap dengan waktu presisi (Hari, Tgl, Bulan, Tahun - Jam:Menit:Detik WIB).',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('attendance_records')
+              .orderBy('waktu', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada data presensi siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final namaSiswa = data['nama'] ?? 'Siswa';
+                final nisnSiswa = data['nisn'] ?? '-';
+                final kelasSiswa = data['kelas'] ?? '-';
+                final mapel = data['mataPelajaran'] ?? '-';
+                final formatWaktu = data['formatWaktuLengkap']?.toString();
+                final waktuVal = data['waktu'];
+
+                String fullTimeStr = formatWaktu ?? '';
+                if (fullTimeStr.isEmpty && waktuVal is Timestamp) {
+                  final dt = waktuVal.toDate();
+                  final days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+                  final months = [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                  ];
+                  final hari = days[dt.weekday - 1];
+                  final tgl = dt.day;
+                  final bln = months[dt.month - 1];
+                  final thn = dt.year;
+                  final jam = dt.hour.toString().padLeft(2, '0');
+                  final mnt = dt.minute.toString().padLeft(2, '0');
+                  final det = dt.second.toString().padLeft(2, '0');
+                  fullTimeStr = '$hari, $tgl $bln $thn - $jam:$mnt:$det WIB';
+                }
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.green.shade100,
+                      child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
+                    ),
+                    title: Text(
+                      '$namaSiswa ($kelasSiswa)',
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 2),
+                        Text('NISN: $nisnSiswa • Mapel: $mapel', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time_rounded, size: 13, color: AppTheme.primaryBrown),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                fullTimeStr.isEmpty ? 'Baru saja' : fullTimeStr,
+                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
