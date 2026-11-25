@@ -375,17 +375,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: (val) async {
                         await _settingsService.setReminderEnabled(val);
                         setState(() => _isReminderEnabled = val);
-                        if (val) {
-                          await LocalNotificationService().requestPermission();
-                          await LocalNotificationService().showTestNotification(
-                            title: 'Pengingat Belajar Aktif! ⏰',
-                            body: 'Notifikasi banner pengingat belajar harian telah diaktifkan.',
-                          );
-                          if (_reminderTime == 'Belum diatur' || _reminderTime == 'Not set') {
-                            _selectReminderTime();
-                          }
-                        } else {
+                        if (!val) {
                           await LocalNotificationService().cancelReminder();
+                        } else if (_reminderTime == 'Belum diatur' || _reminderTime == 'Not set') {
+                          _selectReminderTime();
                         }
                       },
                     ),

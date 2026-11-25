@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/notification_service.dart';
-import '../services/local_notification_service.dart';
 import '../services/localization_service.dart';
 import '../materi/materi_screen.dart';
 import '../peminjaman/borrowing_screen.dart';
@@ -177,26 +176,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
             foregroundColor: Colors.white,
             elevation: 0,
             actions: [
-              IconButton(
-                tooltip: 'Izin & Uji Notifikasi Banner',
-                icon: const Icon(Icons.notifications_active_rounded),
-                onPressed: () async {
-                  await LocalNotificationService().requestPermission();
-                  await LocalNotificationService().showTestNotification(
-                    title: 'Notifikasi Banner Netropia Aktif! 🎉',
-                    body: 'Izin notifikasi telah diaktifkan. Anda akan menerima notifikasi di atas layar.',
-                  );
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Notifikasi banner teruji & izin dikonfirmasi!'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                    _loadNotifications();
-                  }
-                },
-              ),
               if (unreadCount > 0)
                 IconButton(
                   tooltip: localizationService.translate('mark_all_read'),

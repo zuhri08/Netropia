@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'local_notification_service.dart';
 
 enum NotificationType { belajar, peminjaman, absensi, project, system }
 
@@ -172,13 +171,6 @@ class NotificationService {
     );
     notifications.insert(0, newNotif);
     await _saveNotifications(notifications);
-
-    try {
-      await LocalNotificationService().showBanner(
-        title: title,
-        body: message,
-      );
-    } catch (_) {}
   }
 
   Future<void> clearAll() async {

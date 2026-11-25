@@ -12,10 +12,6 @@ class LocalNotificationService {
   final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
 
-  static const String channelId = 'netropia_headsup_channel_v3';
-  static const String channelName = 'Notifikasi Netropia';
-  static const String channelDesc = 'Saluran notifikasi pengingat belajar dan aktivitas Netropia';
-
   Future<void> init() async {
     if (_isInitialized) return;
 
@@ -45,34 +41,13 @@ class LocalNotificationService {
         },
       );
 
-      final androidImpl = _notificationsPlugin.resolvePlatformSpecificImplementation<
+      final androidImplementation = _notificationsPlugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
-      if (androidImpl != null) {
-        const AndroidNotificationChannel channel = AndroidNotificationChannel(
-          channelId,
-          channelName,
-          description: channelDesc,
-          importance: Importance.max,
-          playSound: true,
-          enableVibration: true,
-          showBadge: true,
-        );
-
-        await androidImpl.createNotificationChannel(channel);
-        await androidImpl.requestNotificationsPermission();
+      if (androidImplementation != null) {
+        await androidImplementation.requestNotificationsPermission();
         try {
-          await androidImpl.requestExactAlarmsPermission();
+          await androidImplementation.requestExactAlarmsPermission();
         } catch (_) {}
-      }
-
-      final iosImpl = _notificationsPlugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
-      if (iosImpl != null) {
-        await iosImpl.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
       }
     } catch (e) {
       debugPrint('Local notifications init exception: $e');
@@ -81,42 +56,17 @@ class LocalNotificationService {
     _isInitialized = true;
   }
 
-  Future<bool> requestPermission() async {
-    await init();
-    bool granted = false;
-
-    try {
-      final androidImpl = _notificationsPlugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
-      if (androidImpl != null) {
-        final res = await androidImpl.requestNotificationsPermission();
-        granted = res ?? false;
-      }
-
-      final iosImpl = _notificationsPlugin.resolvePlatformSpecificImplementation<
-          IOSFlutterLocalNotificationsPlugin>();
-      if (iosImpl != null) {
-        final res = await iosImpl.requestPermissions(alert: true, badge: true, sound: true);
-        granted = res ?? false;
-      }
-    } catch (e) {
-      debugPrint('Request permission exception: $e');
-    }
-
-    return granted;
-  }
-
   NotificationDetails _getAlarmNotificationDetails() {
     const androidDetails = AndroidNotificationDetails(
-      channelId,
-      channelName,
-      channelDescription: channelDesc,
+      'study_reminder_channel_v2',
+      'Pengingat Belajar Netropia',
+      channelDescription: 'Saluran notifikasi dan alarm pengingat belajar Netropia',
       importance: Importance.max,
-      priority: Priority.max,
+      priority: Priority.high,
       playSound: true,
       enableVibration: true,
       fullScreenIntent: true,
-      category: AndroidNotificationCategory.reminder,
+      category: AndroidNotificationCategory.alarm,
       styleInformation: BigTextStyleInformation(''),
     );
 
@@ -133,8 +83,8 @@ class LocalNotificationService {
     );
   }
 
-  /// Menampilkan notifikasi banner di atas layar seketika
-  Future<void> showBanner({
+  /// Menampilkan notifikasi dan membunyikan alarm seketika (untuk pengujian)
+  Future<void> showTestNotification({
     required String title,
     required String body,
   }) async {
@@ -142,23 +92,15 @@ class LocalNotificationService {
 
     try {
       await _notificationsPlugin.show(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        888,
         title,
         body,
         _getAlarmNotificationDetails(),
-        payload: 'netropia_headsup',
+        payload: 'study_reminder_test',
       );
     } catch (e) {
-      debugPrint('Banner notification show error: $e');
+      debugPrint('Test notification show error: $e');
     }
-  }
-
-  /// Menampilkan notifikasi dan membunyikan alarm seketika (untuk pengujian)
-  Future<void> showTestNotification({
-    required String title,
-    required String body,
-  }) async {
-    await showBanner(title: title, body: body);
 
     await NotificationService().addNotification(
       title: title,
