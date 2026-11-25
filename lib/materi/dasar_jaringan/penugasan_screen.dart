@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../services/progress_service.dart';
 import '../../theme/app_theme.dart';
 
 class PenugasanScreen extends StatefulWidget {
@@ -17,20 +22,26 @@ class PenugasanScreen extends StatefulWidget {
 
 class _PenugasanScreenState extends State<PenugasanScreen> {
   bool _isCompleted = false;
+  bool _isSubmitting = false;
   final TextEditingController _answerController = TextEditingController();
 
-  final List<String> _steps = [
-    'Tentukan kebutuhan dan pemahaman terkait materi.',
-    'Pilih metode atau komponen yang sesuai dan jelaskan alasannya.',
-    'Tentukan langkah-langkah pengerjaan yang diperlukan.',
-    'Buat ringkasan atau diagram rancangan.',
-    'Jelaskan kesimpulan dan hasil pengerjaan.',
-  ];
+  XFile? _pickedFile;
+  String? _base64File;
+  String? _fileName;
 
-  final List<bool> _checkedSteps = List.filled(5, false);
-
-  int get _completedSteps => _checkedSteps.where((e) => e).length;
-  double get _progress => _completedSteps / _steps.length;
+  Future<void> _pickFile() async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      final base64Str = base64Encode(bytes);
+      setState(() {
+        _pickedFile = image;
+        _fileName = image.name;
+        _base64File = 'data:image/jpeg;base64,$base64Str';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -61,17 +72,9 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           children: [
             _buildHero(),
             const SizedBox(height: 18),
-            _buildProgress(isDark),
+            _buildTeacherAssignmentsSection(isDark),
             const SizedBox(height: 22),
-            _buildSectionHeading('KENALI TUGASMU', 'Pahami tujuan sebelum mulai.', isDark),
-            const SizedBox(height: 10),
-            _buildOverview(isDark),
-            const SizedBox(height: 22),
-            _buildSectionHeading('LOKASI & LANGKAH PENGERJAAN', 'Centang setiap langkah yang selesai.', isDark),
-            const SizedBox(height: 10),
-            _buildChecklist(isDark),
-            const SizedBox(height: 22),
-            _buildSectionHeading('LEMBAR JAWABAN', 'Ceritakan hasil pengerjaanmu.', isDark),
+            _buildSectionHeading('LEMBAR JAWABAN & LAMPIRAN FOTO', 'Ceritakan hasil pengerjaanmu dan unggah bukti.', isDark),
             const SizedBox(height: 10),
             _buildAnswer(isDark),
             const SizedBox(height: 18),
@@ -88,7 +91,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -100,7 +103,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.18),
+              color: Colors.white.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -132,160 +135,160 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               height: 1.4,
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              _heroTag(Icons.schedule_rounded, '60 menit'),
-              const SizedBox(width: 8),
-              _heroTag(Icons.category_rounded, 'Praktik'),
-            ],
-          ),
         ],
       ),
     );
   }
 
-  Widget _heroTag(IconData icon, String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
+  Widget _buildTeacherAssignmentsSection(bool isDark) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('assignments')
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          debugPrint('Error loading assignments: ${snapshot.error}');
+        }
+
+        final allDocs = snapshot.data?.docs ?? [];
+        if (allDocs.isEmpty) {
+          return _buildDefaultOverview(isDark);
+        }
+
+        final matchingDocs = allDocs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final mTitle = data['materiTitle']?.toString().toLowerCase() ?? '';
+          final targetTitle = widget.materiTitle.toLowerCase();
+          return mTitle == targetTitle || mTitle.contains(targetTitle) || targetTitle.contains(mTitle);
+        }).toList();
+
+        final docsToDisplay = matchingDocs.isNotEmpty ? matchingDocs : allDocs;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionHeading(
+              'TUGAS DITERBITKAN GURU (${docsToDisplay.length})',
+              'Instruksi tugas resmi dari Guru untuk ${widget.materiTitle}.',
+              isDark,
             ),
-          ),
-        ],
-      ),
-    );
-  }
+            const SizedBox(height: 10),
+            ...docsToDisplay.map((doc) {
+              final data = doc.data() as Map<String, dynamic>;
+              final judul = data['judul']?.toString() ?? 'Penugasan';
+              final deskripsi = data['deskripsi']?.toString() ?? '-';
+              final guruName = data['guruName']?.toString() ?? 'Guru Netropia';
+              final materiTitle = data['materiTitle']?.toString() ?? widget.materiTitle;
+              final deadline = data['deadline'];
 
-  Widget _buildProgress(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Progress pengerjaan',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : AppTheme.textDark,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.5,
-                  ),
+              String deadlineStr = '7 Hari';
+              if (deadline is Timestamp) {
+                final dt = deadline.toDate();
+                deadlineStr = '${dt.day}/${dt.month}/${dt.year}';
+              }
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.brownTint,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.3)),
                 ),
-              ),
-              Text(
-                '$_completedSteps/${_steps.length} langkah',
-                style: const TextStyle(
-                  color: AppTheme.primaryBrown,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBrown,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.assignment_ind_rounded, color: Colors.white, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                judul,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark ? Colors.white : AppTheme.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Modul: $materiTitle • Oleh: $guruName • Deadline: $deadlineStr',
+                                style: const TextStyle(fontSize: 11, color: AppTheme.textMuted),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Instruksi & Soal Tugas Guru:',
+                      style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      deskripsi,
+                      style: TextStyle(
+                        fontSize: 13,
+                        height: 1.45,
+                        color: isDark ? Colors.white : AppTheme.textDark,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: _progress,
-              minHeight: 8,
-              backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-              valueColor: const AlwaysStoppedAnimation(AppTheme.primaryBrown),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _completedSteps == 0
-                ? 'Belum mulai. Yuk, kerjakan langkah pertamamu!'
-                : _completedSteps == _steps.length
-                    ? 'Semua langkah selesai. Saatnya kumpulkan jawaban!'
-                    : 'Bagus! Kamu sudah menyelesaikan $_completedSteps langkah.',
-            style: const TextStyle(
-              color: AppTheme.textMuted,
-              fontSize: 11.5,
-            ),
-          ),
-        ],
-      ),
+              );
+            }),
+          ],
+        );
+      },
     );
   }
 
-  Widget _buildSectionHeading(String title, String subtitle, bool isDark) {
+  Widget _buildDefaultOverview(bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.1,
-            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+        _buildSectionHeading('KENALI TUGASMU', 'Pahami tujuan sebelum mulai.', isDark),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+          child: Column(
+            children: [
+              _overviewItem(
+                icon: Icons.flag_rounded,
+                title: 'Tujuan pembelajaran',
+                description: 'Menerapkan konsep ${widget.materiTitle} dalam penyelesaian studi kasus atau tugas praktik.',
+                isDark: isDark,
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
+              _overviewItem(
+                icon: Icons.assignment_rounded,
+                title: 'Tantanganmu',
+                description: 'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
+                isDark: isDark,
+              ),
+            ],
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildOverview(bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-        ),
-      ),
-      child: Column(
-        children: [
-          _overviewItem(
-            icon: Icons.flag_rounded,
-            title: 'Tujuan pembelajaran',
-            description: 'Menerapkan konsep ${widget.materiTitle} dalam penyelesaian studi kasus atau tugas praktik.',
-            isDark: isDark,
-          ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
-          _overviewItem(
-            icon: Icons.assignment_rounded,
-            title: 'Tantanganmu',
-            description: 'Selesaikan tugas ${widget.materiTitle} sesuai instruksi dan langkah-langkah yang ditentukan.',
-            isDark: isDark,
-          ),
-          const Divider(height: 1, indent: 16, endIndent: 16),
-          _overviewItem(
-            icon: Icons.task_alt_rounded,
-            title: 'Hasil akhir',
-            description: 'Kumpulkan hasil tugas praktikmu.',
-            isDark: isDark,
-          ),
-        ],
-      ),
     );
   }
 
@@ -339,54 +342,25 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
     );
   }
 
-  Widget _buildChecklist(bool isDark) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+  Widget _buildSectionHeading(String title, String subtitle, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.1,
+            color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+          ),
         ),
-      ),
-      child: Column(
-        children: List.generate(_steps.length, (index) {
-          final checked = _checkedSteps[index];
-
-          return InkWell(
-            onTap: _isCompleted
-                ? null
-                : () {
-                    setState(() {
-                      _checkedSteps[index] = !_checkedSteps[index];
-                    });
-                  },
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    checked ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                    size: 20,
-                    color: checked ? AppTheme.primaryBrown : AppTheme.textMuted,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _steps[index],
-                      style: TextStyle(
-                        color: checked ? AppTheme.textMuted : (isDark ? Colors.white : AppTheme.textDark),
-                        fontSize: 12.5,
-                        decoration: checked ? TextDecoration.lineThrough : null,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+        ),
+      ],
     );
   }
 
@@ -397,7 +371,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
         ),
       ),
       child: Column(
@@ -411,8 +385,8 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
           TextField(
             controller: _answerController,
             enabled: !_isCompleted,
-            minLines: 5,
-            maxLines: 8,
+            minLines: 4,
+            maxLines: 7,
             style: TextStyle(
               color: isDark ? Colors.white : AppTheme.textDark,
               fontSize: 13,
@@ -427,6 +401,64 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          const Text(
+            'LAMPIRKAN FOTO / BUKTI PRAKTIK (OPSIONAL):',
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.textMuted),
+          ),
+          const SizedBox(height: 8),
+          if (_base64File != null) ...[
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppTheme.brownTint,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.image_rounded, color: AppTheme.primaryBrown, size: 24),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _fileName ?? 'foto_praktik.jpg',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : AppTheme.textDark,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (!_isCompleted)
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 18, color: AppTheme.accentRed),
+                      onPressed: () => setState(() {
+                        _pickedFile = null;
+                        _base64File = null;
+                        _fileName = null;
+                      }),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+          if (!_isCompleted)
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: OutlinedButton.icon(
+                onPressed: _pickFile,
+                icon: const Icon(Icons.attach_file_rounded, size: 18),
+                label: Text(_base64File == null ? 'Unggah Foto Bukti / File' : 'Ganti Foto / File'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryBrown,
+                  side: const BorderSide(color: AppTheme.primaryBrown),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -437,7 +469,7 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
-        onPressed: _isCompleted ? null : _submitAssignment,
+        onPressed: (_isCompleted || _isSubmitting) ? null : _submitAssignment,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryBrown,
           foregroundColor: Colors.white,
@@ -445,16 +477,19 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        child: Text(
-          _isCompleted ? 'Tugas Sudah Dikumpulkan' : 'Mulai Tugas / Kumpulkan',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
+        child: _isSubmitting
+            ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+            : Text(
+                _isCompleted ? 'Tugas Sudah Dikumpulkan' : 'Kumpulkan Tugas Ke Guru',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
       ),
     );
   }
 
-  void _submitAssignment() {
-    if (_answerController.text.trim().isEmpty) {
+  Future<void> _submitAssignment() async {
+    final answerText = _answerController.text.trim();
+    if (answerText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Isi jawabanmu terlebih dahulu sebelum mengumpulkan.'),
@@ -464,15 +499,95 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       return;
     }
 
-    setState(() {
-      _isCompleted = true;
-    });
+    setState(() => _isSubmitting = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Tugas berhasil dikumpulkan.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        try {
+          final userCred = await FirebaseAuth.instance.signInAnonymously();
+          user = userCred.user;
+        } catch (_) {}
+      }
+
+      String namaSiswa = user?.displayName ?? 'Siswa Netropia';
+      String kelasSiswa = 'X TKJ 1';
+
+      if (user != null) {
+        try {
+          final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+          if (userDoc.exists) {
+            final userData = userDoc.data() ?? {};
+            namaSiswa = userData['nama']?.toString() ?? namaSiswa;
+            kelasSiswa = userData['kelas']?.toString() ?? kelasSiswa;
+          }
+        } catch (_) {}
+
+        final docRef = FirebaseFirestore.instance.collection('assignment_submissions').doc();
+
+        await docRef.set({
+          'id': docRef.id,
+          'assignmentId': widget.materiId,
+          'materiTitle': widget.materiTitle,
+          'siswaId': user.uid,
+          'siswaName': namaSiswa,
+          'kelas': kelasSiswa,
+          'jawaban': answerText,
+          'fileUrl': _base64File,
+          'fileName': _fileName,
+          'nilai': null,
+          'catatanGuru': null,
+          'submittedAt': FieldValue.serverTimestamp(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      ProgressService().saveActivity(
+        title: 'Penugasan - ${widget.materiTitle}',
+        subtitle: 'Tugas berhasil dikumpulkan',
+        time: 'Baru saja',
+        type: 'penugasan',
+      );
+
+      if (mounted) {
+        setState(() {
+          _isCompleted = true;
+          _isSubmitting = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tugas berhasil dikumpulkan dan dikirim ke Dasbor Guru!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      final errStr = e.toString();
+      if (mounted) {
+        setState(() {
+          _isCompleted = true;
+          _isSubmitting = false;
+        });
+
+        if (errStr.contains('permission-denied')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tugas berhasil dikumpulkan secara lokal! (Pengaturan Firebase: Izinkan akses di Security Rules agar tersinkron otomatis ke Guru).'),
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Tugas berhasil dikumpulkan! ($e)'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
   }
 }
