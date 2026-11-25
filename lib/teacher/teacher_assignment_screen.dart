@@ -131,7 +131,7 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryTeal),
+                  Icon(Icons.assignment_turned_in_rounded, color: AppTheme.primaryTeal),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -195,10 +195,10 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    const CircleAvatar(
+                                    CircleAvatar(
                                       radius: 16,
                                       backgroundColor: AppTheme.primaryTeal,
-                                      child: Icon(Icons.person_rounded, size: 16, color: Colors.white),
+                                      child: const Icon(Icons.person_rounded, size: 16, color: Colors.white),
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(
@@ -225,7 +225,7 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
                                 Text('Jawaban Siswa:\n"$jawaban"', style: const TextStyle(fontSize: 13, height: 1.4)),
                                 if (imageBytes != null) ...[
                                   const SizedBox(height: 10),
-                                  const Text('Foto Bukti Jawaban:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
+                                  Text('Foto Bukti Jawaban:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal)),
                                   const SizedBox(height: 6),
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -330,7 +330,7 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(Icons.add_task_rounded, color: AppTheme.primaryTeal),
                         SizedBox(width: 8),
@@ -438,9 +438,9 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
                           children: [
                             ListTile(
                               contentPadding: EdgeInsets.zero,
-                              leading: const CircleAvatar(
+                              leading: CircleAvatar(
                                 backgroundColor: AppTheme.tealTint,
-                                child: Icon(Icons.assignment_ind_rounded, color: AppTheme.primaryTeal),
+                                child: const Icon(Icons.assignment_ind_rounded, color: AppTheme.primaryTeal),
                               ),
                               title: Text(judul, style: const TextStyle(fontWeight: FontWeight.bold)),
                               subtitle: Text('${data['materiTitle']} • ${data['deskripsi']}'),
@@ -460,7 +460,7 @@ class _TeacherAssignmentScreenState extends State<TeacherAssignmentScreen> {
                                 onPressed: () => _showSubmissionsDialog(assignmentId, judul),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppTheme.primaryTeal,
-                                  side: const BorderSide(color: AppTheme.primaryTeal),
+                                  side: BorderSide(color: AppTheme.primaryTeal),
                                 ),
                                 icon: const Icon(Icons.rate_review_rounded, size: 16),
                                 label: const Text('Lihat Jawaban & Beri Nilai Siswa'),

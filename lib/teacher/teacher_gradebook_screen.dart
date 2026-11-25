@@ -280,7 +280,7 @@ class _TeacherGradebookScreenState extends State<TeacherGradebookScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(Icons.picture_as_pdf_rounded, color: AppTheme.primaryTeal),
                         SizedBox(width: 8),
@@ -340,7 +340,7 @@ class _TeacherGradebookScreenState extends State<TeacherGradebookScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           children: [
             Icon(Icons.event_available_rounded, color: AppTheme.primaryTeal),
             SizedBox(width: 8),

@@ -118,7 +118,7 @@ class _TeacherAnnouncementScreenState extends State<TeacherAnnouncementScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
                         Icon(Icons.campaign_rounded, color: AppTheme.primaryTeal),
                         SizedBox(width: 8),
