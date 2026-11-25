@@ -1659,7 +1659,7 @@ class DashboardScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
+                      builder: (context) => const TeacherReflectionScreen(),
                     ),
                   );
                 },
