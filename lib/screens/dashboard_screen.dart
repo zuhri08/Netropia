@@ -15,6 +15,12 @@ import '../project/project_screen.dart';
 import '../materi/dasar_jaringan/portofolio_screen.dart';
 import '../services/localization_service.dart';
 import '../teacher/teacher_panel_screen.dart';
+import '../teacher/teacher_assignment_screen.dart';
+import '../teacher/teacher_quiz_screen.dart';
+import '../teacher/teacher_material_screen.dart';
+import '../teacher/teacher_announcement_screen.dart';
+import '../teacher/teacher_reflection_screen.dart';
+import '../teacher/teacher_gradebook_screen.dart';
 import 'notification_screen.dart';
 import '../widgets/home_effects.dart';
 
@@ -1334,19 +1340,19 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildTeacherManagementPanel(BuildContext context) {
     final learning = <_TeacherAction>[
       _TeacherAction(Icons.assignment_add, 'Kelola Tugas', 0,
-          () => const TeacherPanelScreen(initialTab: 'tugas')),
+          () => const TeacherAssignmentScreen()),
       _TeacherAction(Icons.quiz_rounded, 'Kelola Kuis', 1,
-          () => const TeacherPanelScreen(initialTab: 'quiz')),
+          () => const TeacherQuizScreen()),
       _TeacherAction(Icons.note_add_rounded, 'Buat Materi', 2,
-          () => const TeacherPanelScreen(initialTab: 'materi')),
+          () => const TeacherMaterialScreen()),
       _TeacherAction(Icons.campaign_rounded, 'Pengumuman', 4,
-          () => const TeacherPanelScreen(initialTab: 'pengumuman')),
+          () => const TeacherAnnouncementScreen()),
     ];
     final lab = <_TeacherAction>[
       _TeacherAction(Icons.rate_review_rounded, 'Ulasan & Refleksi', 3,
-          () => const TeacherPanelScreen(initialTab: 'refleksi')),
+          () => const TeacherReflectionScreen()),
       _TeacherAction(Icons.assessment_rounded, 'Rekap & Apresiasi', 6,
-          () => const TeacherPanelScreen(initialTab: 'rekap')),
+          () => const TeacherGradebookScreen()),
       _TeacherAction(Icons.fact_check_rounded, 'Sesi Absensi QR', 5,
           () => const TeacherAttendanceScreen()),
       _TeacherAction(Icons.inventory_2_rounded, 'Persetujuan Alat', 0,
