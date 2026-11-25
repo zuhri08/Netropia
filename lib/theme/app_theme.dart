@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Deep Teal & Warm Cream System
-  static const Color primaryTeal = Color(0xFF1F5C56);
-  static const Color darkTeal = Color(0xFF0E3B37);
-  static const Color lightTeal = Color(0xFF2F7F77);
-  static const Color tealTint = Color(0xFFE3ECE9);
+  static const Color primaryBrown = Color(0xFFAD8B73);
+  static const Color secondaryBeige = Color(0xFFCEAB93);
+  static const Color accentTan = Color(0xFFE3CAA5);
+  static const Color backgroundCream = Color(0xFFFFFBE9);
+  // Warna baru: cokelat tua untuk bar navigasi bawah & aksen gelap.
+  static const Color deepEspresso = Color(0xFF4A3428);
 
-  // Brown & Cream System (Compatibility Aliases)
-  static const Color primaryBrown = Color(0xFF1F5C56);
-  static const Color secondaryBeige = Color(0xFF2F7F77);
-  static const Color accentTan = Color(0xFFF2A93B);
-  static const Color backgroundCream = Color(0xFFF6F3EC);
-  static const Color deepEspresso = Color(0xFF0E3B37);
-
-  static const Color darkBrown = Color(0xFF0E3B37);
-  static const Color brownTint = Color(0xFFE3ECE9);
-  static const Color textDark = Color(0xFF14231F);
-  static const Color textMuted = Color(0xFF7F9089);
-  static const Color surfaceCream = Color(0xFFEBE7DD);
-  static const Color borderCream = Color(0xFFDDD8CC);
-  static const Color accentRed = Color(0xFFBE3A2D);
-  static const Color accentAmber = Color(0xFFF2A93B);
+  // Kompatibilitas warna tema tambahan
+  static const Color darkBrown = Color(0xFF8E6F5B);
+  static const Color brownTint = Color(0xFFF5EBE6);
+  static const Color textDark = Color(0xFF2C3E50);
+  static const Color textMuted = Color(0xFF7F8C8D);
+  static const Color surfaceCream = Color(0xFFFFFBE9);
+  static const Color borderCream = Color(0xFFE9DDD3);
+  static const Color accentRed = Color(0xFFC0392B);
+  static const Color accentAmber = Color(0xFFD35400);
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -29,17 +24,17 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: backgroundCream,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryTeal,
-      primary: primaryTeal,
-      secondary: lightTeal,
-      tertiary: accentAmber,
+      seedColor: primaryBrown,
+      primary: primaryBrown,
+      secondary: secondaryBeige,
+      tertiary: accentTan,
       brightness: Brightness.light,
     ),
     cardColor: Colors.white,
     appBarTheme: const AppBarTheme(
       centerTitle: false,
       elevation: 0,
-      backgroundColor: primaryTeal,
+      backgroundColor: primaryBrown,
       foregroundColor: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -56,12 +51,12 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: primaryTeal, width: 2),
+        borderSide: const BorderSide(color: primaryBrown, width: 2),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryTeal,
+        backgroundColor: primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -70,9 +65,9 @@ class AppTheme {
       ),
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-      backgroundColor: darkTeal,
+      backgroundColor: deepEspresso,
       selectedItemColor: Colors.white,
-      unselectedItemColor: accentAmber,
+      unselectedItemColor: accentTan,
       type: BottomNavigationBarType.fixed,
       elevation: 0,
     ),
@@ -84,10 +79,10 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: const Color(0xFF121212),
     colorScheme: ColorScheme.fromSeed(
-      seedColor: primaryTeal,
-      primary: primaryTeal,
-      secondary: lightTeal,
-      tertiary: accentAmber,
+      seedColor: secondaryBeige,
+      primary: secondaryBeige,
+      secondary: primaryBrown,
+      tertiary: accentTan,
       brightness: Brightness.dark,
     ),
     cardColor: const Color(0xFF1E1E1E),
@@ -111,12 +106,12 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: primaryTeal, width: 2),
+        borderSide: const BorderSide(color: secondaryBeige, width: 2),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primaryTeal,
+        backgroundColor: primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -126,7 +121,7 @@ class AppTheme {
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Color(0xFF1E1E1E),
-      selectedItemColor: primaryTeal,
+      selectedItemColor: secondaryBeige,
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
       elevation: 0,

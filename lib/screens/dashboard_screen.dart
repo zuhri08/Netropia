@@ -240,10 +240,15 @@ class DashboardScreen extends StatelessWidget {
           ),
           body: Stack(
             children: [
-              const Positioned.fill(child: AnimatedBackdrop()),
+              Positioned(
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: MediaQuery.of(context).padding.bottom,
+                child: const AnimatedBackdrop(),
+              ),
               SafeArea(
-                child: BottomFade(
-                  child: SingleChildScrollView(
+                child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
               child: Column(
@@ -554,7 +559,6 @@ class DashboardScreen extends StatelessWidget {
                   _buildProgressCard(context),
                 ],
               ),
-            ),
             ),
           ),
             ],
@@ -1328,34 +1332,59 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildTeacherManagementPanel(BuildContext context) {
-    return AnimatedHeroCard(
-      colors: const [
-        Color(0xFFAD8B73),
-        Color(0xFF8E6F5B),
-      ],
-      borderRadius: 24,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(20),
-      shadowColor: Colors.black,
-      shadowOpacity: 0.16,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final learning = <_TeacherAction>[
+      _TeacherAction(Icons.assignment_add, 'Kelola Tugas', 0,
+          () => const TeacherPanelScreen(initialTab: 'tugas')),
+      _TeacherAction(Icons.quiz_rounded, 'Kelola Kuis', 1,
+          () => const TeacherPanelScreen(initialTab: 'quiz')),
+      _TeacherAction(Icons.note_add_rounded, 'Buat Materi', 2,
+          () => const TeacherPanelScreen(initialTab: 'materi')),
+      _TeacherAction(Icons.campaign_rounded, 'Pengumuman', 4,
+          () => const TeacherPanelScreen(initialTab: 'pengumuman')),
+    ];
+    final lab = <_TeacherAction>[
+      _TeacherAction(Icons.rate_review_rounded, 'Ulasan & Refleksi', 3,
+          () => const TeacherPanelScreen(initialTab: 'refleksi')),
+      _TeacherAction(Icons.assessment_rounded, 'Rekap & Apresiasi', 6,
+          () => const TeacherPanelScreen(initialTab: 'rekap')),
+      _TeacherAction(Icons.fact_check_rounded, 'Sesi Absensi QR', 5,
+          () => const TeacherAttendanceScreen()),
+      _TeacherAction(Icons.inventory_2_rounded, 'Persetujuan Alat', 0,
+          () => const TeacherBorrowingScreen()),
+    ];
+
+    return Column(
+      children: [
+        // Header banner
+        AnimatedHeroCard(
+          colors: const [
+            Color(0xFFAD8B73),
+            Color(0xFFC4A58C),
+          ],
+          borderRadius: 24,
+          padding: const EdgeInsets.all(18),
+          shadowColor: const Color(0xFFAD8B73),
+          shadowOpacity: 0.3,
+          child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(14),
+                  color: Colors.white.withOpacity(0.22),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white.withOpacity(0.35)),
                 ),
-                child: const Icon(
-                  Icons.admin_panel_settings_rounded,
-                  color: Colors.white,
-                  size: 26,
+                child: const Floating(
+                  amplitude: 2.5,
+                  child: Icon(
+                    Icons.admin_panel_settings_rounded,
+                    color: Colors.white,
+                    size: 30,
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1365,15 +1394,16 @@ class DashboardScreen extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: 3),
                     Text(
                       'Pusat Kelola Pembelajaran & Fasilitas TKJ',
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.white,
                         fontSize: 12,
+                        height: 1.25,
                       ),
                     ),
                   ],
@@ -1381,150 +1411,108 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+        ),
+        const SizedBox(height: 14),
+        _teacherGroup(
+          context,
+          title: 'KELOLA PEMBELAJARAN',
+          icon: Icons.menu_book_rounded,
+          actions: learning,
+          order: 0,
+        ),
+        const SizedBox(height: 12),
+        _teacherGroup(
+          context,
+          title: 'KELOLA KELAS & LAB TKJ',
+          icon: Icons.science_rounded,
+          actions: lab,
+          order: 1,
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
 
-          // Sub-Section 1: KELOLA PEMBELAJARAN
-          const Text(
-            'KELOLA PEMBELAJARAN',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.1,
-              color: Colors.white70,
+  /// Satu kelompok menu guru: judul kecil + grid 2 kolom yang rata.
+  Widget _teacherGroup(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required List<_TeacherAction> actions,
+    required int order,
+  }) {
+    return FadeSlideIn(
+      delay: Duration(milliseconds: 220 + order * 130),
+      offset: const Offset(0, 24),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+            color: const Color(0xFFAD8B73).withOpacity(0.18),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFAD8B73).withOpacity(0.12),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
             ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _teacherActionButton(
-                context,
-                icon: Icons.assignment_add,
-                label: 'Kelola Tugas',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'tugas'),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFCEAB93), Color(0xFFAD8B73)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.quiz_rounded,
-                label: 'Kelola Kuis',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'quiz'),
-                    ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.note_add_rounded,
-                label: 'Buat Materi',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'materi'),
-                    ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.campaign_rounded,
-                label: 'Pengumuman',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'pengumuman'),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Sub-Section 2: KELOLA KELAS & LAB TKJ
-          const Text(
-            'KELOLA KELAS & LAB TKJ',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.1,
-              color: Colors.white70,
+                  ),
+                  child: Icon(icon, size: 15, color: Colors.white),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    color: _cardSub(context),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Container(
+                    height: 1,
+                    color: const Color(0xFFAD8B73).withOpacity(0.18),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _teacherActionButton(
-                context,
-                icon: Icons.rate_review_rounded,
-                label: 'Ulasan & Refleksi',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
-                    ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.assessment_rounded,
-                label: 'Rekap & Apresiasi',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherPanelScreen(initialTab: 'rekap'),
-                    ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.fact_check_rounded,
-                label: 'Sesi Absensi QR',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherAttendanceScreen(),
-                    ),
-                  );
-                },
-              ),
-              _teacherActionButton(
-                context,
-                icon: Icons.inventory_2_rounded,
-                label: 'Persetujuan Alat',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TeacherBorrowingScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 10,
+              crossAxisSpacing: 10,
+              childAspectRatio: 2.35,
+              children: [
+                for (int i = 0; i < actions.length; i++)
+                  _teacherTile(context, actions[i], order * 4 + i),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1825,38 +1813,84 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _teacherActionButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return PressScale(
-      child: Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 16, color: const Color(0xFFAD8B73)),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF2C2C2C),
+  /// Tile menu guru: ikon berwarna di kiri + label, latar putih -> krem.
+  Widget _teacherTile(BuildContext context, _TeacherAction action, int order) {
+    final st = _menuStyles[action.style % _menuStyles.length];
+
+    return FadeSlideIn(
+      delay: Duration(milliseconds: 380 + order * 70),
+      offset: const Offset(0, 20),
+      scaleFrom: 0.9,
+      duration: const Duration(milliseconds: 520),
+      child: PressScale(
+        pressedScale: 0.94,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: _cardBg(context, st),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: st.accent.withOpacity(0.2)),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(16),
+              splashColor: st.accent.withOpacity(0.15),
+              highlightColor: st.accent.withOpacity(0.06),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => action.page()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(11),
+                        gradient: LinearGradient(
+                          colors: [st.accentLight, st.accent],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: st.accent.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Icon(action.icon, size: 19, color: Colors.white),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        action.label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.15,
+                          fontWeight: FontWeight.w700,
+                          color: _cardTitle(context),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -1868,4 +1902,13 @@ class _MenuStyle {
   final Color tint;
 
   const _MenuStyle(this.accent, this.accentLight, this.tint);
+}
+
+class _TeacherAction {
+  final IconData icon;
+  final String label;
+  final int style;
+  final Widget Function() page;
+
+  _TeacherAction(this.icon, this.label, this.style, this.page);
 }

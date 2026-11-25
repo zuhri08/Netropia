@@ -10,11 +10,16 @@ class MagicNavBar extends StatefulWidget {
   final Function(int) onTap;
   final List<MagicNavItem> items;
 
+  /// Tab yang "tombolnya pindah ke atas" saat dipilih (mis. AI).
+  /// Saat tab ini aktif: bar jadi lurus (tanpa lekukan), tombolnya hilang.
+  final int? dockedIndex;
+
   const MagicNavBar({
     super.key,
     required this.currentIndex,
     required this.onTap,
     required this.items,
+    this.dockedIndex,
   });
 
   @override
@@ -51,9 +56,11 @@ class _MagicNavBarState extends State<MagicNavBar>
   @override
   Widget build(BuildContext context) {
     final items = widget.items;
+    final int n = items.length;
     final int currentIndex = widget.currentIndex;
+    final int? di = widget.dockedIndex;
+    final bool docked = di != null && currentIndex == di;
     final double width = MediaQuery.of(context).size.width;
-    final double itemWidth = width / items.length;
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final bool reduce = MediaQuery.of(context).disableAnimations;
 
@@ -82,172 +89,214 @@ class _MagicNavBarState extends State<MagicNavBar>
       child: SizedBox(
         height: 85,
         child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(end: currentIndex.toDouble()),
-          duration: reduce ? Duration.zero : const Duration(milliseconds: 520),
-          curve: Curves.easeOutCubic,
-          builder: (context, pos, _) {
-            final double centerX = pos * itemWidth + itemWidth / 2;
-            // Seberapa jauh lekukan masih "bergerak" (0 = diam, 1 = jauh).
-            final double stretch = (pos - currentIndex).abs().clamp(0.0, 1.0);
+          // dock: 0 = normal, 1 = tombol sudah "pindah ke atas" (bar lurus)
+          tween: Tween<double>(end: docked ? 1.0 : 0.0),
+          duration: reduce ? Duration.zero : const Duration(milliseconds: 550),
+          curve: Curves.easeInOutCubic,
+          builder: (context, dock, _) {
+            // Lebar tiap slot (slot yang "docked" menyusut sampai 0)
+            final double baseW = width / n;
+            final List<double> widths = List<double>.generate(n, (i) {
+              if (di == null) return baseW;
+              final double dockedW = baseW * (1 - dock);
+              return i == di ? dockedW : (width - dockedW) / (n - 1);
+            });
+            final List<double> lefts = List<double>.filled(n, 0);
+            for (int i = 1; i < n; i++) {
+              lefts[i] = lefts[i - 1] + widths[i - 1];
+            }
+            double centerOf(int i) => lefts[i] + widths[i] / 2;
 
-            return Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // Bar (tanpa bayangan)
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: CustomPaint(
-                    size: Size(width, 70),
-                    painter: NavPainter(
-                      centerX: centerX,
-                      stretch: stretch,
-                      topColor: barTop,
-                      bottomColor: barBottom,
-                      edgeColor: edgeLine,
-                      glowColor: glowColor,
-                      glow: _glow,
-                    ),
-                  ),
-                ),
+            return TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: currentIndex.toDouble()),
+              duration:
+                  reduce ? Duration.zero : const Duration(milliseconds: 520),
+              curve: Curves.easeOutCubic,
+              builder: (context, pos, _) {
+                final int i0 = pos.floor().clamp(0, n - 1);
+                final int i1 = pos.ceil().clamp(0, n - 1);
+                final double centerX = centerOf(i0) +
+                    (centerOf(i1) - centerOf(i0)) * (pos - i0).clamp(0.0, 1.0);
+                final double stretch =
+                    (pos - currentIndex).abs().clamp(0.0, 1.0);
+                final double dipScale = 1 - dock;
 
-                // Percikan kecil saat pindah tab
-                if (!reduce)
-                  Positioned(
-                    left: centerX - 60,
-                    top: 40.5 - 60,
-                    width: 120,
-                    height: 120,
-                    child: IgnorePointer(
-                      child: TweenAnimationBuilder<double>(
-                        key: ValueKey(currentIndex),
-                        tween: Tween<double>(begin: 0, end: 1),
-                        duration: const Duration(milliseconds: 750),
-                        curve: Curves.easeOutCubic,
-                        builder: (context, t, _) => CustomPaint(
-                          painter: _BurstPainter(
-                            t,
-                            AppTheme.primaryBrown,
-                            AppTheme.secondaryBeige,
-                          ),
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Bar (tanpa bayangan; jadi lurus saat docked)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: CustomPaint(
+                        size: Size(width, 70),
+                        painter: NavPainter(
+                          centerX: centerX,
+                          stretch: stretch,
+                          dipScale: dipScale,
+                          topColor: barTop,
+                          bottomColor: barBottom,
+                          edgeColor: edgeLine,
+                          glowColor: glowColor,
+                          glow: _glow,
                         ),
                       ),
                     ),
-                  ),
 
-                // Lingkaran aktif
-                Positioned(
-                  left: centerX - 27.5,
-                  top: 13,
-                  child: Container(
-                    width: 55,
-                    height: 55,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppTheme.secondaryBeige,
-                          AppTheme.primaryBrown,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.55),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Item navigasi
-                Row(
-                  children: items.asMap().entries.map((entry) {
-                    final int index = entry.key;
-                    final MagicNavItem item = entry.value;
-                    final bool isActive = currentIndex == index;
-
-                    final Icon icon = Icon(
-                      item.icon,
-                      color: isActive ? Colors.white : inactiveIcon,
-                      size: isActive ? 20 : 24,
-                    );
-
-                    return Expanded(
-                      child: PressScale(
-                        pressedScale: 0.88,
-                        child: GestureDetector(
-                          onTap: () => widget.onTap(index),
-                          behavior: HitTestBehavior.opaque,
-                          child: SizedBox(
-                            height: 85,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 320),
-                                  curve: Curves.easeOutBack,
-                                  margin: EdgeInsets.only(
-                                      bottom: isActive ? 8 : 0),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // Ikon aktif: putar + membal saat dipilih
-                                      isActive && !reduce
-                                          ? TweenAnimationBuilder<double>(
-                                              key: ValueKey('pop$currentIndex'),
-                                              tween: Tween<double>(
-                                                  begin: 0, end: 1),
-                                              duration: const Duration(
-                                                  milliseconds: 650),
-                                              curve: Curves.easeOutBack,
-                                              builder: (context, v, child) =>
-                                                  Transform.rotate(
-                                                angle: (1 - v) * -0.9,
-                                                child: Transform.scale(
-                                                  scale: 0.5 + 0.5 * v,
-                                                  child: child,
-                                                ),
-                                              ),
-                                              child: icon,
-                                            )
-                                          : icon,
-                                      if (isActive) ...[
-                                        const SizedBox(height: 1),
-                                        Text(
-                                          item.label,
-                                          style: const TextStyle(
-                                            fontSize: 8,
-                                            fontWeight: FontWeight.w800,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                if (!isActive)
-                                  Positioned(
-                                    bottom: 12,
-                                    child: Text(
-                                      item.label,
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        fontWeight: FontWeight.w600,
-                                        color: inactiveLabel,
-                                      ),
-                                    ),
-                                  ),
-                              ],
+                    // Percikan kecil saat pindah tab
+                    if (!reduce && !docked)
+                      Positioned(
+                        left: centerX - 60,
+                        top: 40.5 - 60,
+                        width: 120,
+                        height: 120,
+                        child: IgnorePointer(
+                          child: TweenAnimationBuilder<double>(
+                            key: ValueKey(currentIndex),
+                            tween: Tween<double>(begin: 0, end: 1),
+                            duration: const Duration(milliseconds: 750),
+                            curve: Curves.easeOutCubic,
+                            builder: (context, t, _) => CustomPaint(
+                              painter: _BurstPainter(
+                                t,
+                                AppTheme.primaryBrown,
+                                AppTheme.secondaryBeige,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ],
+
+                    // Lingkaran aktif (mengecil & hilang saat docked)
+                    if (dock < 1)
+                      Positioned(
+                        left: centerX - 27.5,
+                        top: 13,
+                        child: Transform.scale(
+                          scale: dipScale,
+                          child: Container(
+                            width: 55,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [
+                                  AppTheme.secondaryBeige,
+                                  AppTheme.primaryBrown,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.55),
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Item navigasi
+                    Row(
+                      children: items.asMap().entries.map((entry) {
+                        final int index = entry.key;
+                        final MagicNavItem item = entry.value;
+                        final bool isActive = currentIndex == index;
+                        final bool isDockSlot = di != null && index == di;
+
+                        final Icon icon = Icon(
+                          item.icon,
+                          color: isActive ? Colors.white : inactiveIcon,
+                          size: isActive ? 20 : 24,
+                        );
+
+                        Widget slot = PressScale(
+                          pressedScale: 0.88,
+                          child: GestureDetector(
+                            onTap: () => widget.onTap(index),
+                            behavior: HitTestBehavior.opaque,
+                            child: SizedBox(
+                              height: 85,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 320),
+                                    curve: Curves.easeOutBack,
+                                    margin: EdgeInsets.only(
+                                        bottom: isActive ? 8 : 0),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Ikon aktif: putar + membal saat dipilih
+                                        isActive && !reduce && !isDockSlot
+                                            ? TweenAnimationBuilder<double>(
+                                                key: ValueKey('pop$currentIndex'),
+                                                tween: Tween<double>(
+                                                    begin: 0, end: 1),
+                                                duration: const Duration(
+                                                    milliseconds: 650),
+                                                curve: Curves.easeOutBack,
+                                                builder: (context, v, child) =>
+                                                    Transform.rotate(
+                                                  angle: (1 - v) * -0.9,
+                                                  child: Transform.scale(
+                                                    scale: 0.5 + 0.5 * v,
+                                                    child: child,
+                                                  ),
+                                                ),
+                                                child: icon,
+                                              )
+                                            : icon,
+                                        if (isActive) ...[
+                                          const SizedBox(height: 1),
+                                          Text(
+                                            item.label,
+                                            style: const TextStyle(
+                                              fontSize: 8,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  if (!isActive)
+                                    Positioned(
+                                      bottom: 12,
+                                      child: Text(
+                                        item.label,
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w600,
+                                          color: inactiveLabel,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+
+                        if (isDockSlot) {
+                          slot = IgnorePointer(
+                            ignoring: dock > 0.5,
+                            child: Opacity(
+                              opacity: (1 - dock).clamp(0.0, 1.0),
+                              child: slot,
+                            ),
+                          );
+                        }
+
+                        return SizedBox(width: widths[index], child: slot);
+                      }).toList(),
+                    ),
+                  ],
+                );
+              },
             );
           },
         ),
@@ -269,7 +318,6 @@ class _BurstPainter extends CustomPainter {
     final Offset c = size.center(Offset.zero);
     final double fade = (1 - t).clamp(0.0, 1.0);
 
-    // cincin tipis yang melebar
     canvas.drawCircle(
       c,
       27.5 + 26 * t,
@@ -279,7 +327,6 @@ class _BurstPainter extends CustomPainter {
         ..color = a.withOpacity(0.35 * fade),
     );
 
-    // titik-titik memancar
     const int n = 8;
     for (int i = 0; i < n; i++) {
       final double ang = (i / n) * 2 * math.pi + 0.4;
@@ -300,6 +347,7 @@ class _BurstPainter extends CustomPainter {
 class NavPainter extends CustomPainter {
   final double centerX;
   final double stretch;
+  final double dipScale; // 1 = ada lekukan, 0 = bar lurus
   final Color topColor;
   final Color bottomColor;
   final Color edgeColor;
@@ -309,6 +357,7 @@ class NavPainter extends CustomPainter {
   NavPainter({
     required this.centerX,
     required this.stretch,
+    required this.dipScale,
     required this.topColor,
     required this.bottomColor,
     required this.edgeColor,
@@ -319,12 +368,12 @@ class NavPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // Lekukan melebar & sedikit dangkal saat bergerak (efek "cairan")
-    final double dipWidth = 65 * (1 + 0.32 * stretch);
-    final double dipHeight = 48 - 7 * stretch;
+    final double dipWidth = 65 * (1 + 0.32 * stretch) * dipScale;
+    final double dipHeight = (48 - 7 * stretch) * dipScale;
 
     final Path top = Path();
     top.moveTo(0, 0);
-    top.lineTo(centerX - (dipWidth + 5), 0);
+    top.lineTo(centerX - (dipWidth + 5 * dipScale), 0);
     top.cubicTo(
       centerX - dipWidth / 2, 0,
       centerX - dipWidth / 2, dipHeight,
@@ -333,7 +382,7 @@ class NavPainter extends CustomPainter {
     top.cubicTo(
       centerX + dipWidth / 2, dipHeight,
       centerX + dipWidth / 2, 0,
-      centerX + (dipWidth + 5), 0,
+      centerX + (dipWidth + 5 * dipScale), 0,
     );
     top.lineTo(size.width, 0);
 
@@ -386,6 +435,7 @@ class NavPainter extends CustomPainter {
   bool shouldRepaint(NavPainter old) =>
       old.centerX != centerX ||
       old.stretch != stretch ||
+      old.dipScale != dipScale ||
       old.topColor != topColor ||
       old.bottomColor != bottomColor ||
       old.edgeColor != edgeColor ||

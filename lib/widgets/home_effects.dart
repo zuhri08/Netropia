@@ -640,8 +640,8 @@ class _BackdropPainter extends CustomPainter {
     _Blob(0.90, 0.08, 0.62, 1, 0.00, 0.10, 0.05, Color(0xFFF0B993), 0.55),
     _Blob(0.05, 0.32, 0.55, 1, 0.35, 0.12, 0.06, Color(0xFFF6DCA0), 0.60),
     _Blob(0.95, 0.58, 0.58, 2, 0.60, 0.08, 0.06, Color(0xFFE3A99D), 0.40),
-    _Blob(0.10, 0.82, 0.60, 1, 0.15, 0.12, 0.05, Color(0xFFD9B79E), 0.50),
-    _Blob(0.60, 0.98, 0.50, 2, 0.80, 0.10, 0.04, Color(0xFFF2CDA6), 0.50),
+    _Blob(0.05, 0.60, 0.50, 1, 0.15, 0.10, 0.04, Color(0xFFD9B79E), 0.45),
+    _Blob(0.62, 0.30, 0.45, 2, 0.80, 0.08, 0.04, Color(0xFFF2CDA6), 0.45),
   ];
 
   @override
@@ -679,7 +679,8 @@ class _BackdropPainter extends CustomPainter {
       final double x = ((i * 0.137 + 0.05) % 1.0) +
           math.sin((t * 3 + i * 0.3) * 2 * math.pi) * 0.02;
       final double y = 1.05 - progress * 1.1;
-      final double fade = math.sin(progress * math.pi);
+      final double edge = ((1.0 - y) * 6).clamp(0.0, 1.0); // pudar sebelum tepi bawah
+      final double fade = math.sin(progress * math.pi) * edge;
       final double r = 2 + (i % 3) * 1.3;
       dot.color = const Color(0xFFAD8B73)
           .withOpacity((0.28 * fade * strength).clamp(0.0, 1.0));

@@ -5,6 +5,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../services/ai_service.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/ai_fly_effect.dart';
 
 class NetropiaAiScreen extends StatefulWidget {
   final String? initialMessage;
@@ -385,16 +386,19 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
       elevation: 0,
       title: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.psychology_rounded,
-              size: 20,
-              color: Colors.white,
+          AiBarIconSlot(
+            child: Container(
+              key: aiBarIconKey,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.psychology_rounded,
+                size: 20,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(width: 12),

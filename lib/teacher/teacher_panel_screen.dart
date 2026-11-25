@@ -80,12 +80,6 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
     'X TKJ 1',
     'X TKJ 2',
     'X TKJ 3',
-    'XI TKJ 1',
-    'XI TKJ 2',
-    'XI TKJ 3',
-    'XII TKJ 1',
-    'XII TKJ 2',
-    'XII TKJ 3',
   ];
 
   bool _isSubmitting = false;
@@ -714,110 +708,21 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               isEn ? 'Teacher Management Panel' : 'Panel Kelola Guru',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  indicator: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  labelColor: AppTheme.primaryBrown,
-                  unselectedLabelColor: Colors.white70,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  padding: const EdgeInsets.all(4),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
-                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 12),
-                  tabs: [
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.assignment_add, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Assignments' : 'Tugas'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.quiz_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Quizzes' : 'Soal Kuis'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.note_add_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Text Material' : 'Materi Teks'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.video_call_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Videos & Ref' : 'Video & Referensi'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.campaign_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Announcements' : 'Pengumuman'),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.assessment_rounded, size: 18),
-                            const SizedBox(width: 6),
-                            Text(isEn ? 'Gradebook' : 'Rekap & Feedback'),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            bottom: TabBar(
+              controller: _tabController,
+              indicatorColor: Colors.white,
+              indicatorWeight: 3,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.white70,
+              isScrollable: true,
+              tabs: [
+                Tab(icon: const Icon(Icons.assignment_add), text: isEn ? 'Assignments' : 'Tugas'),
+                Tab(icon: const Icon(Icons.quiz_rounded), text: isEn ? 'Quizzes' : 'Soal Kuis'),
+                Tab(icon: const Icon(Icons.note_add_rounded), text: isEn ? 'Text Material' : 'Materi Teks'),
+                Tab(icon: const Icon(Icons.video_call_rounded), text: isEn ? 'Videos & Ref' : 'Video & Referensi'),
+                Tab(icon: const Icon(Icons.campaign_rounded), text: isEn ? 'Announcements' : 'Pengumuman'),
+                Tab(icon: const Icon(Icons.assessment_rounded), text: isEn ? 'Gradebook & Feedback' : 'Rekap & Feedback'),
+              ],
             ),
           ),
           body: TabBarView(
@@ -1621,238 +1526,52 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
   }
 
   // =========================================================
-  // TAB 6: REFLEKSI & FEEDBACK SISWA + EXPORT PDF DETAIL
+  // TAB 6: REFLEKSI & FEEDBACK SISWA + EXPORT PDF
   // =========================================================
   Future<void> _exportGradebookToPdf(List<QueryDocumentSnapshot> students) async {
-    // 1. Fetch Quiz Results
-    final quizSnap = await _firestore
-        .collection('quiz_results')
-        .where('kelas', isEqualTo: _selectedGradebookClass)
-        .get();
-    final quizMap = <String, Map<String, dynamic>>{};
-    for (final doc in quizSnap.docs) {
-      final d = doc.data();
-      final uid = d['siswaId']?.toString() ?? doc.id;
-      quizMap[uid] = d;
-    }
-
-    // 2. Fetch Assignment Submissions
-    final assignmentSnap = await _firestore
-        .collection('assignment_submissions')
-        .where('kelas', isEqualTo: _selectedGradebookClass)
-        .get();
-    final assignmentMap = <String, Map<String, dynamic>>{};
-    for (final doc in assignmentSnap.docs) {
-      final d = doc.data();
-      final uid = d['siswaId']?.toString() ?? doc.id;
-      assignmentMap[uid] = d;
-    }
-
-    // 3. Fetch Project Submissions
-    final projectSnap = await _firestore
-        .collection('project_submissions')
-        .where('kelas', isEqualTo: _selectedGradebookClass)
-        .get();
-    final projectMap = <String, Map<String, dynamic>>{};
-    for (final doc in projectSnap.docs) {
-      final d = doc.data();
-      final uid = d['siswaId']?.toString() ?? doc.id;
-      projectMap[uid] = d;
-    }
-
-    // 4. Fetch Attendance Records
-    final attendanceSnap = await _firestore
-        .collection('attendance_records')
-        .where('kelas', isEqualTo: _selectedGradebookClass)
-        .get();
-    final attendanceCountMap = <String, int>{};
-    for (final doc in attendanceSnap.docs) {
-      final d = doc.data();
-      final uid = d['siswaId']?.toString() ?? '';
-      if (uid.isNotEmpty) {
-        attendanceCountMap[uid] = (attendanceCountMap[uid] ?? 0) + 1;
-      }
-    }
-
     final pdf = pw.Document();
-    final now = DateTime.now();
-    final dateStr = '${now.day}/${now.month}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} WIB';
-
-    double totalClassScore = 0;
-    int ratedStudentsCount = 0;
-
-    final tableData = students.asMap().entries.map((entry) {
-      final idx = entry.key + 1;
-      final data = entry.value.data() as Map<String, dynamic>;
-      final uid = entry.value.id;
-
-      final name = data['nama']?.toString() ?? 'Siswa';
-      final nisn = data['nisn']?.toString() ?? '-';
-
-      // Quiz
-      final qData = quizMap[uid];
-      final int quizScore = (qData?['score'] as num?)?.toInt() ?? 0;
-      final int cheatCount = (qData?['cheatViolations'] as num?)?.toInt() ?? 0;
-      final String cheatStatus = qData == null
-          ? 'Belum'
-          : (cheatCount > 0 ? 'Curang ($cheatCount x)' : 'Jujur');
-
-      // Assignment
-      final aData = assignmentMap[uid];
-      final int taskScore = (aData?['nilai'] as num?)?.toInt() ?? 0;
-      final String taskStatus = aData != null
-          ? (aData['nilai'] != null ? '$taskScore' : 'Terkumpul')
-          : 'Belum';
-
-      // Project
-      final pData = projectMap[uid];
-      final int projScore = (pData?['nilai'] as num?)?.toInt() ?? 0;
-      final String projStatus = pData != null
-          ? (pData['nilai'] != null ? '$projScore' : 'Terkumpul')
-          : 'Belum';
-
-      // Attendance
-      final int attendCount = attendanceCountMap[uid] ?? 0;
-
-      // Average calculation
-      int activeScores = 0;
-      int scoreSum = 0;
-      if (qData != null) { scoreSum += quizScore; activeScores++; }
-      if (aData?['nilai'] != null) { scoreSum += taskScore; activeScores++; }
-      if (pData?['nilai'] != null) { scoreSum += projScore; activeScores++; }
-
-      final double avg = activeScores > 0 ? (scoreSum / activeScores) : 0;
-      if (activeScores > 0) {
-        totalClassScore += avg;
-        ratedStudentsCount++;
-      }
-
-      String predikat = '-';
-      if (avg >= 85) predikat = 'Sangat Baik (A)';
-      else if (avg >= 75) predikat = 'Baik (B)';
-      else if (avg >= 60) predikat = 'Cukup (C)';
-      else if (activeScores > 0) predikat = 'Perlu Bimbingan';
-
-      return [
-        '$idx',
-        name,
-        nisn,
-        qData != null ? '$quizScore' : '-',
-        taskStatus,
-        projStatus,
-        '$attendCount Hadir',
-        cheatStatus,
-        activeScores > 0 ? avg.toStringAsFixed(1) : '-',
-        predikat,
-      ];
-    }).toList();
-
-    final double classAvg = ratedStudentsCount > 0 ? (totalClassScore / ratedStudentsCount) : 0;
 
     pdf.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
-        margin: const pw.EdgeInsets.all(24),
+        pageFormat: PdfPageFormat.a4,
         build: (pw.Context context) {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              // HEADER KOP LAPORAN
-              pw.Container(
-                padding: const pw.EdgeInsets.all(12),
-                decoration: pw.BoxDecoration(
-                  color: const PdfColor.fromInt(0xFF1F5C56),
-                  borderRadius: pw.BorderRadius.circular(8),
-                ),
+              pw.Header(
+                level: 0,
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text(
-                          'REKAPITULASI NILAI & CAPAIAN HASIL BELAJAR SISWA',
-                          style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-                        ),
-                        pw.SizedBox(height: 2),
-                        pw.Text(
-                          'NETROPIA - Media Pembelajaran Interaktif TKJ SMK',
-                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.white),
-                        ),
-                      ],
-                    ),
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.end,
-                      children: [
-                        pw.Text('Kelas: $_selectedGradebookClass', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
-                        pw.Text('Cetak: $dateStr', style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.white)),
-                      ],
-                    ),
+                    pw.Text('REKAP NILAI & KEHADIRAN SISWA NETROPIA', style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                    pw.Text('Kelas: $_selectedGradebookClass', style: const pw.TextStyle(fontSize: 11)),
                   ],
                 ),
               ),
-
-              pw.SizedBox(height: 12),
-
-              // RINGKASAN REKAP KELAS
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text('Total Siswa: ${students.length} Orang', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('Rata-Rata Kelas: ${classAvg.toStringAsFixed(1)} / 100', style: pw.TextStyle(fontSize: 9.5, fontWeight: pw.FontWeight.bold, color: const PdfColor.fromInt(0xFF1F5C56))),
-                ],
+              pw.SizedBox(height: 10),
+              pw.Table.fromTextArray(
+                headers: ['No', 'Nama Siswa', 'Email', 'Kelas', 'Role'],
+                data: students.asMap().entries.map((entry) {
+                  final idx = entry.key + 1;
+                  final data = entry.value.data() as Map<String, dynamic>;
+                  return [
+                    '$idx',
+                    data['nama'] ?? '-',
+                    data['email'] ?? '-',
+                    data['kelas'] ?? '-',
+                    (data['role'] ?? 'siswa').toString().toUpperCase(),
+                  ];
+                }).toList(),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFFAD8B73)),
+                rowDecoration: const pw.BoxDecoration(
+                  border: pw.Border(bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5)),
+                ),
               ),
-
-              pw.SizedBox(height: 8),
-
-              // TABEL DETAIL SISWA
-              pw.TableHelper.fromTextArray(
-                headers: [
-                  'No',
-                  'Nama Siswa',
-                  'NISN',
-                  'Kuis',
-                  'Tugas',
-                  'Project',
-                  'Presensi',
-                  'Kejujuran',
-                  'Rata2',
-                  'Predikat',
-                ],
-                data: tableData,
-                border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
-                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8.5),
-                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF0E3B37)),
-                cellStyle: const pw.TextStyle(fontSize: 8),
-                cellAlignment: pw.Alignment.centerLeft,
-                columnWidths: {
-                  0: const pw.FixedColumnWidth(20),
-                  1: const pw.FlexColumnWidth(2.5),
-                  2: const pw.FlexColumnWidth(1.5),
-                  3: const pw.FlexColumnWidth(1.0),
-                  4: const pw.FlexColumnWidth(1.2),
-                  5: const pw.FlexColumnWidth(1.2),
-                  6: const pw.FlexColumnWidth(1.2),
-                  7: const pw.FlexColumnWidth(1.6),
-                  8: const pw.FlexColumnWidth(1.0),
-                  9: const pw.FlexColumnWidth(1.8),
-                },
-              ),
-
               pw.SizedBox(height: 20),
-
-              // TANDA TANGAN GURU
               pw.Align(
                 alignment: pw.Alignment.centerRight,
-                child: pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.center,
-                  children: [
-                    pw.Text('Guru Mata Pelajaran TKJ,', style: const pw.TextStyle(fontSize: 9.5)),
-                    pw.SizedBox(height: 30),
-                    pw.Text('________________________', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
-                    pw.Text('NIP / NUPTK: ________________', style: const pw.TextStyle(fontSize: 8)),
-                  ],
-                ),
+                child: pw.Text('Dicetak pada: ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'),
               ),
             ],
           );
