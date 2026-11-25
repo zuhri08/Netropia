@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import '../theme/app_theme.dart';
 
 class TeacherResultsScreen extends StatefulWidget {
@@ -50,6 +53,206 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     );
   }
 
+  Future<void> _exportResultsToPdf() async {
+    final pdf = pw.Document();
+
+    final QuerySnapshot studentsSnap = _selectedClassFilter == 'Semua Kelas'
+        ? await _firestore.collection('users').where('role', isEqualTo: 'siswa').get()
+        : await _firestore.collection('users').where('kelas', isEqualTo: _selectedClassFilter).get();
+
+    final students = studentsSnap.docs;
+
+    final quizSnap = await _firestore.collection('quiz_results').get();
+    final quizMap = <String, Map<String, dynamic>>{};
+    for (final doc in quizSnap.docs) {
+      final d = doc.data() as Map<String, dynamic>;
+      final uid = d['siswaId']?.toString() ?? doc.id;
+      quizMap[uid] = d;
+    }
+
+    final assignmentSnap = await _firestore.collection('assignment_submissions').get();
+    final assignmentMap = <String, Map<String, dynamic>>{};
+    for (final doc in assignmentSnap.docs) {
+      final d = doc.data() as Map<String, dynamic>;
+      final uid = d['siswaId']?.toString() ?? doc.id;
+      assignmentMap[uid] = d;
+    }
+
+    final projectSnap = await _firestore.collection('project_submissions').get();
+    final projectMap = <String, Map<String, dynamic>>{};
+    for (final doc in projectSnap.docs) {
+      final d = doc.data() as Map<String, dynamic>;
+      final uid = d['siswaId']?.toString() ?? doc.id;
+      projectMap[uid] = d;
+    }
+
+    final now = DateTime.now();
+    final dateStr = '${now.day}/${now.month}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} WIB';
+
+    final tableData = students.asMap().entries.map((entry) {
+      final idx = entry.key + 1;
+      final data = entry.value.data() as Map<String, dynamic>;
+      final uid = entry.value.id;
+
+      final name = data['nama']?.toString() ?? 'Siswa';
+      final nisn = data['nisn']?.toString() ?? '-';
+      final kelasStr = data['kelas']?.toString() ?? _selectedClassFilter;
+
+      final qData = quizMap[uid];
+      final int quizScore = (qData?['score'] as num?)?.toInt() ?? 0;
+      final int cheatCount = (qData?['cheatViolations'] as num?)?.toInt() ?? 0;
+      final String cheatStatus = qData == null
+          ? 'Belum'
+          : (cheatCount > 0 ? 'Curang ($cheatCount x)' : 'Jujur');
+
+      final aData = assignmentMap[uid];
+      final int taskScore = (aData?['nilai'] as num?)?.toInt() ?? 0;
+      final String taskStatus = aData != null
+          ? (aData['nilai'] != null ? '$taskScore' : 'Terkumpul')
+          : 'Belum';
+
+      final pData = projectMap[uid];
+      final int projScore = (pData?['nilai'] as num?)?.toInt() ?? 0;
+      final String projStatus = pData != null
+          ? (pData['nilai'] != null ? '$projScore' : 'Terkumpul')
+          : 'Belum';
+
+      int activeScores = 0;
+      int scoreSum = 0;
+      if (qData != null) { scoreSum += quizScore; activeScores++; }
+      if (aData?['nilai'] != null) { scoreSum += taskScore; activeScores++; }
+      if (pData?['nilai'] != null) { scoreSum += projScore; activeScores++; }
+
+      final double avg = activeScores > 0 ? (scoreSum / activeScores) : 0;
+
+      String predikat = '-';
+      if (avg >= 85) {
+        predikat = 'Sangat Baik (A)';
+      } else if (avg >= 75) {
+        predikat = 'Baik (B)';
+      } else if (avg >= 60) {
+        predikat = 'Cukup (C)';
+      } else if (activeScores > 0) {
+        predikat = 'Perlu Bimbingan';
+      }
+
+      return [
+        '$idx',
+        name,
+        nisn,
+        kelasStr,
+        qData != null ? '$quizScore' : '-',
+        taskStatus,
+        projStatus,
+        cheatStatus,
+        activeScores > 0 ? avg.toStringAsFixed(1) : '-',
+        predikat,
+      ];
+    }).toList();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4.landscape,
+        margin: const pw.EdgeInsets.all(24),
+        build: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.all(12),
+                decoration: pw.BoxDecoration(
+                  color: const PdfColor.fromInt(0xFF1F5C56),
+                  borderRadius: pw.BorderRadius.circular(8),
+                ),
+                child: pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          'LAPORAN REKAPITULASI HASIL KUIS, TUGAS, & PROJECT SISWA',
+                          style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          'NETROPIA - Media Pembelajaran Interaktif TKJ SMK',
+                          style: const pw.TextStyle(fontSize: 9, color: PdfColors.white),
+                        ),
+                      ],
+                    ),
+                    pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.end,
+                      children: [
+                        pw.Text('Kelas: $_selectedClassFilter', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold, color: PdfColors.white)),
+                        pw.Text('Cetak: $dateStr', style: const pw.TextStyle(fontSize: 8.5, color: PdfColors.white)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              pw.SizedBox(height: 12),
+
+              pw.TableHelper.fromTextArray(
+                headers: [
+                  'No',
+                  'Nama Siswa',
+                  'NISN',
+                  'Kelas',
+                  'Kuis',
+                  'Tugas',
+                  'Project',
+                  'Kejujuran',
+                  'Rata2',
+                  'Predikat',
+                ],
+                data: tableData,
+                border: pw.TableBorder.all(color: PdfColors.grey400, width: 0.5),
+                headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold, color: PdfColors.white, fontSize: 8.5),
+                headerDecoration: const pw.BoxDecoration(color: PdfColor.fromInt(0xFF0E3B37)),
+                cellStyle: const pw.TextStyle(fontSize: 8),
+                cellAlignment: pw.Alignment.centerLeft,
+                columnWidths: {
+                  0: const pw.FixedColumnWidth(20),
+                  1: const pw.FlexColumnWidth(2.5),
+                  2: const pw.FlexColumnWidth(1.5),
+                  3: const pw.FlexColumnWidth(1.2),
+                  4: const pw.FlexColumnWidth(1.0),
+                  5: const pw.FlexColumnWidth(1.2),
+                  6: const pw.FlexColumnWidth(1.2),
+                  7: const pw.FlexColumnWidth(1.6),
+                  8: const pw.FlexColumnWidth(1.0),
+                  9: const pw.FlexColumnWidth(1.8),
+                },
+              ),
+
+              pw.SizedBox(height: 20),
+
+              pw.Align(
+                alignment: pw.Alignment.centerRight,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.Text('Guru Mata Pelajaran TKJ,', style: const pw.TextStyle(fontSize: 9.5)),
+                    pw.SizedBox(height: 30),
+                    pw.Text('________________________', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 9.5)),
+                    pw.Text('NIP / NUPTK: ________________', style: const pw.TextStyle(fontSize: 8)),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+      name: 'Laporan_Hasil_$_selectedClassFilter.pdf',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,6 +262,14 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
         backgroundColor: AppTheme.primaryBrown,
         foregroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.print_rounded),
+            tooltip: 'Cetak / Unduh PDF Laporan',
+            onPressed: _exportResultsToPdf,
+          ),
+          const SizedBox(width: 8),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -457,8 +668,8 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

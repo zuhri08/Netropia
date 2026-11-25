@@ -31,7 +31,12 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
 
   Future<void> _pickFile() async {
     final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
+    final image = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 35,
+    );
     if (image != null) {
       final bytes = await image.readAsBytes();
       final base64Str = base64Encode(bytes);
