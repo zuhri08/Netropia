@@ -14,7 +14,6 @@ import '../peminjaman/teacher_borrowing_screen.dart';
 import '../project/project_screen.dart';
 import '../materi/dasar_jaringan/portofolio_screen.dart';
 import '../services/localization_service.dart';
-import '../teacher/teacher_panel_screen.dart';
 import '../teacher/teacher_assignment_screen.dart';
 import '../teacher/teacher_quiz_screen.dart';
 import '../teacher/teacher_material_screen.dart';
