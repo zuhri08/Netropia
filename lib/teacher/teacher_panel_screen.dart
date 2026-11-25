@@ -1059,6 +1059,8 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               );
             },
           ),
+          const SizedBox(height: 24),
+          _buildQuizResultsSection(),
         ],
       ),
     );
@@ -1647,6 +1649,7 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
               ),
             ),
           ),
+          _buildQuizResultsSection(),
           const SizedBox(height: 20),
           const Text(
             'Refleksi & Evaluasi Siswa',
@@ -1822,6 +1825,159 @@ class _TeacherPanelScreenState extends State<TeacherPanelScreen>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuizResultsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Icon(Icons.quiz_rounded, color: AppTheme.primaryBrown),
+            const SizedBox(width: 8),
+            const Text(
+              'Hasil Pre-Test & Post-Test Siswa',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Tinjau skor kuis siswa serta laporan deteksi kecurangan (pindah aplikasi/tab saat kuis).',
+          style: TextStyle(fontSize: 12.5, color: Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('quiz_results')
+              .orderBy('createdAt', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final docs = snapshot.data?.docs ?? [];
+            if (docs.isEmpty) {
+              return const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(
+                    child: Text(
+                      'Belum ada hasil kuis yang dikumpulkan oleh siswa.',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+                final namaSiswa = data['namaSiswa'] ?? 'Siswa';
+                final kelas = data['kelas'] ?? '-';
+                final materiTitle = data['materiTitle'] ?? 'Kuis';
+                final testType = data['testType'] ?? 'Tes';
+                final score = data['score'] ?? 0;
+                final correct = data['correct'] ?? 0;
+                final total = data['totalQuestions'] ?? 25;
+                final cheatCount = data['cheatViolations'] ?? 0;
+                final isCheated = cheatCount > 0;
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: score >= 75 ? Colors.green.shade100 : Colors.orange.shade100,
+                              child: Text(
+                                '$score',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: score >= 75 ? Colors.green.shade900 : Colors.orange.shade900,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '$namaSiswa ($kelas)',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '$testType: $materiTitle • Benar $correct dari $total',
+                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isCheated ? AppTheme.accentRed.withOpacity(0.12) : Colors.green.withOpacity(0.12),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                isCheated ? '⚠️ Curang ($cheatCount x)' : '✅ Jujur',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: isCheated ? AppTheme.accentRed : Colors.green.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (isCheated) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentRed.withOpacity(0.08),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppTheme.accentRed.withOpacity(0.3)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.warning_amber_rounded, color: AppTheme.accentRed, size: 18),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Peringatan: Siswa terdeteksi keluar dari layar ujian sebanyak $cheatCount kali saat tes!',
+                                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold, color: AppTheme.accentRed),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
+      ],
     );
   }
 
