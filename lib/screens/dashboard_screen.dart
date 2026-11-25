@@ -21,6 +21,7 @@ import '../teacher/teacher_material_screen.dart';
 import '../teacher/teacher_announcement_screen.dart';
 import '../teacher/teacher_reflection_screen.dart';
 import '../teacher/teacher_gradebook_screen.dart';
+import '../teacher/teacher_results_screen.dart';
 import 'notification_screen.dart';
 import '../widgets/home_effects.dart';
 
@@ -1347,6 +1348,8 @@ class DashboardScreen extends StatelessWidget {
           () => const TeacherMaterialScreen()),
       _TeacherAction(Icons.campaign_rounded, 'Pengumuman', 4,
           () => const TeacherAnnouncementScreen()),
+      _TeacherAction(Icons.assignment_turned_in_rounded, 'Hasil Kuis & Tugas', 0,
+          () => const TeacherResultsScreen()),
     ];
     final lab = <_TeacherAction>[
       _TeacherAction(Icons.rate_review_rounded, 'Ulasan & Refleksi', 3,
