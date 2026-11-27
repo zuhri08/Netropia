@@ -591,57 +591,66 @@ class DashboardScreen extends StatelessWidget {
     return AnimatedHeroCard(
       colors: const [
         Color(0xFFAD8B73),
-        Color(0xFFCEAB93),
+        Color(0xFF8E6F5B),
       ],
-      borderRadius: 20,
+      borderRadius: 22,
       padding: const EdgeInsets.all(18),
       shadowColor: const Color(0xFFAD8B73),
+      shadowOpacity: 0.35,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            localizationService.translate('continue_learning'),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              '6 MODUL UTAMA • PEMBELAJARAN TKJ',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+              ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.18),
+                  color: Colors.white.withValues(alpha: 0.20),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Floating(
                   amplitude: 3,
                   child: Icon(
-                    Icons.menu_book_rounded,
+                    Icons.school_rounded,
                     color: Colors.white,
-                    size: 28,
+                    size: 26,
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'K3LH',
+                      'Materi Pembelajaran TKJ',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 2),
                     Text(
-                      'Modul Pembelajaran',
+                      'Pelajari konsep jaringan & perakitan PC',
                       style: TextStyle(
                         color: Colors.white70,
                         fontSize: 12,
@@ -652,40 +661,20 @@ class DashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Row(
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
             children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: 0.66),
-                    duration: const Duration(milliseconds: 2200),
-                    curve: const Interval(0.35, 1.0, curve: Curves.easeOutCubic),
-                    builder: (context, value, _) => LinearProgressIndicator(
-                      value: value,
-                      minHeight: 7,
-                      backgroundColor: const Color(0x55FFFFFF),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              const CountUpText(
-                value: 66,
-                suffix: '%',
-                duration: Duration(milliseconds: 2200),
-                curve: Interval(0.35, 1.0, curve: Curves.easeOutCubic),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              _buildHeroModuleChip(context, '🛡️ K3LH', const K3Screen()),
+              _buildHeroModuleChip(context, '💻 Komputer', const KomponenKomputerScreen()),
+              _buildHeroModuleChip(context, '🌐 Perangkat', const PerangkatJaringanScreen()),
+              _buildHeroModuleChip(context, '🔌 Dasar Jaringan', const DasarJaringanScreen()),
+              _buildHeroModuleChip(context, '📡 IP Address', const IpAddressScreen()),
+              _buildHeroModuleChip(context, '🪛 Kabel Jaringan', const KabelJaringanScreen()),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             height: 44,
@@ -697,9 +686,9 @@ class DashboardScreen extends StatelessWidget {
                 Icons.play_circle_fill_rounded,
                 size: 20,
               ),
-              label: Text(
-                localizationService.translate('continue_button'),
-                style: const TextStyle(
+              label: const Text(
+                'Buka Seluruh Materi TKJ',
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13.5,
                 ),
@@ -708,6 +697,44 @@ class DashboardScreen extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFFAD8B73),
                 elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroModuleChip(BuildContext context, String label, Widget targetScreen) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetScreen),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
