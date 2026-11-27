@@ -5,6 +5,12 @@ import '../services/notification_service.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
 import '../materi/ebook_list_screen.dart';
+import '../materi/k3/k3_screen.dart';
+import '../materi/komponen_komputer/komponen_komputer_screen.dart';
+import '../materi/perangkat_jaringan/perangkat_jaringan_screen.dart';
+import '../materi/dasar_jaringan/dasar_jaringan_screen.dart';
+import '../materi/ip_address/ip_address_screen.dart';
+import '../materi/kabel_jaringan/kabel_jaringan_screen.dart';
 import '../kalkulator_subnet/subnet_calculator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -918,40 +924,49 @@ class DashboardScreen extends StatelessWidget {
                                     color: _cardSub(context),
                                   ),
                                 ),
-                                const SizedBox(height: 10),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [st.accentLight, st.accent],
-                                    ),
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: st.accent.withOpacity(0.35),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        localizationService.isEnglish
-                                            ? 'Start learning'
-                                            : 'Mulai belajar',
-                                        style: const TextStyle(
-                                          fontSize: 11.5,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 6,
+                                  runSpacing: 6,
+                                  children: [
+                                    _buildModuleChip(context, '🛡️ K3LH', const K3Screen()),
+                                    _buildModuleChip(context, '💻 Komputer', const KomponenKomputerScreen()),
+                                    _buildModuleChip(context, '🌐 Perangkat', const PerangkatJaringanScreen()),
+                                    _buildModuleChip(context, '🔌 Dasar Jaringan', const DasarJaringanScreen()),
+                                    _buildModuleChip(context, '📡 IP Address', const IpAddressScreen()),
+                                    _buildModuleChip(context, '🪛 Kabel Jaringan', const KabelJaringanScreen()),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton.icon(
+                                        onPressed: () => _openMateri(context),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: st.accent,
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(vertical: 8),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                         ),
+                                        icon: const Icon(Icons.school_rounded, size: 16),
+                                        label: const Text('Buka 6 Modul TKJ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    OutlinedButton.icon(
+                                      onPressed: () => _openEbooks(context),
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: st.accent,
+                                        side: BorderSide(color: st.accent),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      ),
+                                      icon: const Icon(Icons.menu_book_rounded, size: 16),
+                                      label: const Text('Flipbook 3D', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -963,6 +978,35 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModuleChip(BuildContext context, String label, Widget targetScreen) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => targetScreen),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF382A22) : const Color(0xFFF3EBE1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.25)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.primaryBrown,
           ),
         ),
       ),
