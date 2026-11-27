@@ -735,17 +735,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildSectionLabel(BuildContext context, String text, int index) {
     return FadeSlideIn(
       delay: Duration(milliseconds: 380 + index * 90),
