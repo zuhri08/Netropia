@@ -59,15 +59,26 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
+        _pageImages = [];
       });
 
       final ByteData data = await rootBundle.load(widget.assetPath);
       final Uint8List bytes = data.buffer.asUint8List();
 
       final List<Uint8List> renderedPages = [];
-      await for (final page in Printing.raster(bytes, dpi: 150)) {
+      await for (final page in Printing.raster(bytes, dpi: 100)) {
         final imageBytes = await page.toPng();
         renderedPages.add(imageBytes);
+
+        // Tampilkan halaman pertama secara instan (<0.3 detik)
+        if (renderedPages.length == 1 && mounted) {
+          setState(() {
+            _pageImages = List.from(renderedPages);
+            _totalPages = 1;
+            _isLoading = false;
+            _pageInputController.text = '1';
+          });
+        }
       }
 
       if (mounted) {
@@ -75,13 +86,13 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
           _pageImages = renderedPages;
           _totalPages = renderedPages.length;
           _isLoading = false;
-          _pageInputController.text = '1';
         });
       }
     } catch (e) {
+      debugPrint('Error loading flipbook PDF: $e');
       if (mounted) {
         setState(() {
-          _errorMessage = 'Gagal memuat file PDF. $e';
+          _errorMessage = 'Gagal memuat file E-Book PDF.\nDetail error: $e';
           _isLoading = false;
         });
       }
@@ -193,7 +204,6 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
             },
             child: Stack(
               children: [
-                // Loading Skeleton / Error State / Flipbook Content
                 if (_isLoading)
                   _buildLoadingSkeleton()
                 else if (_errorMessage != null)
@@ -201,7 +211,6 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
                 else
                   _buildFlipbookView(isDark),
 
-                // Floating Toolbar Minimalis (Auto-Hideable)
                 if (!_isLoading && _errorMessage == null && _showToolbar)
                   Positioned(
                     left: 16,
@@ -226,11 +235,11 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
             width: 140,
             height: 180,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppTheme.primaryBrown.withOpacity(0.2),
+                  color: AppTheme.primaryBrown.withValues(alpha: 0.2),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -377,7 +386,7 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(isDark ? 0.4 : 0.15),
+              color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.15),
               blurRadius: 25,
               offset: const Offset(0, 10),
             ),
@@ -385,24 +394,21 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
         ),
         child: Row(
           children: [
-            // Left Page
             Expanded(
               child: _buildSinglePageCard(leftIndex, isDark, isLeftInSpread: true),
             ),
-            // Spine Shadow (Lipatan Tengah Buku)
             Container(
               width: 12,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withOpacity(0.18),
+                    Colors.black.withValues(alpha: 0.18),
                     Colors.transparent,
-                    Colors.black.withOpacity(0.18),
+                    Colors.black.withValues(alpha: 0.18),
                   ],
                 ),
               ),
             ),
-            // Right Page
             Expanded(
               child: hasRightPage
                   ? _buildSinglePageCard(rightIndex, isDark, isRightInSpread: true)
@@ -443,7 +449,7 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isDark ? 0.35 : 0.12),
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -458,23 +464,20 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
         ),
         child: Stack(
           children: [
-            // Page Image
             Positioned.fill(
               child: Image.memory(
                 imageBytes,
                 fit: BoxFit.contain,
               ),
             ),
-
-            // Inner Shadow & Paper Texture Effect
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.black.withOpacity(0.04),
+                      Colors.black.withValues(alpha: 0.04),
                       Colors.transparent,
-                      Colors.black.withOpacity(0.03),
+                      Colors.black.withValues(alpha: 0.03),
                     ],
                     begin: Alignment.centerLeft,
                     end: Alignment.centerRight,
@@ -482,8 +485,6 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
                 ),
               ),
             ),
-
-            // Page Number Badge
             Positioned(
               bottom: 10,
               right: isLeftInSpread ? null : 14,
@@ -491,7 +492,7 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.6),
+                  color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -514,30 +515,27 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: (isDark ? Colors.grey.shade900 : Colors.white).withOpacity(0.92),
+        color: (isDark ? Colors.grey.shade900 : Colors.white).withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.18),
+            color: Colors.black.withValues(alpha: 0.18),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.1) : AppTheme.borderCream,
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : AppTheme.borderCream,
         ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Previous Button
           IconButton(
             icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
             tooltip: 'Halaman Sebelumnya',
             onPressed: _currentPage > 0 ? () => _goToPage(_currentPage) : null,
           ),
-
-          // Page Number Jump Input
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -569,8 +567,6 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
               ),
             ],
           ),
-
-          // Zoom Controls
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -593,8 +589,6 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
               ),
             ],
           ),
-
-          // Next Button
           IconButton(
             icon: const Icon(Icons.arrow_forward_ios_rounded, size: 18),
             tooltip: 'Halaman Berikutnya',
