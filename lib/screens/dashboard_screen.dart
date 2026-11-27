@@ -5,6 +5,7 @@ import '../services/notification_service.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
 import '../materi/ebook_list_screen.dart';
+import '../materi/pdf_flipbook_reader_screen.dart';
 import '../materi/k3/k3_screen.dart';
 import '../materi/komponen_komputer/komponen_komputer_screen.dart';
 import '../materi/perangkat_jaringan/perangkat_jaringan_screen.dart';
@@ -337,9 +338,9 @@ class DashboardScreen extends StatelessWidget {
                       _buildFeaturedMenuCard(
                         context,
                         index: 0,
-                        title: localizationService.translate('study_materials'),
-                        subtitle: localizationService.translate('study_materials_desc'),
-                        icon: Icons.menu_book_rounded,
+                        title: 'E-Book Flipbook 3D',
+                        subtitle: 'Buku Paket Resmi SMK TKJ Interaktif 3D',
+                        icon: Icons.auto_stories_rounded,
                         iconColor: const Color(0xFFAD8B73),
                         backgroundColor: const Color(0xFFF4EBE8),
                         onTap: () {
@@ -930,12 +931,12 @@ class DashboardScreen extends StatelessWidget {
                                   spacing: 6,
                                   runSpacing: 6,
                                   children: [
-                                    _buildModuleChip(context, '🛡️ K3LH', const K3Screen()),
-                                    _buildModuleChip(context, '💻 Komputer', const KomponenKomputerScreen()),
-                                    _buildModuleChip(context, '🌐 Perangkat', const PerangkatJaringanScreen()),
-                                    _buildModuleChip(context, '🔌 Dasar Jaringan', const DasarJaringanScreen()),
-                                    _buildModuleChip(context, '📡 IP Address', const IpAddressScreen()),
-                                    _buildModuleChip(context, '🪛 Kabel Jaringan', const KabelJaringanScreen()),
+                                    _buildEbookChip(context, '📖 Jaringan 1', 'Jaringan Dasar 1', 'assets/ebook/Kelas_10_SMK_Jaringan_Dasar_1.pdf'),
+                                    _buildEbookChip(context, '📖 Jaringan 2', 'Jaringan Dasar 2', 'assets/ebook/Kelas_10_SMK_Jaringan_Dasar_2.pdf'),
+                                    _buildEbookChip(context, '💻 Perakitan PC 1', 'Perakitan Komputer 1', 'assets/ebook/Kelas_10_SMK_Perakitan_Komputer_1.pdf'),
+                                    _buildEbookChip(context, '💻 Perakitan PC 2', 'Perakitan Komputer 2', 'assets/ebook/Kelas_10_SMK_Perakitan_Komputer_2.pdf'),
+                                    _buildEbookChip(context, '🖥️ Sistem Operasi', 'Sistem Operasi 1', 'assets/ebook/Kelas_10_SMK_Sistem_Operasi_1.pdf'),
+                                    _buildEbookChip(context, '🌐 Pemrograman Web', 'Pemrograman Web 1', 'assets/ebook/Kelas_10_SMK_Pemrograman_Web_1.pdf'),
                                   ],
                                 ),
                                 const SizedBox(height: 14),
@@ -943,7 +944,7 @@ class DashboardScreen extends StatelessWidget {
                                   children: [
                                     Expanded(
                                       child: ElevatedButton.icon(
-                                        onPressed: () => _openMateri(context),
+                                        onPressed: () => _openEbooks(context),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: st.accent,
                                           foregroundColor: Colors.white,
@@ -951,21 +952,21 @@ class DashboardScreen extends StatelessWidget {
                                           padding: const EdgeInsets.symmetric(vertical: 8),
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                         ),
-                                        icon: const Icon(Icons.school_rounded, size: 16),
-                                        label: const Text('Buka 6 Modul TKJ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                        icon: const Icon(Icons.flip_to_front_rounded, size: 16),
+                                        label: const Text('Buka Flipbook 3D', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     OutlinedButton.icon(
-                                      onPressed: () => _openEbooks(context),
+                                      onPressed: () => _openMateri(context),
                                       style: OutlinedButton.styleFrom(
                                         foregroundColor: st.accent,
                                         side: BorderSide(color: st.accent),
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                       ),
-                                      icon: const Icon(Icons.menu_book_rounded, size: 16),
-                                      label: const Text('Flipbook 3D', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
+                                      icon: const Icon(Icons.school_rounded, size: 16),
+                                      label: const Text('Modul Materi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
                                     ),
                                   ],
                                 ),
@@ -985,8 +986,39 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleChip(BuildContext context, String label, Widget targetScreen) {
+  Widget _buildEbookChip(BuildContext context, String label, String title, String assetPath) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PdfFlipbookReaderScreen(
+              assetPath: assetPath,
+              title: title,
+            ),
+          ),
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF382A22) : const Color(0xFFF3EBE1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.25)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : AppTheme.primaryBrown,
+          ),
+        ),
+      ),
+    );
+  }
     return InkWell(
       onTap: () {
         Navigator.push(
