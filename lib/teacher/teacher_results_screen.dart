@@ -668,8 +668,8 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
               );
             },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
