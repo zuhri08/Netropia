@@ -926,19 +926,6 @@ class DashboardScreen extends StatelessWidget {
                                     color: _cardSub(context),
                                   ),
                                 ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 6,
-                                  runSpacing: 6,
-                                  children: [
-                                    _buildEbookChip(context, '📖 Jaringan 1', 'Jaringan Dasar 1', 'assets/ebook/Kelas_10_SMK_Jaringan_Dasar_1.pdf'),
-                                    _buildEbookChip(context, '📖 Jaringan 2', 'Jaringan Dasar 2', 'assets/ebook/Kelas_10_SMK_Jaringan_Dasar_2.pdf'),
-                                    _buildEbookChip(context, '💻 Perakitan PC 1', 'Perakitan Komputer 1', 'assets/ebook/Kelas_10_SMK_Perakitan_Komputer_1.pdf'),
-                                    _buildEbookChip(context, '💻 Perakitan PC 2', 'Perakitan Komputer 2', 'assets/ebook/Kelas_10_SMK_Perakitan_Komputer_2.pdf'),
-                                    _buildEbookChip(context, '🖥️ Sistem Operasi', 'Sistem Operasi 1', 'assets/ebook/Kelas_10_SMK_Sistem_Operasi_1.pdf'),
-                                    _buildEbookChip(context, '🌐 Pemrograman Web', 'Pemrograman Web 1', 'assets/ebook/Kelas_10_SMK_Pemrograman_Web_1.pdf'),
-                                  ],
-                                ),
                                 const SizedBox(height: 14),
                                 Row(
                                   children: [
@@ -986,39 +973,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEbookChip(BuildContext context, String label, String title, String assetPath) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PdfFlipbookReaderScreen(
-              assetPath: assetPath,
-              title: title,
-            ),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF382A22) : const Color(0xFFF3EBE1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.25)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : AppTheme.primaryBrown,
-          ),
-        ),
-      ),
-    );
-  }
   /// Kartu kecil terang (grid 2 kolom).
   Widget _buildMenuCard(
     BuildContext context, {
