@@ -926,36 +926,40 @@ class DashboardScreen extends StatelessWidget {
                                     color: _cardSub(context),
                                   ),
                                 ),
-                                const SizedBox(height: 14),
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: ElevatedButton.icon(
-                                        onPressed: () => _openEbooks(context),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: st.accent,
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          padding: const EdgeInsets.symmetric(vertical: 8),
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [st.accentLight, st.accent],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: st.accent.withValues(alpha: 0.35),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        localizationService.isEnglish
+                                            ? 'Start reading'
+                                            : 'Mulai membaca',
+                                        style: const TextStyle(
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
-                                        icon: const Icon(Icons.flip_to_front_rounded, size: 16),
-                                        label: const Text('Buka Flipbook 3D', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                                       ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    OutlinedButton.icon(
-                                      onPressed: () => _openMateri(context),
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: st.accent,
-                                        side: BorderSide(color: st.accent),
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      ),
-                                      icon: const Icon(Icons.school_rounded, size: 16),
-                                      label: const Text('Modul Materi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5)),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
