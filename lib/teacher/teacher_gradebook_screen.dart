@@ -366,15 +366,23 @@ class _TeacherGradebookScreenState extends State<TeacherGradebookScreen> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final docs = snapshot.data?.docs ?? [];
+            final allDocs = snapshot.data?.docs ?? [];
+            final docs = _selectedGradebookClass == 'Semua Kelas'
+                ? allDocs
+                : allDocs.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final k = data['kelas']?.toString() ?? '';
+                    return k == _selectedGradebookClass;
+                  }).toList();
+
             if (docs.isEmpty) {
-              return const Card(
+              return Card(
                 child: Padding(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   child: Center(
                     child: Text(
-                      'Belum ada data presensi siswa.',
-                      style: TextStyle(color: Colors.grey),
+                      'Belum ada data presensi siswa untuk kelas $_selectedGradebookClass.',
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
                 ),
