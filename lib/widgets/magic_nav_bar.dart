@@ -64,10 +64,11 @@ class _MagicNavBarState extends State<MagicNavBar>
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final bool reduce = MediaQuery.of(context).disableAnimations;
 
+    // Bar lebih terang daripada latar halaman (krem-pasir) supaya jelas terpisah.
     final Color barTop =
-        isDark ? const Color(0xFF2E2520) : const Color(0xFFFFF4E3);
+        isDark ? const Color(0xFF2E2520) : const Color(0xFFFFFCF6);
     final Color barBottom =
-        isDark ? const Color(0xFF231B17) : const Color(0xFFEBD8C3);
+        isDark ? const Color(0xFF231B17) : const Color(0xFFFBEFDF);
     final Color edgeLine = isDark
         ? Colors.white.withOpacity(0.08)
         : AppTheme.primaryBrown.withOpacity(0.28);

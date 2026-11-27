@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -6,6 +8,7 @@ import '../services/ai_service.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ai_fly_effect.dart';
+import '../widgets/home_effects.dart';
 
 class NetropiaAiScreen extends StatefulWidget {
   final String? initialMessage;
@@ -350,7 +353,10 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           appBar: _buildAppBar(),
           endDrawer: _buildHistoryDrawer(isDark),
-          body: Column(
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AnimatedBackdrop()),
+              Column(
             children: [
               Expanded(
                 child: _messages.isEmpty
@@ -374,6 +380,8 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
               _buildInputArea(isDark),
             ],
           ),
+            ],
+          ),
         );
       },
     );
@@ -381,9 +389,11 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: AppTheme.primaryBrown,
+      backgroundColor: Colors.transparent,
       foregroundColor: Colors.white,
       elevation: 0,
+      scrolledUnderElevation: 0,
+      flexibleSpace: const BrandAppBarBackground(),
       title: Row(
         children: [
           AiBarIconSlot(
@@ -469,7 +479,11 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
           children: [
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              color: AppTheme.primaryBrown,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFAD8B73), Color(0xFFC4A58C)],
+                ),
+              ),
               child: Row(
                 children: [
                   const Icon(Icons.history_rounded, color: Colors.white),
@@ -556,22 +570,82 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline_rounded,
-            size: 70,
-            color: AppTheme.textMuted,
-          ),
-          SizedBox(height: 14),
-          Text(
-            'Belum ada percakapan',
-            style: TextStyle(color: AppTheme.textMuted),
+  Widget _aiAvatar({double size = 32}) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          colors: [Color(0xFFC4A58C), AppTheme.primaryBrown],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryBrown.withOpacity(0.35),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
+      ),
+      child: Icon(Icons.psychology_rounded, color: Colors.white, size: size * 0.58),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final en = localizationService.isEnglish;
+    return Center(
+      child: FadeSlideIn(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Floating(
+                amplitude: 6,
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFC4A58C), AppTheme.primaryBrown],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryBrown.withOpacity(0.4),
+                        blurRadius: 24,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.psychology_rounded,
+                      color: Colors.white, size: 54),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                en ? 'Hi, I am Netropia AI' : 'Halo, aku Netropia AI',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.darkBrown,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                en
+                    ? 'Ask me anything about TKJ lessons.'
+                    : 'Tanyakan apa saja seputar materi TKJ.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppTheme.textMuted),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -582,82 +656,113 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
         ? Colors.white
         : (isDark ? Colors.white : AppTheme.textDark);
 
-    final bubbleColor = isUser
-        ? AppTheme.primaryBrown
-        : (isDark ? Theme.of(context).cardColor : Colors.white);
-
-    return Align(
-      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.84,
-        ),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(isUser ? 16 : 4),
-            bottomRight: Radius.circular(isUser ? 4 : 16),
-          ),
-          border: Border.all(
-            color: isUser
-                ? Colors.transparent
-                : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (isUser)
-              Text(
-                message.message,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 13.5,
-                  height: 1.5,
-                ),
+    final bubble = Container(
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * (isUser ? 0.78 : 0.74),
+      ),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: isUser
+            ? const LinearGradient(
+                colors: [Color(0xFFC4A58C), AppTheme.primaryBrown],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               )
-            else
-              MarkdownBody(
-                data: message.message,
-                selectable: true,
-                styleSheet: _buildMarkdownStyle(textColor, isDark),
+            : null,
+        color: isUser
+            ? null
+            : (isDark ? Theme.of(context).cardColor : Colors.white),
+        borderRadius: BorderRadius.only(
+          topLeft: const Radius.circular(18),
+          topRight: const Radius.circular(18),
+          bottomLeft: Radius.circular(isUser ? 18 : 4),
+          bottomRight: Radius.circular(isUser ? 4 : 18),
+        ),
+        border: isUser
+            ? null
+            : Border.all(
+                color: isDark
+                    ? Colors.white.withOpacity(0.08)
+                    : AppTheme.primaryBrown.withOpacity(0.15),
               ),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryBrown.withOpacity(isUser ? 0.3 : 0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (isUser)
+            Text(
+              message.message,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 13.5,
+                height: 1.5,
+              ),
+            )
+          else
+            MarkdownBody(
+              data: message.message,
+              selectable: true,
+              styleSheet: _buildMarkdownStyle(textColor, isDark),
+            ),
 
-            if (!isUser) ...[
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: InkWell(
-                  onTap: () => _copyToClipboard(message.message),
-                  borderRadius: BorderRadius.circular(8),
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.copy_rounded,
-                          size: 14,
+          if (!isUser) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: InkWell(
+                onTap: () => _copyToClipboard(message.message),
+                borderRadius: BorderRadius.circular(8),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.copy_rounded,
+                        size: 14,
+                        color: AppTheme.textMuted,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Salin',
+                        style: TextStyle(
+                          fontSize: 11,
                           color: AppTheme.textMuted,
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          'Salin',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppTheme.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+            ),
+          ],
+        ],
+      ),
+    );
+
+    return FadeSlideIn(
+      duration: const Duration(milliseconds: 450),
+      offset: Offset(isUser ? 30 : -30, 10),
+      scaleFrom: 0.96,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            if (!isUser) ...[
+              _aiAvatar(),
+              const SizedBox(width: 8),
             ],
+            Flexible(child: bubble),
           ],
         ),
       ),
@@ -679,80 +784,135 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
 
   Widget _buildLoadingBubble() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isDark ? Theme.of(context).cardColor : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppTheme.borderCream),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppTheme.primaryBrown,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          _aiAvatar(),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: isDark ? Theme.of(context).cardColor : Colors.white,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(18),
+                topRight: Radius.circular(18),
+                bottomRight: Radius.circular(18),
+                bottomLeft: Radius.circular(4),
               ),
+              border: Border.all(
+                color: AppTheme.primaryBrown.withOpacity(0.15),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.primaryBrown.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-            SizedBox(width: 12),
-            Text(
-              'Netropia AI sedang memproses jawaban...',
-              style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _TypingDots(),
+                SizedBox(width: 12),
+                Text(
+                  'Netropia AI sedang memproses jawaban...',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildQuickPrompts() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Text(
-            'COBA TANYAKAN',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.8,
-              color: AppTheme.textMuted,
-            ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: Row(
+            children: [
+              Container(
+                width: 4,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBrown,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'COBA TANYAKAN',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.0,
+                  color: AppTheme.textMuted,
+                ),
+              ),
+            ],
           ),
         ),
         SizedBox(
-          height: 40,
+          height: 46,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: _quickPrompts.length,
             itemBuilder: (context, index) {
               final prompt = _quickPrompts[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ActionChip(
-                  avatar: const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 14,
-                    color: AppTheme.primaryBrown,
+              final accent = kAccentPalette[index % kAccentPalette.length];
+              return FadeSlideIn(
+                delay: Duration(milliseconds: 80 * index),
+                offset: const Offset(24, 0),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10, bottom: 4),
+                  child: PressScale(
+                    pressedScale: 0.94,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: _isLoading ? null : () => _sendQuickPrompt(prompt),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          decoration: BoxDecoration(
+                            gradient: softCardGradient(context, accent),
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: accent.withOpacity(0.3)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: accent.withOpacity(0.15),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.auto_awesome_rounded,
+                                  size: 15, color: accent),
+                              const SizedBox(width: 6),
+                              Text(
+                                prompt,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : AppTheme.textDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  label: Text(
-                    prompt,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textDark),
-                  ),
-                  backgroundColor: AppTheme.surfaceCream,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    side: const BorderSide(color: AppTheme.borderCream),
-                  ),
-                  onPressed: _isLoading ? null : () => _sendQuickPrompt(prompt),
                 ),
               );
             },
@@ -763,56 +923,133 @@ class _NetropiaAiScreenState extends State<NetropiaAiScreen> {
   }
 
   Widget _buildInputArea(bool isDark) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 95),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border(
-          top: BorderSide(
-            color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-          ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 14, 95),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: isDark ? Theme.of(context).cardColor : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: AppTheme.primaryBrown.withOpacity(0.2)),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryBrown.withOpacity(0.16),
+              blurRadius: 18,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              enabled: !_isLoading,
-              textInputAction: TextInputAction.send,
-              minLines: 1,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: 'Tanyakan tentang materi TKJ...',
-                hintStyle: const TextStyle(fontSize: 13.5, color: AppTheme.textMuted),
-                filled: true,
-                fillColor: isDark ? const Color(0xFF2E241E) : AppTheme.surfaceCream,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                  borderSide: BorderSide.none,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                enabled: !_isLoading,
+                textInputAction: TextInputAction.send,
+                minLines: 1,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'Tanyakan tentang materi TKJ...',
+                  hintStyle: TextStyle(fontSize: 13.5, color: AppTheme.textMuted),
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                ),
+                onSubmitted: (_) => _handleSend(),
+              ),
+            ),
+            const SizedBox(width: 6),
+            PressScale(
+              pressedScale: 0.9,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: _isLoading
+                        ? [Colors.grey.shade400, Colors.grey.shade500]
+                        : const [Color(0xFFC4A58C), AppTheme.primaryBrown],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryBrown.withOpacity(0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.send_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: _isLoading ? null : _handleSend,
                 ),
               ),
-              onSubmitted: (_) => _handleSend(),
             ),
-          ),
-          const SizedBox(width: 10),
-          Container(
-            decoration: const BoxDecoration(
-              color: AppTheme.primaryBrown,
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.send_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              onPressed: _isLoading ? null : _handleSend,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Tiga titik yang melompat bergantian (indikator "sedang mengetik").
+class _TypingDots extends StatefulWidget {
+  const _TypingDots();
+
+  @override
+  State<_TypingDots> createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<_TypingDots>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c;
+
+  @override
+  void initState() {
+    super.initState();
+    _c = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, _) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (i) {
+            final t = (_c.value + (2 - i) * 0.18) % 1.0;
+            final v = math.sin(t * math.pi);
+            return Transform.translate(
+              offset: Offset(0, -5 * v),
+              child: Container(
+                width: 7,
+                height: 7,
+                margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppTheme.primaryBrown.withOpacity(0.4 + 0.6 * v),
+                ),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

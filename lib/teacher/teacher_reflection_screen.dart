@@ -286,20 +286,20 @@ class _TeacherReflectionScreenState extends State<TeacherReflectionScreen> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.tealTint,
+                                  color: const Color(0xFFE0F2F1),
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: AppTheme.primaryTeal.withValues(alpha: 0.3)),
+                                  border: Border.all(color: const Color(0xFF00897B).withValues(alpha: 0.3)),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Row(
                                       children: [
-                                        Icon(Icons.check_circle_rounded, size: 16, color: AppTheme.primaryTeal),
+                                        Icon(Icons.check_circle_rounded, size: 16, color: Color(0xFF00897B)),
                                         SizedBox(width: 6),
                                         Text(
                                           'Tanggapan / Catatan Guru:',
-                                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryTeal),
+                                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF00897B)),
                                         ),
                                       ],
                                     ),
@@ -333,8 +333,8 @@ class _TeacherReflectionScreenState extends State<TeacherReflectionScreen> {
                                 OutlinedButton.icon(
                                   onPressed: () => _showGiveFeedbackDialog(docId, namaSiswa, feedbackGuru.toString()),
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: AppTheme.primaryTeal,
-                                    side: const BorderSide(color: AppTheme.primaryTeal),
+                                    foregroundColor: const Color(0xFF00897B),
+                                    side: const BorderSide(color: Color(0xFF00897B)),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                   icon: const Icon(Icons.rate_review_rounded, size: 16),

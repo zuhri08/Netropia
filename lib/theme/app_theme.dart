@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Warm Cokelat & Earthy Cream System (Warna Utama Asli Netropia)
   static const Color primaryBrown = Color(0xFFAD8B73);
   static const Color secondaryBeige = Color(0xFFCEAB93);
   static const Color accentTan = Color(0xFFE3CAA5);
   static const Color backgroundCream = Color(0xFFFFFBE9);
+  // Latar halaman: krem-pasir yang lebih gelap supaya bar navigasi (terang) tidak menyatu.
+  static const Color backgroundSand = Color(0xFFEEDCC6);
+  // Warna baru: cokelat tua untuk bar navigasi bawah & aksen gelap.
   static const Color deepEspresso = Color(0xFF4A3428);
 
+  // Kompatibilitas warna tema tambahan
   static const Color darkBrown = Color(0xFF8E6F5B);
   static const Color brownTint = Color(0xFFF5EBE6);
   static const Color textDark = Color(0xFF2C3E50);
@@ -16,18 +19,14 @@ class AppTheme {
   static const Color borderCream = Color(0xFFE9DDD3);
   static const Color accentRed = Color(0xFFC0392B);
   static const Color accentAmber = Color(0xFFD35400);
-
-  // Aliases untuk kompatibilitas penuh (menunjuk ke Cokelat)
-  static const Color primaryTeal = primaryBrown;
-  static const Color darkTeal = darkBrown;
-  static const Color lightTeal = secondaryBeige;
-  static const Color tealTint = brownTint;
+  static const Color primaryTeal = Color(0xFF00897B);
+  static const Color tealTint = Color(0xFFE0F2F1);
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     fontFamily: 'Roboto',
     brightness: Brightness.light,
-    scaffoldBackgroundColor: backgroundCream,
+    scaffoldBackgroundColor: backgroundSand,
     colorScheme: ColorScheme.fromSeed(
       seedColor: primaryBrown,
       primary: primaryBrown,

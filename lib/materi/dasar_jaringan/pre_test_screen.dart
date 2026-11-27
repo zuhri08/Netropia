@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../data/quiz_data.dart';
 import '../../services/progress_service.dart';
@@ -185,62 +183,10 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
     }
   }
 
-  Future<void> _saveQuizResultToFirestore() async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        try {
-          final userCred = await FirebaseAuth.instance.signInAnonymously();
-          user = userCred.user;
-        } catch (_) {}
-      }
-
-      if (user != null) {
-        String nama = user.displayName ?? 'Siswa Netropia';
-        String nisn = '-';
-        String kelas = 'X TKJ 1';
-
-        try {
-          final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-          if (userDoc.exists) {
-            final userData = userDoc.data() ?? {};
-            nama = userData['nama']?.toString() ?? nama;
-            nisn = userData['nisn']?.toString() ?? nisn;
-            kelas = userData['kelas']?.toString() ?? kelas;
-          }
-        } catch (_) {}
-
-        final docRef = FirebaseFirestore.instance.collection('quiz_results').doc();
-
-        await docRef.set({
-          'id': docRef.id,
-          'siswaId': user.uid,
-          'namaSiswa': nama,
-          'nisn': nisn,
-          'kelas': kelas,
-          'materiId': widget.materiId,
-          'materiTitle': widget.materiTitle,
-          'testType': 'Pre-Test',
-          'score': _score,
-          'correct': _correctCount,
-          'wrong': _wrongCount,
-          'totalQuestions': _questions.length,
-          'cheatViolations': _cheatViolations,
-          'isCheated': _cheatViolations > 0,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-    } catch (e) {
-      debugPrint('Error saving pre-test result to firestore: $e');
-    }
-  }
-
-  void _showResult() async {
+  void _showResult() {
     if (_isSubmitted) return;
     _isSubmitted = true;
     _timer?.cancel();
-
-    await _saveQuizResultToFirestore();
 
     ProgressService().setLessonCompleted('${widget.materiId}_pre_test', true);
     ProgressService().saveActivity(
@@ -249,8 +195,6 @@ class _PreTestScreenState extends State<PreTestScreen> with WidgetsBindingObserv
       time: 'Baru saja',
       type: 'pre_test',
     );
-
-    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,

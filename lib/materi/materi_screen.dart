@@ -11,6 +11,7 @@ import 'materi_detail_layout.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/animated_pressable.dart';
+import '../widgets/home_effects.dart';
 
 class MateriScreen extends StatelessWidget {
   const MateriScreen({super.key});
@@ -26,43 +27,31 @@ class MateriScreen extends StatelessWidget {
           {
             'title': 'K3',
             'subtitle': 'Keselamatan dan kesehatan kerja di bidang TKJ',
-            'icon': Icons.health_and_safety_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const K3Screen(),
           },
           {
             'title': 'Komponen Komputer',
             'subtitle': 'Mengenal komponen utama komputer',
-            'icon': Icons.memory_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const KomponenKomputerScreen(),
           },
           {
             'title': 'Perangkat Jaringan',
             'subtitle': 'Mengenal perangkat yang digunakan dalam jaringan',
-            'icon': Icons.router_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const PerangkatJaringanScreen(),
           },
           {
             'title': 'Dasar Jaringan',
             'subtitle': 'Konsep dasar jaringan komputer',
-            'icon': Icons.account_tree_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const DasarJaringanScreen(),
           },
           {
             'title': 'IP Address',
             'subtitle': 'Memahami alamat dan konfigurasi IP',
-            'icon': Icons.language_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const IpAddressScreen(),
           },
           {
             'title': 'Kabel Jaringan',
             'subtitle': 'Mengenal jenis dan penggunaan kabel jaringan',
-            'icon': Icons.cable_rounded,
-            'color': AppTheme.primaryBrown,
             'screen': const KabelJaringanScreen(),
           },
         ];
@@ -74,111 +63,314 @@ class MateriScreen extends StatelessWidget {
               'Materi TKJ',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: AppTheme.primaryBrown,
+            backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             elevation: 0,
+            scrolledUnderElevation: 0,
+            flexibleSpace: const BrandAppBarBackground(),
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 50),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Banner
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AnimatedBackdrop()),
+              SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 50),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Banner
+                    FadeSlideIn(
+                      child: AnimatedHeroCard(
+                        colors: const [Color(0xFFAD8B73), Color(0xFFC4A58C)],
+                        borderRadius: 24,
+                        padding: const EdgeInsets.all(20),
+                        shadowColor: AppTheme.primaryBrown,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.22),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${materi.length} MODUL • BERTAHAP',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Modul Pembelajaran',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Pelajari konsep TKJ secara bertahap melalui pembelajaran yang interaktif.',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.9),
+                                fontSize: 13,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.18),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 32,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      const Text(
-                        'Modul Pembelajaran',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Pelajari konsep TKJ secara bertahap melalui pembelajaran yang interaktif.',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 22),
+                    const SizedBox(height: 24),
 
-                Text(
-                  'PILIH MATERI',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.1,
-                    color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Mulai dari materi dasar kemudian lanjutkan ke materi berikutnya.',
-                  style: TextStyle(
-                    color: AppTheme.textMuted,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                ...materi.map(
-                  (item) => _materiCard(
-                    context: context,
-                    isDark: isDark,
-                    title: item['title'],
-                    subtitle: item['subtitle'],
-                    icon: item['icon'],
-                    color: item['color'],
-                    screen: item['screen'],
-                  ),
-                ),
-                _buildTeacherCustomMaterials(context, isDark),
-                const SizedBox(height: 30),
-                const Center(
-                  child: Text(
-                    'Netropia • Pembelajaran TKJ SMK Kelas X',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: AppTheme.textMuted,
-                      fontSize: 12,
+                    _sectionLabel(context, isDark, 'JALUR BELAJAR', 120),
+                    const SizedBox(height: 4),
+                    const FadeSlideIn(
+                      delay: Duration(milliseconds: 160),
+                      child: Text(
+                        'Mulai dari materi dasar kemudian lanjutkan ke materi berikutnya.',
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 18),
+
+                    // Jalur belajar bernomor
+                    for (int i = 0; i < materi.length; i++)
+                      _timelineItem(
+                        context: context,
+                        isDark: isDark,
+                        index: i,
+                        isLast: i == materi.length - 1,
+                        title: materi[i]['title'],
+                        subtitle: materi[i]['subtitle'],
+                        screen: materi[i]['screen'],
+                      ),
+
+                    _buildTeacherCustomMaterials(context, isDark),
+                    const SizedBox(height: 30),
+                    const Center(
+                      child: Text(
+                        'Netropia • Pembelajaran TKJ SMK Kelas X',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppTheme.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Widget _sectionLabel(BuildContext context, bool isDark, String text, int delayMs) {
+    return FadeSlideIn(
+      delay: Duration(milliseconds: delayMs),
+      offset: const Offset(-20, 0),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 16,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryBrown,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.1,
+              color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: AppTheme.primaryBrown.withOpacity(0.18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Satu langkah di jalur belajar: nomor berwarna + garis penghubung + kartu.
+  Widget _timelineItem({
+    required BuildContext context,
+    required bool isDark,
+    required int index,
+    required bool isLast,
+    required String title,
+    required String subtitle,
+    required Widget screen,
+  }) {
+    final Color accent = kAccentPalette[index % kAccentPalette.length];
+    final Color next = kAccentPalette[(index + 1) % kAccentPalette.length];
+
+    return FadeSlideIn(
+      delay: Duration(milliseconds: 200 + index * 90),
+      offset: const Offset(0, 26),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // nomor + garis
+            SizedBox(
+              width: 44,
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        colors: [accentLightOf(accent), accent],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      border: Border.all(color: Colors.white, width: 2.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: accent.withOpacity(0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  if (!isLast)
+                    Expanded(
+                      child: Container(
+                        width: 3,
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(3),
+                          gradient: LinearGradient(
+                            colors: [
+                              accent.withOpacity(0.55),
+                              next.withOpacity(0.55),
+                            ],
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // kartu
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: AnimatedPressable(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => screen),
+                    );
+                  },
+                  scaleFactor: 0.97,
+                  child: SoftCard(
+                    accent: accent,
+                    radius: 20,
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: isDark ? Colors.white : AppTheme.textDark,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            height: 1.35,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : AppTheme.textMuted,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accent.withOpacity(0.14),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                'MODUL ${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.8,
+                                  color: accent,
+                                ),
+                              ),
+                            ),
+                            const Spacer(),
+                            Text(
+                              'Mulai  ›',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: accent,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -204,16 +396,8 @@ class MateriScreen extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 22),
-            Text(
-              'MATERI TAMBAHAN DARI GURU',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-                color: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
-              ),
-            ),
+            const SizedBox(height: 14),
+            _sectionLabel(context, isDark, 'MATERI TAMBAHAN DARI GURU', 600),
             const SizedBox(height: 4),
             const Text(
               'Modul materi tambahan yang diterbitkan langsung oleh Guru',
@@ -223,19 +407,20 @@ class MateriScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            ...docs.map((doc) {
-              final data = doc.data() as Map<String, dynamic>;
+            ...docs.asMap().entries.map((entry) {
+              final index = entry.key;
+              final data = entry.value.data() as Map<String, dynamic>;
               final title = data['judul'] ?? 'Materi Pembelajaran';
               final category = data['kategori'] ?? 'Umum';
               final guruName = data['guruName'] ?? 'Guru';
+              final accent = kAccentPalette[(index + 3) % kAccentPalette.length];
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                child: Material(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
+              return FadeSlideIn(
+                delay: Duration(milliseconds: 650 + index * 70),
+                offset: const Offset(0, 20),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: AnimatedPressable(
                     onTap: () {
                       Navigator.push(
                         context,
@@ -250,27 +435,23 @@ class MateriScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Container(
+                    scaleFactor: 0.97,
+                    child: SoftCard(
+                      accent: accent,
+                      radius: 18,
                       padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-                        ),
-                      ),
                       child: Row(
                         children: [
                           Container(
-                            width: 48,
-                            height: 48,
+                            width: 5,
+                            height: 42,
                             decoration: BoxDecoration(
-                              color: AppTheme.brownTint,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(
-                              Icons.note_alt_rounded,
-                              color: AppTheme.primaryBrown,
-                              size: 24,
+                              borderRadius: BorderRadius.circular(4),
+                              gradient: LinearGradient(
+                                colors: [accentLightOf(accent), accent],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -297,10 +478,13 @@ class MateriScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const Icon(
-                            Icons.chevron_right_rounded,
-                            size: 20,
-                            color: AppTheme.textMuted,
+                          Text(
+                            '›',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: accent,
+                            ),
                           ),
                         ],
                       ),
@@ -312,88 +496,6 @@ class MateriScreen extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Widget _materiCard({
-    required BuildContext context,
-    required bool isDark,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required Widget screen,
-  }) {
-    return AnimatedPressable(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => screen,
-          ),
-        );
-      },
-      scaleFactor: 0.96,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: AppTheme.brownTint,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: AppTheme.primaryBrown,
-                  size: 26,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : AppTheme.textDark,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 11.5,
-                        color: AppTheme.textMuted,
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: AppTheme.textMuted,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

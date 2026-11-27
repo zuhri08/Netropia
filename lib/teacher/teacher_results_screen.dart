@@ -65,7 +65,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final quizSnap = await _firestore.collection('quiz_results').get();
     final quizMap = <String, Map<String, dynamic>>{};
     for (final doc in quizSnap.docs) {
-      final Map<String, dynamic> d = doc.data() as Map<String, dynamic>;
+      final d = doc.data() as Map<String, dynamic>;
       final uid = d['siswaId']?.toString() ?? doc.id;
       quizMap[uid] = d;
     }
@@ -73,7 +73,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final assignmentSnap = await _firestore.collection('assignment_submissions').get();
     final assignmentMap = <String, Map<String, dynamic>>{};
     for (final doc in assignmentSnap.docs) {
-      final Map<String, dynamic> d = doc.data() as Map<String, dynamic>;
+      final d = doc.data() as Map<String, dynamic>;
       final uid = d['siswaId']?.toString() ?? doc.id;
       assignmentMap[uid] = d;
     }
@@ -81,7 +81,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final projectSnap = await _firestore.collection('project_submissions').get();
     final projectMap = <String, Map<String, dynamic>>{};
     for (final doc in projectSnap.docs) {
-      final Map<String, dynamic> d = doc.data() as Map<String, dynamic>;
+      final d = doc.data() as Map<String, dynamic>;
       final uid = d['siswaId']?.toString() ?? doc.id;
       projectMap[uid] = d;
     }
@@ -91,7 +91,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
 
     final tableData = students.asMap().entries.map((entry) {
       final idx = entry.key + 1;
-      final Map<String, dynamic> data = entry.value.data() as Map<String, dynamic>;
+      final data = entry.value.data() as Map<String, dynamic>;
       final uid = entry.value.id;
 
       final name = data['nama']?.toString() ?? 'Siswa';
@@ -119,18 +119,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
 
       int activeScores = 0;
       int scoreSum = 0;
-      if (qData != null) {
-        scoreSum += quizScore;
-        activeScores++;
-      }
-      if (aData?['nilai'] != null) {
-        scoreSum += taskScore;
-        activeScores++;
-      }
-      if (pData?['nilai'] != null) {
-        scoreSum += projScore;
-        activeScores++;
-      }
+      if (qData != null) { scoreSum += quizScore; activeScores++; }
+      if (aData?['nilai'] != null) { scoreSum += taskScore; activeScores++; }
+      if (pData?['nilai'] != null) { scoreSum += projScore; activeScores++; }
 
       final double avg = activeScores > 0 ? (scoreSum / activeScores) : 0;
 
@@ -200,7 +191,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
                   ],
                 ),
               ),
+
               pw.SizedBox(height: 12),
+
               pw.TableHelper.fromTextArray(
                 headers: [
                   'No',
@@ -233,7 +226,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
                   9: const pw.FlexColumnWidth(1.8),
                 },
               ),
+
               pw.SizedBox(height: 20),
+
               pw.Align(
                 alignment: pw.Alignment.centerRight,
                 child: pw.Column(
@@ -316,11 +311,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
               ),
               items: _classOptions.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
               onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _selectedClassFilter = val;
-                  });
-                }
+                if (val != null) setState(() => _selectedClassFilter = val);
               },
             ),
           ),
@@ -329,6 +320,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     );
   }
 
+  // =========================================================
+  // TAB 1: HASIL KUIS (PRE-TEST & POST-TEST)
+  // =========================================================
   Widget _buildQuizResultsTab() {
     return Column(
       children: [
@@ -469,6 +463,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     );
   }
 
+  // =========================================================
+  // TAB 2: PENGUMPULAN TUGAS SISWA
+  // =========================================================
   Widget _buildTaskSubmissionsTab() {
     return Column(
       children: [
@@ -538,9 +535,9 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
                         children: [
                           Row(
                             children: [
-                              const CircleAvatar(
+                              CircleAvatar(
                                 backgroundColor: AppTheme.primaryBrown,
-                                child: Icon(Icons.person_rounded, size: 18, color: Colors.white),
+                                child: const Icon(Icons.person_rounded, size: 18, color: Colors.white),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -578,6 +575,8 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
                           const SizedBox(height: 2),
                           Text('"$jawaban"', style: const TextStyle(fontSize: 13, height: 1.4)),
                           const SizedBox(height: 12),
+
+                          // Foto / File Attachment Preview
                           if (imageBytes != null) ...[
                             const Text('Foto Bukti Jawaban Siswa:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.primaryBrown)),
                             const SizedBox(height: 6),
@@ -608,6 +607,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
                             ),
                             const SizedBox(height: 12),
                           ],
+
                           Row(
                             children: [
                               SizedBox(
@@ -668,8 +668,8 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

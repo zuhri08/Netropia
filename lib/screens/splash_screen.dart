@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../theme/app_theme.dart';
 import 'login_screen.dart';
 import 'main_screen.dart';
+import '../widgets/brand_background.dart';
+import '../widgets/home_effects.dart';
+import '../widgets/netropia_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,8 +23,19 @@ class _SplashScreenState extends State<SplashScreen> {
     _checkLoginStatus();
   }
 
+  // Pindah halaman dengan transisi memudar yang halus
+  Route<void> _fadeRoute(Widget page) {
+    return PageRouteBuilder<void>(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+          FadeTransition(opacity: animation, child: child),
+      transitionDuration: const Duration(milliseconds: 700),
+    );
+  }
+
   Future<void> _checkLoginStatus() async {
-    await Future.delayed(const Duration(seconds: 2));
+    // beri waktu animasi logo selesai
+    await Future.delayed(const Duration(milliseconds: 4400));
     if (!mounted) return;
 
     final User? user = FirebaseAuth.instance.currentUser;
@@ -41,12 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
-              builder: (context) => MainScreen(
-                username: nama,
-                role: role,
-              ),
-            ),
+            _fadeRoute(MainScreen(username: nama, role: role)),
           );
           return;
         }
@@ -56,103 +64,97 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LoginScreen(),
-        ),
-      );
+      Navigator.pushReplacement(context, _fadeRoute(const LoginScreen()));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    const String title = 'NETROPIA';
+
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppTheme.primaryBrown,
-              AppTheme.darkBrown,
-            ],
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo
-            Container(
-              width: 90,
-              height: 90,
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.18),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
-                  'assets/icon/app_icon.png',
-                  fit: BoxFit.cover,
+      body: BrandBackground(
+        child: SafeArea(
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Logo beranimasi
+                const NetropiaLogoGif(width: 300),
+
+                const SizedBox(height: 8),
+
+                // Nama aplikasi: huruf muncul satu per satu
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < title.length; i++)
+                      FadeSlideIn(
+                        delay: Duration(milliseconds: 2000 + i * 70),
+                        offset: const Offset(0, 18),
+                        duration: const Duration(milliseconds: 450),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1.5),
+                          child: Text(
+                            title[i],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 1,
+                              shadows: [
+                                Shadow(
+                                  color: Color(0x33000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-              ),
+
+                const SizedBox(height: 8),
+
+                const FadeSlideIn(
+                  delay: Duration(milliseconds: 2800),
+                  offset: Offset(0, 10),
+                  child: Text(
+                    'Interactive TKJ Learning',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 44),
+
+                const FadeSlideIn(
+                  delay: Duration(milliseconds: 3000),
+                  offset: Offset(0, 10),
+                  child: Column(
+                    children: [
+                      NetropiaLoadingBar(width: 150),
+                      SizedBox(height: 12),
+                      Text(
+                        'Mempersiapkan pembelajaran...',
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 22),
-
-            // Nama aplikasi
-            const Text(
-              'NETROPIA',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-              ),
-            ),
-
-            const SizedBox(height: 6),
-
-            const Text(
-              'Interactive TKJ Learning',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
-
-            const SizedBox(height: 36),
-
-            const SizedBox(
-              width: 26,
-              height: 26,
-              child: CircularProgressIndicator(
-                color: AppTheme.accentAmber,
-                strokeWidth: 3,
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            const Text(
-              'Mempersiapkan pembelajaran...',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

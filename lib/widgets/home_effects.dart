@@ -719,3 +719,156 @@ class BottomFade extends StatelessWidget {
     );
   }
 }
+
+
+// ---------------------------------------------------------------------------
+// 11. Komponen desain bersama (dipakai Progres, AI, Simulasi, Profil)
+// ---------------------------------------------------------------------------
+
+/// Palet aksen hangat (tanpa hijau) untuk chip ikon & kartu.
+const List<Color> kAccentPalette = [
+  Color(0xFFC75B3B), // terakota
+  Color(0xFFE09A22), // amber
+  Color(0xFFD4607E), // rose
+  Color(0xFF8E5E9E), // plum
+  Color(0xFF5E86B8), // biru debu
+  Color(0xFF7A5C48), // kopi
+];
+
+Color accentLightOf(Color c) => Color.lerp(c, Colors.white, 0.35)!;
+
+/// Gradient kartu lembut: putih -> tint warna aksen (mode gelap: kartu gelap).
+LinearGradient softCardGradient(BuildContext context, Color accent) {
+  final bool isDark = Theme.of(context).brightness == Brightness.dark;
+  if (isDark) {
+    final base = Theme.of(context).cardColor;
+    return LinearGradient(
+      colors: [
+        Color.alphaBlend(accent.withOpacity(0.10), base),
+        Color.alphaBlend(accent.withOpacity(0.22), base),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+  }
+  return LinearGradient(
+    colors: [Colors.white, Color.alphaBlend(accent.withOpacity(0.13), Colors.white)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
+/// Kartu lembut dengan gradient putih -> krem, border & bayangan berwarna aksen.
+class SoftCard extends StatelessWidget {
+  const SoftCard({
+    super.key,
+    required this.child,
+    this.accent = const Color(0xFFAD8B73),
+    this.radius = 20,
+    this.padding = const EdgeInsets.all(16),
+    this.margin,
+    this.highlighted = false,
+  });
+
+  final Widget child;
+  final Color accent;
+  final double radius;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? margin;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      padding: padding,
+      decoration: BoxDecoration(
+        gradient: softCardGradient(context, accent),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: accent.withOpacity(highlighted ? 0.55 : 0.18),
+          width: highlighted ? 1.5 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withOpacity(highlighted ? 0.28 : 0.14),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Chip ikon: kotak gradient berwarna aksen dengan ikon putih.
+class AccentChip extends StatelessWidget {
+  const AccentChip({
+    super.key,
+    required this.icon,
+    required this.accent,
+    this.size = 44,
+    this.iconSize,
+    this.radius,
+  });
+
+  final IconData icon;
+  final Color accent;
+  final double size;
+  final double? iconSize;
+  final double? radius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius ?? size * 0.32),
+        gradient: LinearGradient(
+          colors: [accentLightOf(accent), accent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withOpacity(0.35),
+            blurRadius: size * 0.22,
+            offset: Offset(0, size * 0.1),
+          ),
+        ],
+      ),
+      child: Icon(icon, color: Colors.white, size: iconSize ?? size * 0.52),
+    );
+  }
+}
+
+/// Latar AppBar bermerek: gradient cokelat-beige dengan sudut bawah membulat.
+class BrandAppBarBackground extends StatelessWidget {
+  const BrandAppBarBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [Color(0xFF3A2D26), Color(0xFF2A211C)]
+              : const [Color(0xFFAD8B73), Color(0xFFC4A58C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(22)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFAD8B73).withOpacity(0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+    );
+  }
+}

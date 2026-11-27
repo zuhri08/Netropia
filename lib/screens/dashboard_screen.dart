@@ -14,13 +14,7 @@ import '../peminjaman/teacher_borrowing_screen.dart';
 import '../project/project_screen.dart';
 import '../materi/dasar_jaringan/portofolio_screen.dart';
 import '../services/localization_service.dart';
-import '../teacher/teacher_assignment_screen.dart';
-import '../teacher/teacher_quiz_screen.dart';
-import '../teacher/teacher_material_screen.dart';
-import '../teacher/teacher_announcement_screen.dart';
-import '../teacher/teacher_reflection_screen.dart';
-import '../teacher/teacher_gradebook_screen.dart';
-import '../teacher/teacher_results_screen.dart';
+import '../teacher/teacher_panel_screen.dart';
 import 'notification_screen.dart';
 import '../widgets/home_effects.dart';
 
@@ -246,13 +240,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           body: Stack(
             children: [
-              Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: MediaQuery.of(context).padding.bottom,
-                child: const AnimatedBackdrop(),
-              ),
+              const Positioned.fill(child: AnimatedBackdrop()),
               SafeArea(
                 child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
@@ -637,16 +625,6 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const Floating(
-                axis: Axis.horizontal,
-                amplitude: 3,
-                duration: Duration(milliseconds: 1400),
-                child: Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  color: Colors.white,
-                  size: 17,
-                ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -755,13 +733,13 @@ class DashboardScreen extends StatelessWidget {
   // Gaya tiap kartu menu: latar putih -> krem pastel, aksen warna hangat.
   // (accent, accentLight, tint)
   static const List<_MenuStyle> _menuStyles = [
-    _MenuStyle(Color(0xFFA9623F), Color(0xFFDB9570), Color(0xFFFBE6D8)), // 0 Materi TKJ - terakota
-    _MenuStyle(Color(0xFFB07F2F), Color(0xFFD9AC57), Color(0xFFFBEFCF)), // 1 Perangkat 3D - madu
-    _MenuStyle(Color(0xFFAE6A66), Color(0xFFDA9E98), Color(0xFFF9E0DC)), // 2 Subnet - rose
-    _MenuStyle(Color(0xFF8C6D5A), Color(0xFFBC9C86), Color(0xFFF1E5DC)), // 3 Absensi - mocha
-    _MenuStyle(Color(0xFF9B7A4A), Color(0xFFC9AA7A), Color(0xFFF4EAD5)), // 4 Peminjaman - emas pasir
-    _MenuStyle(Color(0xFF7E5C47), Color(0xFFAB8770), Color(0xFFEFE2D9)), // 5 Projek - kopi
-    _MenuStyle(Color(0xFFA67C57), Color(0xFFD2AC85), Color(0xFFF6E8D8)), // 6 Portofolio - latte
+    _MenuStyle(Color(0xFFC75B3B), Color(0xFFE88A6B), Color(0xFFFCE4DC)), // 0 Materi TKJ - terakota
+    _MenuStyle(Color(0xFFE09A22), Color(0xFFF2C262), Color(0xFFFDF0CF)), // 1 Perangkat 3D - amber
+    _MenuStyle(Color(0xFFD4607E), Color(0xFFEE92A8), Color(0xFFFBE0E7)), // 2 Subnet - rose
+    _MenuStyle(Color(0xFF8E5E9E), Color(0xFFB88BC6), Color(0xFFEFE1F3)), // 3 Absensi - plum
+    _MenuStyle(Color(0xFF5E86B8), Color(0xFF8FB0D8), Color(0xFFE0EBF7)), // 4 Peminjaman - biru debu
+    _MenuStyle(Color(0xFF7A5C48), Color(0xFFA88670), Color(0xFFEFE3DA)), // 5 Projek - kopi
+    _MenuStyle(Color(0xFF6B63B5), Color(0xFF9A94D6), Color(0xFFE6E4F5)), // 6 Portofolio - indigo
   ];
 
   List<Color> _cardBg(BuildContext context, _MenuStyle st) {
@@ -865,19 +843,6 @@ class DashboardScreen extends StatelessWidget {
                       bottom: -34,
                       child: _decorCircle(70, 0.07, st.accentLight),
                     ),
-                    Positioned(
-                      right: -8,
-                      bottom: -26,
-                      child: Floating(
-                        amplitude: 4,
-                        duration: const Duration(milliseconds: 3400),
-                        child: Icon(
-                          icon,
-                          size: 128,
-                          color: st.accent.withOpacity(0.11),
-                        ),
-                      ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.all(18),
                       child: Row(
@@ -968,17 +933,6 @@ class DashboardScreen extends StatelessWidget {
                                           color: Colors.white,
                                         ),
                                       ),
-                                      const SizedBox(width: 4),
-                                      const Floating(
-                                        axis: Axis.horizontal,
-                                        amplitude: 2,
-                                        duration: Duration(milliseconds: 1200),
-                                        child: Icon(
-                                          Icons.arrow_forward_rounded,
-                                          size: 14,
-                                          color: Colors.white,
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -1052,24 +1006,6 @@ class DashboardScreen extends StatelessWidget {
                           ? _decorCircle(96, 0.10, st.accent)
                           : _decorRing(96, 0.10, st.accent),
                     ),
-                    Positioned(
-                      right: 34,
-                      top: 52,
-                      child: _decorCircle(24, 0.09, st.accentLight),
-                    ),
-                    Positioned(
-                      right: -14,
-                      bottom: -16,
-                      child: Floating(
-                        amplitude: 3,
-                        duration: Duration(milliseconds: 2800 + index * 350),
-                        child: Icon(
-                          icon,
-                          size: 72,
-                          color: st.accent.withOpacity(0.11),
-                        ),
-                      ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.all(14),
                       child: Column(
@@ -1108,19 +1044,6 @@ class DashboardScreen extends StatelessWidget {
                                     color: Colors.white,
                                     size: 28,
                                   ),
-                                ),
-                              ),
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: st.accent.withOpacity(0.14),
-                                ),
-                                child: Icon(
-                                  Icons.arrow_forward_rounded,
-                                  size: 16,
-                                  color: st.accent,
                                 ),
                               ),
                             ],
@@ -1340,21 +1263,19 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildTeacherManagementPanel(BuildContext context) {
     final learning = <_TeacherAction>[
       _TeacherAction(Icons.assignment_add, 'Kelola Tugas', 0,
-          () => const TeacherAssignmentScreen()),
+          () => const TeacherPanelScreen(initialTab: 'tugas')),
       _TeacherAction(Icons.quiz_rounded, 'Kelola Kuis', 1,
-          () => const TeacherQuizScreen()),
+          () => const TeacherPanelScreen(initialTab: 'quiz')),
       _TeacherAction(Icons.note_add_rounded, 'Buat Materi', 2,
-          () => const TeacherMaterialScreen()),
+          () => const TeacherPanelScreen(initialTab: 'materi')),
       _TeacherAction(Icons.campaign_rounded, 'Pengumuman', 4,
-          () => const TeacherAnnouncementScreen()),
-      _TeacherAction(Icons.assignment_turned_in_rounded, 'Hasil Kuis & Tugas', 0,
-          () => const TeacherResultsScreen()),
+          () => const TeacherPanelScreen(initialTab: 'pengumuman')),
     ];
     final lab = <_TeacherAction>[
       _TeacherAction(Icons.rate_review_rounded, 'Ulasan & Refleksi', 3,
-          () => const TeacherReflectionScreen()),
+          () => const TeacherPanelScreen(initialTab: 'refleksi')),
       _TeacherAction(Icons.assessment_rounded, 'Rekap & Apresiasi', 6,
-          () => const TeacherGradebookScreen()),
+          () => const TeacherPanelScreen(initialTab: 'rekap')),
       _TeacherAction(Icons.fact_check_rounded, 'Sesi Absensi QR', 5,
           () => const TeacherAttendanceScreen()),
       _TeacherAction(Icons.inventory_2_rounded, 'Persetujuan Alat', 0,
@@ -1658,7 +1579,7 @@ class DashboardScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TeacherReflectionScreen(),
+                      builder: (context) => const TeacherPanelScreen(initialTab: 'refleksi'),
                     ),
                   );
                 },

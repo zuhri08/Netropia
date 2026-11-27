@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/app_theme.dart';
+import '../widgets/brand_background.dart';
+import '../widgets/netropia_logo.dart';
 import 'main_screen.dart';
 import 'register_screen.dart';
 
@@ -215,36 +217,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
+      body: Stack(
+        children: [
+          const Positioned.fill(child: BrandBackground()),
+          SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
           child: Column(
             children: [
               // Logo Header Area
-              Center(
-                child: Container(
-                  width: 86,
-                  height: 86,
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(22),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryBrown.withValues(alpha: 0.18),
-                        blurRadius: 18,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(18),
-                    child: Image.asset(
-                      'assets/icon/app_icon.png',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+              const Center(
+                child: NetropiaLogoStatic(width: 170),
               ),
               const SizedBox(height: 14),
               const Text(
@@ -253,14 +236,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
-                  color: AppTheme.primaryBrown,
+                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 2),
               const Text(
                 'Interactive Learning Platform',
                 style: TextStyle(
-                  color: AppTheme.textMuted,
+                  color: Colors.white70,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -274,13 +257,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(22),
                   border: Border.all(
-                    color: isDark ? Colors.white.withValues(alpha: 0.08) : AppTheme.borderCream,
+                    color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 28,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -547,7 +530,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const Text(
                     'Belum punya akun? ',
-                    style: TextStyle(fontSize: 13, color: AppTheme.textMuted),
+                    style: TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                   GestureDetector(
                     onTap: () {
@@ -562,8 +545,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Daftar sekarang',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryBrown,
+                        color: Colors.white,
                         fontSize: 13,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
                       ),
                     ),
                   ),
@@ -572,12 +557,14 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               const Text(
                 'Netropia • Platform Pembelajaran Interaktif',
-                style: TextStyle(fontSize: 11.5, color: AppTheme.textMuted),
+                style: TextStyle(fontSize: 11.5, color: Colors.white54),
               ),
               const SizedBox(height: 10),
             ],
           ),
         ),
+      ),
+        ],
       ),
     );
   }

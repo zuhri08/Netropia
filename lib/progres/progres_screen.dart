@@ -4,6 +4,7 @@ import '../services/settings_service.dart';
 import '../services/notification_service.dart';
 import '../services/localization_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/home_effects.dart';
 import '../screens/notification_screen.dart';
 import '../materi/k3/k3_screen.dart';
 import '../materi/komponen_komputer/komponen_komputer_screen.dart';
@@ -231,9 +232,11 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               'Progress Belajar',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            backgroundColor: AppTheme.primaryBrown,
+            backgroundColor: Colors.transparent,
             foregroundColor: Colors.white,
             elevation: 0,
+            scrolledUnderElevation: 0,
+            flexibleSpace: const BrandAppBarBackground(),
             actions: [
               IconButton(
                 icon: const Icon(Icons.refresh_rounded),
@@ -334,7 +337,10 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               const SizedBox(width: 8),
             ],
           ),
-          body: _isLoading
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AnimatedBackdrop()),
+              _isLoading
               ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryBrown))
               : RefreshIndicator(
                   color: AppTheme.primaryBrown,
@@ -345,41 +351,53 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildHeroCard(context),
+                        FadeSlideIn(child: _buildHeroCard(context)),
                         const SizedBox(height: 18),
-                        _buildStatGrid(context),
+                        FadeSlideIn(
+                          delay: const Duration(milliseconds: 120),
+                          child: _buildStatGrid(context),
+                        ),
                         const SizedBox(height: 20),
-                        _buildTabBar(context),
+                        FadeSlideIn(
+                          delay: const Duration(milliseconds: 220),
+                          child: _buildTabBar(context),
+                        ),
                         const SizedBox(height: 16),
-                        _buildTabContent(context),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 350),
+                          switchInCurve: Curves.easeOutCubic,
+                          transitionBuilder: (child, anim) => FadeTransition(
+                            opacity: anim,
+                            child: SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(0.06, 0),
+                                end: Offset.zero,
+                              ).animate(anim),
+                              child: child,
+                            ),
+                          ),
+                          child: KeyedSubtree(
+                            key: ValueKey(_tabController.index),
+                            child: _buildTabContent(context),
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
+            ],
+          ),
         );
       },
     );
   }
 
   Widget _buildHeroCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return AnimatedHeroCard(
+      colors: const [Color(0xFFAD8B73), Color(0xFFC4A58C)],
+      borderRadius: 24,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppTheme.primaryBrown, AppTheme.darkBrown],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryBrown.withOpacity(0.22),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      shadowColor: AppTheme.primaryBrown,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -409,8 +427,9 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                 ),
               ),
               const Spacer(),
-              Text(
-                '$_overallProgress%',
+              CountUpText(
+                value: _overallProgress,
+                suffix: '%',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 26,
@@ -450,11 +469,16 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
           const SizedBox(height: 16),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: _overallProgress / 100.0,
-              minHeight: 8,
-              backgroundColor: Colors.white24,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentAmber),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: _overallProgress / 100.0),
+              duration: const Duration(milliseconds: 1400),
+              curve: Curves.easeOutCubic,
+              builder: (context, v, _) => LinearProgressIndicator(
+                value: v,
+                minHeight: 10,
+                backgroundColor: Colors.white24,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             ),
           ),
         ],
@@ -472,7 +496,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedFeaturesCount',
             subtitle: 'dari total 42 fitur',
             icon: Icons.task_alt_rounded,
-            color: AppTheme.primaryBrown,
+            color: kAccentPalette[0],
           ),
         ),
         const SizedBox(width: 12),
@@ -483,7 +507,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
             value: '$_completedModulesCount',
             subtitle: 'dari total 6 modul',
             icon: Icons.check_circle_rounded,
-            color: AppTheme.primaryBrown,
+            color: kAccentPalette[1],
           ),
         ),
       ],
@@ -499,41 +523,37 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
     required Color color,
   }) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
+    final int? number = int.tryParse(value);
+    final TextStyle valueStyle = TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w800,
+      color: isDark ? Colors.white : AppTheme.textDark,
+    );
+
+    return SoftCard(
+      accent: color,
+      radius: 20,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: color, size: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AccentChip(icon: icon, accent: color, size: 42),
+              Icon(Icons.north_east_rounded,
+                  size: 16, color: color.withOpacity(0.5)),
+            ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : AppTheme.textDark,
-            ),
-          ),
+          const SizedBox(height: 14),
+          number != null
+              ? CountUpText(value: number, style: valueStyle)
+              : Text(value, style: valueStyle),
           const SizedBox(height: 2),
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.5,
               fontWeight: FontWeight.bold,
               color: isDark ? Colors.white : AppTheme.textDark,
             ),
@@ -556,15 +576,32 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       height: 46,
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF241C17) : AppTheme.surfaceCream,
-        borderRadius: BorderRadius.circular(14),
+        color: isDark ? const Color(0xFF241C17) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryBrown.withOpacity(0.18)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryBrown.withOpacity(0.12),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: TabBar(
         controller: _tabController,
         indicatorSize: TabBarIndicatorSize.tab,
         indicator: BoxDecoration(
-          color: AppTheme.primaryBrown,
-          borderRadius: BorderRadius.circular(11),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFC4A58C), AppTheme.primaryBrown],
+          ),
+          borderRadius: BorderRadius.circular(13),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primaryBrown.withOpacity(0.35),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         labelColor: Colors.white,
         unselectedLabelColor: isDark ? Colors.grey.shade400 : AppTheme.textMuted,
@@ -597,33 +634,35 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
   Widget _buildModuleProgressList(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
-      children: _modulesInfo.map((mod) {
+      children: _modulesInfo.asMap().entries.map((entry) {
+        final mod = entry.value;
+        final index = entry.key;
+        final accent = kAccentPalette[index % kAccentPalette.length];
         final modId = mod['id'] as String;
         final p = _moduleProgressMap[modId] ?? 0;
         final details = _moduleDetailsMap[modId] ?? {};
         final isExpanded = _expandedModuleId == modId;
 
-        return Container(
+        return FadeSlideIn(
+          delay: Duration(milliseconds: 60 * index),
+          offset: const Offset(0, 22),
+          child: SoftCard(
+          accent: accent,
+          radius: 20,
+          padding: EdgeInsets.zero,
           margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-            ),
-          ),
-          child: Column(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: Column(
             children: [
               ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppTheme.brownTint,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.book_rounded, color: AppTheme.primaryBrown, size: 22),
+                leading: AccentChip(
+                  icon: (mod['icon'] as IconData?) ?? Icons.book_rounded,
+                  accent: accent,
+                  size: 46,
                 ),
                 title: Text(
                   mod['title'] as String,
@@ -639,11 +678,18 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                     const SizedBox(height: 6),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: p / 100.0,
-                        minHeight: 6,
-                        backgroundColor: isDark ? Colors.grey.shade800 : AppTheme.borderCream,
-                        valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryBrown),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: p / 100.0),
+                        duration: const Duration(milliseconds: 1000),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, v, _) => LinearProgressIndicator(
+                          value: v,
+                          minHeight: 7,
+                          backgroundColor: isDark
+                              ? Colors.grey.shade800
+                              : accent.withOpacity(0.15),
+                          valueColor: AlwaysStoppedAnimation<Color>(accent),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -721,6 +767,8 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                 ),
             ],
           ),
+          ),
+          ),
         );
       }).toList(),
     );
@@ -747,27 +795,24 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
 
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
-      children: _activities.map((act) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
+      children: _activities.asMap().entries.map((entry) {
+        final act = entry.value;
+        final index = entry.key;
+        final accent = kAccentPalette[index % kAccentPalette.length];
+        return FadeSlideIn(
+          delay: Duration(milliseconds: 50 * index),
+          offset: const Offset(30, 0),
+          child: SoftCard(
+          accent: accent,
+          radius: 18,
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream,
-            ),
-          ),
+          margin: const EdgeInsets.only(bottom: 10),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppTheme.brownTint,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.check_circle_rounded, color: AppTheme.primaryBrown, size: 22),
+              AccentChip(
+                icon: Icons.check_circle_rounded,
+                accent: accent,
+                size: 42,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -792,6 +837,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               ),
             ],
           ),
+          ),
         );
       }).toList(),
     );
@@ -801,9 +847,9 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final badges = [
       {'title': 'Network Beginner', 'desc': 'Selesaikan modul K3LH', 'unlocked': _overallProgress >= 15, 'icon': Icons.lan_rounded, 'color': AppTheme.primaryBrown},
-      {'title': 'First Lesson', 'desc': 'Selesaikan Pre Test pertama', 'unlocked': _completedFeaturesCount >= 1, 'icon': Icons.school_rounded, 'color': Colors.green},
+      {'title': 'First Lesson', 'desc': 'Selesaikan Pre Test pertama', 'unlocked': _completedFeaturesCount >= 1, 'icon': Icons.school_rounded, 'color': kAccentPalette[3]},
       {'title': 'Subnet Master', 'desc': 'Selesaikan modul IP Address', 'unlocked': (_moduleProgressMap['ip_address'] ?? 0) == 100, 'icon': Icons.calculate_rounded, 'color': AppTheme.accentAmber},
-      {'title': 'Lab Explorer', 'desc': 'Gunakan 3D Simulator', 'unlocked': true, 'icon': Icons.science_rounded, 'color': Colors.purple},
+      {'title': 'Lab Explorer', 'desc': 'Gunakan 3D Simulator', 'unlocked': true, 'icon': Icons.science_rounded, 'color': kAccentPalette[2]},
       {'title': '7 Day Streak', 'desc': 'Belajar 7 hari berturut-turut', 'unlocked': false, 'icon': Icons.local_fire_department_rounded, 'color': AppTheme.accentRed},
       {'title': 'Master Netropia', 'desc': 'Capai 90% total progres', 'unlocked': _overallProgress >= 90, 'icon': Icons.military_tech_rounded, 'color': AppTheme.accentAmber},
     ];
@@ -815,27 +861,40 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
       crossAxisSpacing: 12,
       mainAxisSpacing: 12,
       childAspectRatio: 1.1,
-      children: badges.map((badge) {
+      children: badges.asMap().entries.map((entry) {
+        final badge = entry.value;
+        final index = entry.key;
         final unlocked = badge['unlocked'] as bool;
         final color = badge['color'] as Color;
 
-        return Container(
+        return FadeSlideIn(
+          delay: Duration(milliseconds: 70 * index),
+          offset: const Offset(0, 20),
+          scaleFrom: 0.85,
+          child: Opacity(
+          opacity: unlocked ? 1.0 : 0.62,
+          child: SoftCard(
+          accent: unlocked ? color : AppTheme.textMuted,
+          highlighted: unlocked,
+          radius: 20,
           padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: unlocked ? color.withOpacity(0.3) : AppTheme.borderCream,
-            ),
-          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                unlocked ? (badge['icon'] as IconData) : Icons.lock_outline_rounded,
-                color: unlocked ? color : AppTheme.textMuted,
-                size: 34,
-              ),
+              unlocked
+                  ? Floating(
+                      amplitude: 2.5,
+                      child: AccentChip(
+                        icon: badge['icon'] as IconData,
+                        accent: color,
+                        size: 46,
+                      ),
+                    )
+                  : const AccentChip(
+                      icon: Icons.lock_outline_rounded,
+                      accent: AppTheme.textMuted,
+                      size: 46,
+                    ),
               const SizedBox(height: 8),
               Text(
                 badge['title'] as String,
@@ -854,6 +913,8 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
               ),
             ],
           ),
+          ),
+          ),
         );
       }).toList(),
     );
@@ -870,7 +931,9 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
     ];
 
     return Column(
-      children: ranks.map((r) {
+      children: ranks.asMap().entries.map((entry) {
+        final r = entry.value;
+        final index = entry.key;
         final isUser = r['isUser'] as bool;
         final rankNum = r['rank'] as int;
 
@@ -879,20 +942,15 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
         if (rankNum == 2) rankColor = Colors.grey.shade400;
         if (rankNum == 3) rankColor = const Color(0xFFCD7F32);
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 10),
+        return FadeSlideIn(
+          delay: Duration(milliseconds: 60 * index),
+          offset: const Offset(30, 0),
+          child: SoftCard(
+          accent: rankNum <= 3 ? rankColor : AppTheme.primaryBrown,
+          highlighted: isUser,
+          radius: 18,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: isUser
-                ? AppTheme.brownTint
-                : Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isUser
-                  ? AppTheme.primaryBrown
-                  : (isDark ? Colors.white.withOpacity(0.08) : AppTheme.borderCream),
-            ),
-          ),
+          margin: const EdgeInsets.only(bottom: 10),
           child: Row(
             children: [
               Container(
@@ -939,6 +997,7 @@ class ProgresScreenState extends State<ProgresScreen> with SingleTickerProviderS
                 ),
               ),
             ],
+          ),
           ),
         );
       }).toList(),
