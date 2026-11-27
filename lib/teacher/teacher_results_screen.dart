@@ -65,7 +65,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final quizSnap = await _firestore.collection('quiz_results').get();
     final quizMap = <String, Map<String, dynamic>>{};
     for (final doc in quizSnap.docs) {
-      final d = doc.data() as Map<String, dynamic>;
+      final d = doc.data();
       final uid = d['siswaId']?.toString() ?? doc.id;
       quizMap[uid] = d;
     }
@@ -73,7 +73,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final assignmentSnap = await _firestore.collection('assignment_submissions').get();
     final assignmentMap = <String, Map<String, dynamic>>{};
     for (final doc in assignmentSnap.docs) {
-      final d = doc.data() as Map<String, dynamic>;
+      final d = doc.data();
       final uid = d['siswaId']?.toString() ?? doc.id;
       assignmentMap[uid] = d;
     }
@@ -81,7 +81,7 @@ class _TeacherResultsScreenState extends State<TeacherResultsScreen>
     final projectSnap = await _firestore.collection('project_submissions').get();
     final projectMap = <String, Map<String, dynamic>>{};
     for (final doc in projectSnap.docs) {
-      final d = doc.data() as Map<String, dynamic>;
+      final d = doc.data();
       final uid = d['siswaId']?.toString() ?? doc.id;
       projectMap[uid] = d;
     }
