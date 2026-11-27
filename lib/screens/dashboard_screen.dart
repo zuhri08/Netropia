@@ -1019,33 +1019,6 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => targetScreen),
-        );
-      },
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF382A22) : const Color(0xFFF3EBE1),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppTheme.primaryBrown.withValues(alpha: 0.25)),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : AppTheme.primaryBrown,
-          ),
-        ),
-      ),
-    );
-  }
-
   /// Kartu kecil terang (grid 2 kolom).
   Widget _buildMenuCard(
     BuildContext context, {
