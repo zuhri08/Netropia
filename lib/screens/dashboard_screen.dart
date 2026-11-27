@@ -4,6 +4,7 @@ import '../services/settings_service.dart';
 import '../services/notification_service.dart';
 import '../absensi/attendance_screen.dart';
 import '../materi/materi_screen.dart';
+import '../materi/ebook_list_screen.dart';
 import '../kalkulator_subnet/subnet_calculator_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,6 +34,15 @@ class DashboardScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => const MateriScreen(),
+      ),
+    );
+  }
+
+  void _openEbooks(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const EbookListScreen(),
       ),
     );
   }
@@ -115,23 +125,31 @@ class DashboardScreen extends StatelessWidget {
             foregroundColor: Colors.white,
             elevation: 0,
             titleSpacing: 20,
-            title: FadeSlideIn(
-              offset: const Offset(-24, 0),
-              child: Row(
-              children: [
-                const Icon(
-                  Icons.school_rounded,
-                  size: 28,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  localizationService.translate('netropia'),
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
+            title: InkWell(
+              onTap: () => _openMateri(context),
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                child: FadeSlideIn(
+                  offset: const Offset(-24, 0),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.school_rounded,
+                        size: 28,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        localizationService.translate('netropia'),
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
             ),
             actions: [
@@ -319,7 +337,7 @@ class DashboardScreen extends StatelessWidget {
                         iconColor: const Color(0xFFAD8B73),
                         backgroundColor: const Color(0xFFF4EBE8),
                         onTap: () {
-                          _openMateri(context);
+                          _openEbooks(context);
                         },
                       ),
                   const SizedBox(height: 12),

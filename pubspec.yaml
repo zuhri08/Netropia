@@ -49,6 +49,7 @@ flutter:
   assets:
     - assets/icon/
     - assets/images/
+    - assets/ebook/
     - assets/windows/
     - assets/windows/css/
     - assets/windows/fonts/
