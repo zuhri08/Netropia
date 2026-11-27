@@ -25,7 +25,6 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
   bool _isSubmitting = false;
   final TextEditingController _answerController = TextEditingController();
 
-  XFile? _pickedFile;
   String? _base64File;
   String? _fileName;
 
@@ -41,7 +40,6 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
       final bytes = await image.readAsBytes();
       final base64Str = base64Encode(bytes);
       setState(() {
-        _pickedFile = image;
         _fileName = image.name;
         _base64File = 'data:image/jpeg;base64,$base64Str';
       });
@@ -439,7 +437,6 @@ class _PenugasanScreenState extends State<PenugasanScreen> {
                     IconButton(
                       icon: const Icon(Icons.close, size: 18, color: AppTheme.accentRed),
                       onPressed: () => setState(() {
-                        _pickedFile = null;
                         _base64File = null;
                         _fileName = null;
                       }),
