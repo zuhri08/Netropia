@@ -151,7 +151,6 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
             ),
-            ),
             actions: [
               FutureBuilder<int>(
                 future: SettingsService().getStreak(),
