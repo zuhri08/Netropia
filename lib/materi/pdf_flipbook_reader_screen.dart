@@ -8,9 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 
 // ─────────────────────────── Konfigurasi ───────────────────────────
-const double _kBaseWidth = 800; // lebar render halaman normal (px)
-const double _kHiResWidth = 1400; // lebar render saat di-zoom (px)
-const double _kThumbWidth = 180; // lebar render thumbnail (px)
 const int _kCacheCapacity = 10; // maksimal halaman normal di RAM
 const double _kMinutesPerPage = 1.5; // asumsi waktu baca per halaman
 const double _kMaxZoom = 4.0;
