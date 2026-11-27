@@ -70,13 +70,15 @@ class _PdfFlipbookReaderScreenState extends State<PdfFlipbookReaderScreen> {
         final imageBytes = await page.toPng();
         renderedPages.add(imageBytes);
 
-        // Tampilkan halaman pertama secara instan (<0.3 detik)
-        if (renderedPages.length == 1 && mounted) {
+        // Update real-time progres halaman setiap kali 1 halaman selesai dirender
+        if (mounted) {
           setState(() {
             _pageImages = List.from(renderedPages);
-            _totalPages = 1;
+            _totalPages = renderedPages.length;
             _isLoading = false;
-            _pageInputController.text = '1';
+            if (renderedPages.length == 1) {
+              _pageInputController.text = '1';
+            }
           });
         }
       }
